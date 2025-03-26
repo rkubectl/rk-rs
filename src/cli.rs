@@ -32,6 +32,7 @@ impl Cli {
         let output = self.output.unwrap_or_default();
         match self.command {
             Command::ApiResources(api_resources) => api_resources.exec(&kubectl, output).await,
+            Command::ApiVersions => kubectl.api_versions().await,
             Command::Get { resource } => kubectl.get(resource, output).await,
         }
     }

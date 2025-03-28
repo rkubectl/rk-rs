@@ -90,17 +90,15 @@ impl Resource {
     }
 
     async fn get_api(&self, kubectl: &Kubectl) -> kube::Result<api::Api<api::DynamicObject>> {
-        let api = match self {
-            Self::Pods => todo!(),
-            Self::Nodes => todo!(),
-            Self::Other(name) => {
-                let ar = self
-                    .get_api_resource(kubectl, name)
-                    .await?
-                    .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?;
-                kubectl.dynamic_api(ar)
-            }
+        let ar = match self {
+            Self::Pods => api::ApiResource::erase::<corev1::Pod>(&()),
+            Self::Nodes => api::ApiResource::erase::<corev1::Node>(&()),
+            Self::Other(name) => self
+                .get_api_resource(kubectl, name)
+                .await?
+                .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?,
         };
+        let api = kubectl.dynamic_api(ar);
         Ok(api)
     }
 

@@ -22,14 +22,12 @@ impl Show for corev1::Node {
     }
 
     fn yaml(&self, params: &ShowParams) -> String {
-        let mut data = self.clone();
-        data.strip_managed_fields(params);
+        let data = self.strip_managed_fields(params);
         yaml::to_string(&data).unwrap_or_default()
     }
 
     fn json(&self, params: &ShowParams) -> String {
-        let mut data = self.clone();
-        data.strip_managed_fields(params);
+        let data = self.strip_managed_fields(params);
         json::to_string_pretty(&data).unwrap_or_default()
     }
 

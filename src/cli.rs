@@ -2,7 +2,10 @@ use clap::{Args, Parser, Subcommand};
 
 use super::*;
 
+pub use command::ApiResource;
+pub use command::ApiResources;
 pub use command::Command;
+pub use command::Get;
 
 mod command;
 

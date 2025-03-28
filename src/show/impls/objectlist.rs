@@ -21,19 +21,27 @@ where
     }
 
     fn yaml(&self, params: &ShowParams) -> String {
-        let mut objects = self.clone();
-        objects
-            .iter_mut()
-            .for_each(|k| k.strip_managed_fields(params));
-        yaml::to_string(&objects).unwrap_or_default()
+        if params.show_managed_fields {
+            yaml::to_string(self).unwrap_or_default()
+        } else {
+            let mut objects = self.clone();
+            objects
+                .iter_mut()
+                .for_each(|k| k.meta_mut().managed_fields = None);
+            yaml::to_string(&objects).unwrap_or_default()
+        }
     }
 
     fn json(&self, params: &ShowParams) -> String {
-        let mut objects = self.clone();
-        objects
-            .iter_mut()
-            .for_each(|k| k.strip_managed_fields(params));
-        json::to_string_pretty(&objects).unwrap_or_default()
+        if params.show_managed_fields {
+            json::to_string_pretty(self).unwrap_or_default()
+        } else {
+            let mut objects = self.clone();
+            objects
+                .iter_mut()
+                .for_each(|k| k.meta_mut().managed_fields = None);
+            json::to_string_pretty(&objects).unwrap_or_default()
+        }
     }
 
     fn name(&self) -> String {

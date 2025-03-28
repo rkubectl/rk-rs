@@ -1,11 +1,19 @@
+// #![cfg_attr(feature = "pedantic", warn(clippy::pedantic))]
 #![warn(deprecated)]
 #![warn(rust_2018_idioms)]
 #![warn(rust_2018_compatibility)]
 #![warn(rust_2021_compatibility)]
 #![warn(rust_2024_compatibility)]
 #![warn(future_incompatible)]
+#![warn(deprecated_in_future)]
+#![warn(noop_method_call)]
+#![warn(unreachable_pub)]
+#![warn(missing_debug_implementations)]
+#![warn(unused)]
 #![warn(clippy::use_self)]
 #![warn(clippy::map_unwrap_or)]
+#![warn(clippy::map_flatten)]
+#![deny(warnings)]
 
 use std::str;
 
@@ -22,11 +30,16 @@ use kube_client_ext::KubeClientExt;
 use k8s::corev1;
 use k8s::metav1;
 
+pub use cli::ApiResource;
+pub use cli::ApiResources;
 pub use cli::Cli;
+pub use cli::Command;
+pub use cli::Get;
 pub use ext::APIResourceExt;
 pub use ext::APIResourceListExt;
 pub use kubectl::Kubectl;
 pub use namespace::Namespace;
+pub use resource::NamedResource;
 pub use resource::Resource;
 pub use resource::ResourceArg;
 pub use show::OutputFormat;

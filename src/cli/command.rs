@@ -4,8 +4,9 @@ use tabled::settings::location::ByColumnName;
 
 use super::*;
 
-use api_resource::ApiResources;
-use get::Get;
+pub use api_resource::ApiResource;
+pub use api_resource::ApiResources;
+pub use get::Get;
 
 mod api_resource;
 mod get;

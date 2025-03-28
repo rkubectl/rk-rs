@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use super::*;
 
 mod configmap;
@@ -5,17 +7,21 @@ mod node;
 mod objectlist;
 mod pod;
 
-trait StripManagedFields {
-    fn strip_managed_fields(&mut self, params: &ShowParams);
+trait StripManagedFields<'a>: Clone + 'a {
+    fn strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, Self>;
 }
 
-impl<K> StripManagedFields for K
+impl<'a, K> StripManagedFields<'a> for K
 where
-    K: Clone + kube::ResourceExt,
+    K: Clone + kube::ResourceExt + 'a,
 {
-    fn strip_managed_fields(&mut self, params: &ShowParams) {
-        if !params.show_managed_fields {
-            self.meta_mut().managed_fields = None;
+    fn strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, K> {
+        if params.show_managed_fields {
+            Cow::Borrowed(self)
+        } else {
+            let mut object = self.clone();
+            object.meta_mut().managed_fields = None;
+            Cow::Owned(object)
         }
     }
 }

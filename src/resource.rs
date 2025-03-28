@@ -2,6 +2,7 @@ use super::*;
 
 pub use named::NamedResource;
 
+mod impls;
 mod named;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -51,6 +52,20 @@ impl ResourceArg {
             Self::NamedResource(named_resource) => named_resource.get(kubectl).await,
         }
     }
+
+    pub fn output(&self, objects: &[api::DynamicObject], namespace: bool, output: Output) {
+        let mut table = self.resource().output(objects, namespace, output);
+        table.with(tabled::settings::Style::empty());
+
+        println!("{table}");
+    }
+
+    fn resource(&self) -> &Resource {
+        match self {
+            Self::Resource(resource) => resource,
+            Self::NamedResource(named_resource) => named_resource.resource(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -91,7 +106,7 @@ impl Resource {
             .api_resource(kubectl)
             .await?
             .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?;
-        let api = kubectl.dynamic_api(ar);
+        let api = kubectl.dynamic_api(&ar);
         Ok(api)
     }
 

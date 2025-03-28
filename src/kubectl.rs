@@ -2,14 +2,26 @@ use super::*;
 
 pub struct Kubectl {
     client: kube::Client,
+    namespace: Namespace,
     debug: bool,
 }
 
 impl Kubectl {
     pub async fn new(debug: bool) -> kube::Result<Self> {
-        kube::Client::try_default()
-            .await
-            .map(|client| Self { client, debug })
+        let namespace = default();
+        kube::Client::try_default().await.map(|client| Self {
+            client,
+            namespace,
+            debug,
+        })
+    }
+
+    pub fn namespace(self, namespace: Namespace) -> Self {
+        Self { namespace, ..self }
+    }
+
+    pub fn show_namespace(&self) -> bool {
+        matches!(self.namespace, Namespace::All)
     }
 
     pub async fn get_core_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
@@ -59,9 +71,14 @@ impl Kubectl {
         Ok(())
     }
 
-    pub fn dynamic_api(&self, resource: api::ApiResource) -> api::Api<api::DynamicObject> {
+    pub fn dynamic_api(&self, resource: &api::ApiResource) -> api::Api<api::DynamicObject> {
         println!("{resource:?}");
-        api::Api::default_namespaced_with(self.client.clone(), &resource)
+        let client = self.client.clone();
+        match &self.namespace {
+            Namespace::All => api::Api::all_with(client, resource),
+            Namespace::Default => api::Api::default_namespaced_with(client, resource),
+            Namespace::Namespace(ns) => api::Api::namespaced_with(client, ns, resource),
+        }
     }
 
     pub async fn get(&self, resource: Vec<Resource>, output: cli::Output) -> kube::Result<()> {

@@ -10,7 +10,7 @@
 use std::str;
 
 use kube::Resource as _;
-// use kube::ResourceExt;
+use kube::ResourceExt;
 use kube::api;
 use kube::core::gvk;
 // use kube::discovery;
@@ -23,13 +23,20 @@ use k8s::corev1;
 use k8s::metav1;
 
 pub use cli::Cli;
+pub use cli::Output;
 pub use ext::APIResourceExt;
 pub use ext::APIResourceListExt;
 pub use kubectl::Kubectl;
+pub use namespace::Namespace;
 pub use resource::Resource;
 pub use resource::ResourceArg;
 
 mod cli;
 mod ext;
 mod kubectl;
+mod namespace;
 mod resource;
+
+fn default<T: Default>() -> T {
+    T::default()
+}

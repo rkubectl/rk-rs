@@ -86,8 +86,9 @@ impl Resource {
             let gv = arl
                 .group_version()
                 .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
-            if let Some(ar) = arl.find(other, &gv) {
-                return Ok(Some(ar));
+            let ar = arl.find(other).map(|ar| ar.kube_api_resource(gv));
+            if ar.is_some() {
+                return Ok(ar);
             }
         }
         Ok(None)

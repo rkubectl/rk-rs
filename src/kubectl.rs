@@ -60,7 +60,8 @@ impl Kubectl {
     }
 
     pub fn dynamic_api(&self, resource: api::ApiResource) -> api::Api<api::DynamicObject> {
-        api::Api::all_with(self.client.clone(), &resource)
+        println!("{resource:?}");
+        api::Api::default_namespaced_with(self.client.clone(), &resource)
     }
 
     pub async fn get(&self, resource: Vec<Resource>, output: cli::Output) -> kube::Result<()> {

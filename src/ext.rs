@@ -2,7 +2,7 @@ use super::*;
 
 pub trait APIResourceListExt {
     fn group_version(&self) -> Result<gvk::GroupVersion, gvk::ParseGroupVersionError>;
-    fn find(&self, name: &str, gv: &gvk::GroupVersion) -> Option<api::ApiResource>;
+    fn find(self, name: &str) -> Option<metav1::APIResource>;
 }
 
 impl APIResourceListExt for metav1::APIResourceList {
@@ -10,17 +10,14 @@ impl APIResourceListExt for metav1::APIResourceList {
         self.group_version.parse()
     }
 
-    fn find(&self, name: &str, gv: &gvk::GroupVersion) -> Option<api::ApiResource> {
-        self.resources
-            .iter()
-            .find(|ar| ar.matches_name(name))
-            .map(|ar| ar.kube_api_resource(gv))
+    fn find(self, name: &str) -> Option<metav1::APIResource> {
+        self.resources.into_iter().find(|ar| ar.matches_name(name))
     }
 }
 
 pub trait APIResourceExt {
     fn matches_name(&self, name: &str) -> bool;
-    fn kube_api_resource(&self, gv: &gvk::GroupVersion) -> api::ApiResource;
+    fn kube_api_resource(self, gv: gvk::GroupVersion) -> api::ApiResource;
 }
 
 impl APIResourceExt for metav1::APIResource {
@@ -32,16 +29,17 @@ impl APIResourceExt for metav1::APIResource {
                 .as_deref()
                 .unwrap_or_default()
                 .iter()
-                .any(|n| n == name)
+                .any(|text| text == name)
     }
 
-    fn kube_api_resource(&self, gv: &gvk::GroupVersion) -> api::ApiResource {
+    fn kube_api_resource(self, gv: gvk::GroupVersion) -> api::ApiResource {
+        let api_version = gv.api_version();
         api::ApiResource {
-            group: self.group.clone().unwrap_or_else(|| gv.group.clone()),
-            version: self.version.clone().unwrap_or_else(|| gv.version.clone()),
-            api_version: gv.api_version(),
-            kind: self.kind.to_string(),
-            plural: self.name.clone(),
+            group: self.group.unwrap_or(gv.group),
+            version: self.version.unwrap_or(gv.version),
+            api_version,
+            kind: self.kind,
+            plural: self.name,
         }
     }
 }

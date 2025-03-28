@@ -24,12 +24,7 @@ impl Show for corev1::ConfigMap {
             .map(|data| data.len())
             .unwrap_or_default();
         let data = format!("{}", data + binary_data);
-        let age = self
-            .creation_timestamp()
-            .map(|t| t.0)
-            .unwrap_or_default()
-            .to_string();
-
+        let age = self.creation_timestamp().map(age).unwrap_or_default();
         match output {
             Output::Normal => vec![namespace, name, data, age],
             Output::Wide => vec![namespace, name, data, age],

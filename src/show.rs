@@ -3,8 +3,6 @@ use tabled::settings::Remove;
 use tabled::settings::Style;
 use tabled::settings::location::ByColumnName;
 
-// use tabled::Tabled;
-
 use super::*;
 
 mod impls;
@@ -246,5 +244,63 @@ where
         format!("{kind}/{name}")
     } else {
         name
+    }
+}
+
+fn age(time: metav1::Time) -> String {
+    let delta = k8s_openapi::chrono::Utc::now().signed_duration_since(time.0);
+    human_time(delta)
+}
+
+/// Mimics k8s humantime printer
+fn human_time(delta: k8s_openapi::chrono::TimeDelta) -> String {
+    let days = delta.num_days();
+    let hours = delta.num_hours();
+    let seconds = delta.num_seconds();
+    let minutes = delta.num_minutes();
+
+    if seconds < -1 {
+        "<invalid>".to_string()
+    } else if seconds == 0 {
+        "0s".to_string()
+    } else if seconds < 60 * 2 {
+        // 2 minutes
+        format!("{seconds}s")
+    } else if minutes < 10 {
+        let seconds = seconds % 60; // seconds in last minute
+        if seconds == 0 {
+            format!("{minutes}m")
+        } else {
+            format!("{minutes}m{seconds}s")
+        }
+    } else if hours < 8 {
+        let minutes = minutes % 60; // minutes in last hour
+        if minutes == 0 {
+            format!("{hours}h")
+        } else {
+            format!("{hours}h{minutes}m")
+        }
+    } else if hours < 48 {
+        format!("{hours}h")
+    } else if days < 8 {
+        let hours = hours % 24;
+        if hours == 0 {
+            format!("{days}d")
+        } else {
+            format!("{days}d{hours}h")
+        }
+    } else if days < 2 * 365 {
+        format!("{days}d")
+    } else if days < 8 * 365 {
+        let years = days / 365;
+        let days = days % 365;
+        if days == 0 {
+            format!("{years}y")
+        } else {
+            format!("{years}y{days}d")
+        }
+    } else {
+        let years = days / 365;
+        format!("{years}y")
     }
 }

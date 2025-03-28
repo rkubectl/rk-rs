@@ -13,11 +13,7 @@ impl Show for corev1::Pod {
     fn data(&self, show_kind: bool, output: &Output) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
         let name = name(self, show_kind);
-        let age = self
-            .creation_timestamp()
-            .map(|t| t.0)
-            .unwrap_or_default()
-            .to_string();
+        let age = self.creation_timestamp().map(age).unwrap_or_default();
         match output {
             Output::Normal => vec![namespace, name],
             Output::Wide => vec![namespace, name, age],

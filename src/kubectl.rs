@@ -81,13 +81,46 @@ impl Kubectl {
         }
     }
 
-    pub async fn get(&self, resource: Vec<Resource>, output: cli::Output) -> kube::Result<()> {
+    pub async fn get(&self, resource: Vec<Resource>, output: OutputArg) -> kube::Result<()> {
         println!("Getting {resource:?} [{output:?}]");
         Ok(())
     }
 
     pub fn list_params(&self) -> api::ListParams {
         self.client.list_params()
+    }
+
+    pub fn pods(&self) -> api::Api<corev1::Pod> {
+        self.namespaced_api()
+    }
+
+    pub fn configmaps(&self) -> api::Api<corev1::ConfigMap> {
+        self.namespaced_api()
+    }
+
+    pub fn nodes(&self) -> api::Api<corev1::Node> {
+        self.cluster_api()
+    }
+
+    fn cluster_api<K>(&self) -> api::Api<K>
+    where
+        K: kube::Resource<Scope = k8s::openapi::ClusterResourceScope>,
+        <K as kube::Resource>::DynamicType: Default,
+    {
+        self.client.api()
+    }
+
+    fn namespaced_api<K>(&self) -> api::Api<K>
+    where
+        K: kube::Resource<Scope = k8s::openapi::NamespaceResourceScope>,
+        <K as kube::Resource>::DynamicType: Default,
+    {
+        println!("{:?}", self.namespace);
+        match &self.namespace {
+            Namespace::All => self.client.api(),
+            Namespace::Default => self.client.default_namespaced_api(),
+            Namespace::Namespace(namespace) => self.client.namespaced_api(namespace),
+        }
     }
 }
 

@@ -1,4 +1,3 @@
-use tabled::Tabled;
 use tabled::settings::Remove;
 use tabled::settings::Style;
 use tabled::settings::location::ByColumnName;

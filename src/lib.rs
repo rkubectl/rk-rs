@@ -23,11 +23,12 @@ use k8s::corev1;
 use k8s::metav1;
 
 pub use cli::Cli;
-pub use cli::Output;
 pub use ext::APIResourceExt;
 pub use ext::APIResourceListExt;
 pub use kubectl::Kubectl;
 pub use namespace::Namespace;
+pub use output::Output;
+pub use output::OutputArg;
 pub use resource::Resource;
 pub use resource::ResourceArg;
 
@@ -35,6 +36,7 @@ mod cli;
 mod ext;
 mod kubectl;
 mod namespace;
+mod output;
 mod resource;
 
 fn default<T: Default>() -> T {

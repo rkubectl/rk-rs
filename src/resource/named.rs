@@ -25,7 +25,7 @@ impl NamedResource {
         &self.name
     }
 
-    pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
+    pub async fn _get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
         self.resource
             .api(kubectl)
             .await?

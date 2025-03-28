@@ -1,17 +1,15 @@
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand};
 
 use super::*;
 
 pub use command::Command;
-pub use output::Output;
 
 mod command;
-mod output;
 
 #[derive(Debug, Parser)]
 pub struct Cli {
     #[arg(short, long, value_enum, global = true)]
-    pub output: Option<Output>,
+    pub output: Option<OutputArg>,
 
     /// Debug on/off
     #[arg(short, long, global = true)]
@@ -46,14 +44,16 @@ impl Cli {
         }
     }
 
-    async fn get(kubectl: &Kubectl, resources: Vec<String>, output: Output) -> kube::Result<()> {
+    async fn get(kubectl: &Kubectl, resources: Vec<String>, output: OutputArg) -> kube::Result<()> {
         println!("{resources:?}");
         let resources = ResourceArg::from_strings(resources)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
         println!("{resources:?}");
+        let namespace = kubectl.show_namespace();
+        let full_name = resources.len() > 1;
         for resource in resources {
-            let objects = resource.get(kubectl).await?;
-            resource.output(&objects, kubectl.show_namespace(), output);
+            let data = resource.get(kubectl).await?;
+            println!("{}", data.output(namespace, full_name, &output));
         }
         Ok(())
     }

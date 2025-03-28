@@ -2,7 +2,6 @@ use super::*;
 
 pub use named::NamedResource;
 
-mod impls;
 mod named;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -46,21 +45,26 @@ impl ResourceArg {
             .map(Self::NamedResource)
     }
 
-    pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
+    pub async fn _get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
         match self {
-            Self::Resource(resource) => resource.get(kubectl).await,
-            Self::NamedResource(named_resource) => named_resource.get(kubectl).await,
+            Self::Resource(resource) => resource._get(kubectl).await,
+            Self::NamedResource(named_resource) => named_resource._get(kubectl).await,
         }
     }
 
-    pub fn output(&self, objects: &[api::DynamicObject], namespace: bool, output: Output) {
-        let mut table = self.resource().output(objects, namespace, output);
-        table.with(tabled::settings::Style::empty());
-
-        println!("{table}");
+    pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Output>> {
+        match self {
+            Self::Resource(resource) => resource.list(kubectl).await,
+            Self::NamedResource(named_resource) => {
+                named_resource
+                    .resource()
+                    .get(kubectl, named_resource.name())
+                    .await
+            }
+        }
     }
 
-    fn resource(&self) -> &Resource {
+    pub fn resource(&self) -> &Resource {
         match self {
             Self::Resource(resource) => resource,
             Self::NamedResource(named_resource) => named_resource.resource(),
@@ -86,10 +90,51 @@ impl Resource {
         }
     }
 
-    async fn get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
+    async fn _get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
         let lp = kubectl.list_params();
         let items = self.api(kubectl).await?.list(&lp).await?.items;
         Ok(items)
+    }
+
+    async fn list(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Output>> {
+        let lp = kubectl.list_params();
+        match self {
+            Self::Pods => {
+                let list = kubectl.pods().list(&lp).await?;
+                Ok(Box::new(list))
+            }
+            Self::Nodes => {
+                let list = kubectl.nodes().list(&lp).await?;
+                Ok(Box::new(list))
+            }
+            Self::ConfigMaps => {
+                let list = kubectl.configmaps().list(&lp).await?;
+                Ok(Box::new(list))
+            }
+            Self::Other(name) => {
+                todo!("list not implemented yet for {name}")
+            }
+        }
+    }
+
+    async fn get(&self, kubectl: &Kubectl, name: &str) -> kube::Result<Box<dyn Output>> {
+        match self {
+            Self::Pods => {
+                let obj = kubectl.pods().get(name).await?;
+                Ok(Box::new(obj))
+            }
+            Self::Nodes => {
+                let obj = kubectl.nodes().get(name).await?;
+                Ok(Box::new(obj))
+            }
+            Self::ConfigMaps => {
+                let obj = kubectl.configmaps().get(name).await?;
+                Ok(Box::new(obj))
+            }
+            Self::Other(name) => {
+                todo!("get not implemented yet for {name}")
+            }
+        }
     }
 
     pub async fn api_resource(&self, kubectl: &Kubectl) -> kube::Result<Option<api::ApiResource>> {

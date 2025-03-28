@@ -57,6 +57,7 @@ impl ResourceArg {
 pub enum Resource {
     Pods,
     Nodes,
+    ConfigMaps,
     Other(String),
 }
 
@@ -65,17 +66,36 @@ impl Resource {
         match text {
             "po" | "pod" | "pods" => Some(Self::Pods),
             "no" | "node" | "nodes" => Some(Self::Nodes),
+            "cm" | "configmap" | "configmaps" => Some(Self::ConfigMaps),
             _ => None,
         }
     }
 
     async fn get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
         let lp = kubectl.list_params();
-        let items = self.get_api(kubectl).await?.list(&lp).await?.items;
+        let items = self.api(kubectl).await?.list(&lp).await?.items;
         Ok(items)
     }
 
-    async fn get_api_resource(
+    pub async fn api_resource(&self, kubectl: &Kubectl) -> kube::Result<Option<api::ApiResource>> {
+        match self {
+            Self::Pods => Ok(Some(Self::erase::<corev1::Pod>())),
+            Self::Nodes => Ok(Some(Self::erase::<corev1::Node>())),
+            Self::ConfigMaps => Ok(Some(Self::erase::<corev1::ConfigMap>())),
+            Self::Other(name) => self.dynamic_api_resource(kubectl, name).await,
+        }
+    }
+
+    async fn api(&self, kubectl: &Kubectl) -> kube::Result<api::Api<api::DynamicObject>> {
+        let ar = self
+            .api_resource(kubectl)
+            .await?
+            .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?;
+        let api = kubectl.dynamic_api(ar);
+        Ok(api)
+    }
+
+    async fn dynamic_api_resource(
         &self,
         kubectl: &Kubectl,
         name: &str,
@@ -89,21 +109,12 @@ impl Resource {
         Ok(ar)
     }
 
-    async fn get_api(&self, kubectl: &Kubectl) -> kube::Result<api::Api<api::DynamicObject>> {
-        let ar = match self {
-            Self::Pods => api::ApiResource::erase::<corev1::Pod>(&()),
-            Self::Nodes => api::ApiResource::erase::<corev1::Node>(&()),
-            Self::Other(name) => self
-                .get_api_resource(kubectl, name)
-                .await?
-                .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?,
-        };
-        let api = kubectl.dynamic_api(ar);
-        Ok(api)
-    }
-
-    pub fn resolve(&self, _kubectl: &Kubectl) -> api::DynamicObject {
-        todo!()
+    fn erase<K>() -> api::ApiResource
+    where
+        K: kube::Resource,
+        <K as kube::Resource>::DynamicType: Default,
+    {
+        api::ApiResource::erase::<K>(&<K as kube::Resource>::DynamicType::default())
     }
 
     fn other(other: impl ToString) -> Self {

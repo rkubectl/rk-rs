@@ -44,6 +44,13 @@ impl ResourceArg {
             .map(|(resource, name)| NamedResource::new(resource, name))
             .map(Self::NamedResource)
     }
+
+    pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
+        match self {
+            Self::Resource(resource) => resource.get(kubectl).await,
+            Self::NamedResource(named_resource) => named_resource.get(kubectl).await,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -62,7 +69,46 @@ impl Resource {
         }
     }
 
-    pub fn resolve(&self, kubectl: &Kubectl) -> api::DynamicObject {
+    async fn get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
+        let lp = kubectl.list_params();
+        let items = self.get_api(kubectl).await?.list(&lp).await?.items;
+        Ok(items)
+    }
+
+    async fn get_other_api_resource(
+        &self,
+        kubectl: &Kubectl,
+        other: &str,
+    ) -> kube::Result<Option<api::ApiResource>> {
+        let core = kubectl.get_core_api_resources().await?;
+        let apis = kubectl.get_api_resources().await?;
+        for arl in core.into_iter().chain(apis) {
+            let gv = arl
+                .group_version()
+                .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
+            if let Some(ar) = arl.find(other, &gv) {
+                return Ok(Some(ar));
+            }
+        }
+        Ok(None)
+    }
+
+    async fn get_api(&self, kubectl: &Kubectl) -> kube::Result<api::Api<api::DynamicObject>> {
+        let api = match self {
+            Self::Pods => todo!(),
+            Self::Nodes => todo!(),
+            Self::Other(other) => {
+                let ar = self
+                    .get_other_api_resource(kubectl, other)
+                    .await?
+                    .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?;
+                kubectl.dynamic_api(ar)
+            }
+        };
+        Ok(api)
+    }
+
+    pub fn resolve(&self, _kubectl: &Kubectl) -> api::DynamicObject {
         todo!()
     }
 

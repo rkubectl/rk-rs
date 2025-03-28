@@ -4,8 +4,6 @@ use super::*;
 
 pub use command::Command;
 pub use output::Output;
-pub use resource::Resource;
-pub use resource::ResourceArg;
 
 mod command;
 mod output;
@@ -33,20 +31,19 @@ impl Cli {
         match self.command {
             Command::ApiResources(api_resources) => api_resources.exec(&kubectl, output).await,
             Command::ApiVersions => kubectl.api_versions().await,
-            Command::Get { resources } => Self::get(&kubectl, resources).await,
+            Command::Get { resources } => Self::get(&kubectl, resources, output).await,
         }
     }
 
-    async fn get(kubectl: &Kubectl, resources: Vec<String>) -> kube::Result<()> {
+    async fn get(kubectl: &Kubectl, resources: Vec<String>, output: Output) -> kube::Result<()> {
         println!("{resources:#?}");
-
-        // for resource in resources {
-        //     let resource = Resource::from(resource);
-        //     let object = resource.resolve(kubectl);
-
-        //     let data = kubectl.get(resource).await?;
-        //     println!("{data:#?}");
-        // }
+        let resources = ResourceArg::from_strings(resources)
+            .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
+        println!("{resources:#?}");
+        for resource in resources {
+            let objects = resource.get(kubectl).await?;
+            output.objects(&objects);
+        }
         Ok(())
     }
 }

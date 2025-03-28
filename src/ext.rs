@@ -1,8 +1,12 @@
 use super::*;
 
-pub trait APIResourceListExt {
+pub trait APIResourceListExt: Sized {
     fn group_version(&self) -> Result<gvk::GroupVersion, gvk::ParseGroupVersionError>;
     fn find(self, name: &str) -> Option<metav1::APIResource>;
+    fn kube_api_resource(self, name: &str) -> Option<api::ApiResource> {
+        let gv = self.group_version().ok()?;
+        self.find(name).map(|ar| ar.kube_api_resource(gv))
+    }
 }
 
 impl APIResourceListExt for metav1::APIResourceList {

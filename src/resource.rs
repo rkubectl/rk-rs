@@ -75,32 +75,27 @@ impl Resource {
         Ok(items)
     }
 
-    async fn get_other_api_resource(
+    async fn get_api_resource(
         &self,
         kubectl: &Kubectl,
-        other: &str,
+        name: &str,
     ) -> kube::Result<Option<api::ApiResource>> {
         let core = kubectl.get_core_api_resources().await?;
         let apis = kubectl.get_api_resources().await?;
-        for arl in core.into_iter().chain(apis) {
-            let gv = arl
-                .group_version()
-                .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
-            let ar = arl.find(other).map(|ar| ar.kube_api_resource(gv));
-            if ar.is_some() {
-                return Ok(ar);
-            }
-        }
-        Ok(None)
+        let ar = core
+            .into_iter()
+            .chain(apis)
+            .find_map(|arl| arl.kube_api_resource(name));
+        Ok(ar)
     }
 
     async fn get_api(&self, kubectl: &Kubectl) -> kube::Result<api::Api<api::DynamicObject>> {
         let api = match self {
             Self::Pods => todo!(),
             Self::Nodes => todo!(),
-            Self::Other(other) => {
+            Self::Other(name) => {
                 let ar = self
-                    .get_other_api_resource(kubectl, other)
+                    .get_api_resource(kubectl, name)
                     .await?
                     .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?;
                 kubectl.dynamic_api(ar)

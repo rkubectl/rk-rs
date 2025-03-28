@@ -40,22 +40,8 @@ impl Cli {
         match self.command {
             Command::ApiResources(api_resources) => api_resources.exec(&kubectl, output).await,
             Command::ApiVersions => kubectl.api_versions().await,
-            Command::Get { resources } => Self::get(&kubectl, resources, output).await,
+            Command::Get(get) => get.exec(&kubectl, output).await,
         }
-    }
-
-    async fn get(kubectl: &Kubectl, resources: Vec<String>, output: OutputArg) -> kube::Result<()> {
-        println!("{resources:?}");
-        let resources = ResourceArg::from_strings(resources)
-            .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
-        println!("{resources:?}");
-        let namespace = kubectl.show_namespace();
-        let full_name = resources.len() > 1;
-        for resource in resources {
-            let data = resource.get(kubectl).await?;
-            println!("{}", data.output(namespace, full_name, &output));
-        }
-        Ok(())
     }
 }
 

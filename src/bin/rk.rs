@@ -10,5 +10,6 @@ async fn main() -> kube::Result<()> {
     let cli = rk::Cli::new();
     tracing::debug!(?cli, "rk");
     let kubectl = rk::Kubectl::new(cli.debug).await?;
+    tracing::info!(?kubectl);
     cli.exec(kubectl).await
 }

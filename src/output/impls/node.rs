@@ -10,9 +10,9 @@ impl Output for corev1::Node {
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, full_name: bool, output: &OutputArg) -> Vec<String> {
+    fn data(&self, show_kind: bool, output: &OutputArg) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
-        let name = name(self, full_name);
+        let name = name(self, show_kind);
         let age = self
             .creation_timestamp()
             .map(|t| t.0)

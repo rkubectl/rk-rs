@@ -115,7 +115,6 @@ impl Kubectl {
         K: kube::Resource<Scope = k8s::openapi::NamespaceResourceScope>,
         <K as kube::Resource>::DynamicType: Default,
     {
-        println!("{:?}", self.namespace);
         match &self.namespace {
             Namespace::All => self.client.api(),
             Namespace::Default => self.client.default_namespaced_api(),
@@ -128,6 +127,7 @@ impl std::fmt::Debug for Kubectl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Kubectl")
             .field("client", &"kube::Client")
+            .field("namespace", &self.namespace)
             .field("debug", &self.debug)
             .finish()
     }

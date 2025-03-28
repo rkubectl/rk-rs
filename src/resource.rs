@@ -11,12 +11,12 @@ pub enum ResourceArg {
 }
 
 impl ResourceArg {
-    pub fn from_strings(resources: Vec<String>) -> Result<Vec<Self>, InvalidResourceSpec> {
+    pub fn from_strings(resources: &[String]) -> Result<Vec<Self>, InvalidResourceSpec> {
         // Two possible formats
-        // 1. resource/name - in which case all should be the same
+        // 1. resource/name - in which case all the items should be the same
         // 2. resource[,resource,..] [name] [..]
         if resources.iter().any(|resource| resource.contains('/')) {
-            resources.into_iter().map(Self::named_resource).collect()
+            resources.iter().map(Self::named_resource).collect()
         } else {
             let (resource, names) = resources.split_first().ok_or(InvalidResourceSpec)?;
             let resources = resource.split(",").map(Resource::from).collect::<Vec<_>>();
@@ -38,8 +38,9 @@ impl ResourceArg {
         }
     }
 
-    fn named_resource(text: String) -> Result<Self, InvalidResourceSpec> {
-        text.split_once("/")
+    fn named_resource(text: impl AsRef<str>) -> Result<Self, InvalidResourceSpec> {
+        text.as_ref()
+            .split_once("/")
             .ok_or(InvalidResourceSpec)
             .map(|(resource, name)| NamedResource::new(resource, name))
             .map(Self::NamedResource)
@@ -205,8 +206,8 @@ mod tests {
     use super::*;
 
     fn args(s: &[&str]) -> Result<Vec<ResourceArg>, InvalidResourceSpec> {
-        let resources = s.iter().map(ToString::to_string).collect();
-        ResourceArg::from_strings(resources)
+        let resources = s.iter().map(ToString::to_string).collect::<Vec<_>>();
+        ResourceArg::from_strings(&resources)
     }
 
     #[test]

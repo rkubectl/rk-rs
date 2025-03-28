@@ -5,8 +5,10 @@ use tabled::settings::location::ByColumnName;
 use super::*;
 
 use api_resource::ApiResources;
+use get::Get;
 
 mod api_resource;
+mod get;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Command {
@@ -16,12 +18,5 @@ pub enum Command {
     /// Print the supported API versions on the server, in the form of "group/version".
     ApiVersions,
 
-    /// Display one or many resources
-    Get {
-        #[arg(
-            // value_delimiter = ',',
-            required = true
-        )]
-        resources: Vec<String>,
-    },
+    Get(Get),
 }

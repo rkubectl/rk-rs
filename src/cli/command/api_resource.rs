@@ -12,7 +12,7 @@ pub struct ApiResources {
 }
 
 impl ApiResources {
-    pub async fn exec(self, kubectl: &Kubectl, output: Output) -> kube::Result<()> {
+    pub async fn exec(self, kubectl: &Kubectl, output: OutputFormat) -> kube::Result<()> {
         let mut ar = Vec::new();
         for version in kubectl.list_core_api_versions().await?.versions {
             let list = kubectl.list_core_api_resources(&version).await?;
@@ -37,7 +37,7 @@ impl ApiResources {
         }
         let mut table = tabled::Table::new(ar);
         table.with(Style::blank());
-        if output == cli::Output::Normal {
+        if output == cli::OutputFormat::Normal {
             table
                 .with(Remove::column(ByColumnName::new("VERBS")))
                 .with(Remove::column(ByColumnName::new("CATEGORIES")));

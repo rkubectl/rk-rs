@@ -29,7 +29,7 @@ pub use kubectl::Kubectl;
 pub use namespace::Namespace;
 pub use resource::Resource;
 pub use resource::ResourceArg;
-pub use show::Output;
+pub use show::OutputFormat;
 pub use show::Show;
 pub use show::ShowParams;
 

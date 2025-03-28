@@ -1,16 +1,16 @@
 use super::*;
 
 impl Show for corev1::ConfigMap {
-    fn header(&self, output: &Output) -> Vec<String> {
+    fn header(&self, output: &OutputFormat) -> Vec<String> {
         let header = match output {
-            Output::Normal => ["NAMESPACE", "NAME", "DATA", "AGE"].as_slice(),
-            Output::Wide => ["NAMESPACE", "NAME", "DATA", "AGE"].as_slice(),
+            OutputFormat::Normal => ["NAMESPACE", "NAME", "DATA", "AGE"].as_slice(),
+            OutputFormat::Wide => ["NAMESPACE", "NAME", "DATA", "AGE"].as_slice(),
             _ => todo!("{output:?}"),
         };
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, params: &ShowParams, output: &Output) -> Vec<String> {
+    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
         let name = name(self, params);
         let data = self
@@ -26,8 +26,8 @@ impl Show for corev1::ConfigMap {
         let data = format!("{}", data + binary_data);
         let age = self.creation_timestamp().map(age).unwrap_or_default();
         match output {
-            Output::Normal => vec![namespace, name, data, age],
-            Output::Wide => vec![namespace, name, data, age],
+            OutputFormat::Normal => vec![namespace, name, data, age],
+            OutputFormat::Wide => vec![namespace, name, data, age],
             _ => todo!("{output:?}"),
         }
     }

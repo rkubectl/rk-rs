@@ -59,7 +59,7 @@ impl Kubectl {
         Ok(())
     }
 
-    pub async fn get(&self, resource: cli::Resource, output: cli::Output) -> kube::Result<()> {
+    pub async fn get(&self, resource: Vec<Resource>, output: cli::Output) -> kube::Result<()> {
         println!("Getting {resource:?} [{output:?}]");
         Ok(())
     }

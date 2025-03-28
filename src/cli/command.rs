@@ -19,7 +19,10 @@ pub enum Command {
 
     /// Display one or many resources
     Get {
-        #[command(subcommand)]
-        resource: Resource,
+        #[arg(
+            // value_delimiter = ',',
+            required = true
+        )]
+        resources: Vec<String>,
     },
 }

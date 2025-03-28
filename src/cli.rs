@@ -5,10 +5,10 @@ use super::*;
 pub use command::Command;
 pub use output::Output;
 pub use resource::Resource;
+pub use resource::ResourceArg;
 
 mod command;
 mod output;
-mod resource;
 
 #[derive(Debug, Parser)]
 pub struct Cli {
@@ -33,8 +33,21 @@ impl Cli {
         match self.command {
             Command::ApiResources(api_resources) => api_resources.exec(&kubectl, output).await,
             Command::ApiVersions => kubectl.api_versions().await,
-            Command::Get { resource } => kubectl.get(resource, output).await,
+            Command::Get { resources } => Self::get(&kubectl, resources).await,
         }
+    }
+
+    async fn get(kubectl: &Kubectl, resources: Vec<String>) -> kube::Result<()> {
+        println!("{resources:#?}");
+
+        // for resource in resources {
+        //     let resource = Resource::from(resource);
+        //     let object = resource.resolve(kubectl);
+
+        //     let data = kubectl.get(resource).await?;
+        //     println!("{data:#?}");
+        // }
+        Ok(())
     }
 }
 

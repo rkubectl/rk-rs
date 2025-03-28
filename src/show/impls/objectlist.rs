@@ -8,16 +8,16 @@ where
         self.items.header(output)
     }
 
-    fn data(&self, show_kind: bool, output: &Output) -> Vec<String> {
-        self.items.data(show_kind, output)
+    fn data(&self, params: &ShowParams, output: &Output) -> Vec<String> {
+        self.items.data(params, output)
     }
 
-    fn normal(&self, show_kind: bool, output: &Output) -> Table {
-        self.items.normal(show_kind, output)
+    fn normal(&self, params: &ShowParams, output: &Output) -> Table {
+        self.items.normal(params, output)
     }
 
-    fn wide(&self, show_kind: bool, output: &Output) -> Table {
-        self.items.wide(show_kind, output)
+    fn wide(&self, params: &ShowParams, output: &Output) -> Table {
+        self.items.wide(params, output)
     }
 
     fn yaml(&self) -> String {

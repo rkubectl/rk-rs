@@ -31,6 +31,7 @@ pub use resource::Resource;
 pub use resource::ResourceArg;
 pub use show::Output;
 pub use show::Show;
+pub use show::ShowParams;
 
 mod cli;
 mod ext;

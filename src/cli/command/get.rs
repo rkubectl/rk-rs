@@ -4,13 +4,8 @@ use super::*;
 #[derive(Clone, Debug, Args)]
 
 pub struct Get {
-    /// If present, list the resource type for the requested object(s).
-    #[arg(long)]
-    show_kind: bool,
-
-    /// When printing, show all labels as the last column (default hide labels column)
-    #[arg(long)]
-    show_labels: bool,
+    #[command(flatten)]
+    params: ShowParams,
 
     #[arg(
             // value_delimiter = ',',
@@ -23,12 +18,13 @@ impl Get {
     pub async fn exec(&self, kubectl: &Kubectl, output: Output) -> kube::Result<()> {
         let resources = ResourceArg::from_strings(&self.resources)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
+        let mut params = self.params.clone();
+        params.show_kind |= resources.len() > 1;
         tracing::info!(args=?self.resources, ?resources);
         let namespace = kubectl.show_namespace();
-        let show_kind = self.show_kind || resources.len() > 1;
         for resource in resources {
             let data = resource.get(kubectl).await?;
-            println!("{}", data.output(namespace, show_kind, &output));
+            println!("{}", data.output(namespace, &params, &output));
         }
         Ok(())
     }

@@ -5,21 +5,24 @@ use tabled::settings::location::ByColumnName;
 
 use super::*;
 
+pub use params::ShowParams;
+
 mod impls;
+mod params;
 
 pub trait Show {
     fn header(&self, output: &Output) -> Vec<String>;
-    fn data(&self, show_kind: bool, output: &Output) -> Vec<String>;
+    fn data(&self, params: &ShowParams, output: &Output) -> Vec<String>;
     fn yaml(&self) -> String;
     fn json(&self) -> String;
     fn name(&self) -> String;
 
-    fn normal(&self, show_kind: bool, output: &Output) -> Table {
-        tabled::builder::Builder::from_iter([self.header(output), self.data(show_kind, output)])
+    fn normal(&self, params: &ShowParams, output: &Output) -> Table {
+        tabled::builder::Builder::from_iter([self.header(output), self.data(params, output)])
             .build()
     }
-    fn wide(&self, show_kind: bool, output: &Output) -> Table {
-        tabled::builder::Builder::from_iter([self.header(output), self.data(show_kind, output)])
+    fn wide(&self, params: &ShowParams, output: &Output) -> Table {
+        tabled::builder::Builder::from_iter([self.header(output), self.data(params, output)])
             .build()
     }
 
@@ -59,10 +62,10 @@ pub trait Show {
         todo!("This method is not supported yet")
     }
 
-    fn output(&self, namespace: bool, show_kind: bool, output: &Output) -> String {
+    fn output(&self, namespace: bool, params: &ShowParams, output: &Output) -> String {
         match output {
             Output::Normal => {
-                let mut table = self.normal(show_kind, output);
+                let mut table = self.normal(params, output);
                 if namespace {
                     table.with(Style::blank());
                 } else {
@@ -85,7 +88,7 @@ pub trait Show {
             Output::CustomColumns => self.custom_columns(),
             Output::CustomColumnsFile => self.custom_columns_file(),
             Output::Wide => {
-                let mut table = self.wide(show_kind, output);
+                let mut table = self.wide(params, output);
                 if namespace {
                     table.with(Style::blank());
                 } else {
@@ -196,13 +199,13 @@ where
         todo!("Not supported on Vec<T> for {output:?}")
     }
 
-    fn data(&self, _show_kind: bool, output: &Output) -> Vec<String> {
+    fn data(&self, _params: &ShowParams, output: &Output) -> Vec<String> {
         todo!("Not supported on Vec<T> for {output:?}")
     }
 
-    fn normal(&self, show_kind: bool, output: &Output) -> tabled::Table {
+    fn normal(&self, params: &ShowParams, output: &Output) -> tabled::Table {
         let header = self.first().map(|t| t.header(output));
-        let data = self.iter().map(|t| t.data(show_kind, output));
+        let data = self.iter().map(|t| t.data(params, output));
         let builder = header
             .into_iter()
             .chain(data)
@@ -210,9 +213,9 @@ where
         builder.build()
     }
 
-    fn wide(&self, show_kind: bool, output: &Output) -> Table {
+    fn wide(&self, params: &ShowParams, output: &Output) -> Table {
         let header = self.first().map(|t| t.header(output));
-        let data = self.iter().map(|t| t.data(show_kind, output));
+        let data = self.iter().map(|t| t.data(params, output));
         let builder = header
             .into_iter()
             .chain(data)
@@ -233,13 +236,13 @@ where
     }
 }
 
-fn name<K>(object: &K, show_kind: bool) -> String
+fn name<K>(object: &K, params: &ShowParams) -> String
 where
     K: kube::Resource,
     K::DynamicType: Default,
 {
     let name = object.name_any();
-    if show_kind {
+    if params.show_kind {
         let kind = K::kind(&default()).to_lowercase();
         format!("{kind}/{name}")
     } else {

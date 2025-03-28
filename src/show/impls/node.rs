@@ -10,9 +10,9 @@ impl Show for corev1::Node {
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, show_kind: bool, output: &Output) -> Vec<String> {
+    fn data(&self, params: &ShowParams, output: &Output) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
-        let name = name(self, show_kind);
+        let name = name(self, params);
         let age = self.creation_timestamp().map(age).unwrap_or_default();
         match output {
             Output::Normal => vec![namespace, name],

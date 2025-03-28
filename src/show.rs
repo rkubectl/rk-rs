@@ -1,3 +1,5 @@
+use serde_json as json;
+use serde_yaml as yaml;
 use tabled::Table;
 use tabled::settings::Remove;
 use tabled::settings::Style;
@@ -13,8 +15,8 @@ mod params;
 pub trait Show {
     fn header(&self, output: &OutputFormat) -> Vec<String>;
     fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String>;
-    fn yaml(&self) -> String;
-    fn json(&self) -> String;
+    fn yaml(&self, params: &ShowParams) -> String;
+    fn json(&self, params: &ShowParams) -> String;
     fn name(&self) -> String;
 
     fn normal(&self, params: &ShowParams, output: &OutputFormat) -> Table {
@@ -75,8 +77,8 @@ pub trait Show {
                 }
                 table.to_string()
             }
-            OutputFormat::Json => self.json(),
-            OutputFormat::Yaml => self.yaml(),
+            OutputFormat::Json => self.json(params),
+            OutputFormat::Yaml => self.yaml(params),
             OutputFormat::Name => self.name().to_string(),
             OutputFormat::GoTemplate => self.go_template(),
             OutputFormat::GoTemplateFile => self.go_template_file(),
@@ -202,12 +204,18 @@ where
         builder.build()
     }
 
-    fn yaml(&self) -> String {
-        todo!()
+    fn yaml(&self, params: &ShowParams) -> String {
+        self.iter()
+            .map(|item| item.yaml(params))
+            .collect::<Vec<_>>()
+            .join("")
     }
 
-    fn json(&self) -> String {
-        todo!()
+    fn json(&self, params: &ShowParams) -> String {
+        self.iter()
+            .map(|item| item.json(params))
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 
     fn name(&self) -> String {

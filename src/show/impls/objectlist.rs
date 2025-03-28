@@ -2,7 +2,7 @@ use super::*;
 
 impl<K> Show for kube::core::ObjectList<K>
 where
-    K: Clone + Show,
+    K: Clone + Show + kube::ResourceExt + serde::Serialize,
 {
     fn header(&self, output: &OutputFormat) -> Vec<String> {
         self.items.header(output)
@@ -20,12 +20,20 @@ where
         self.items.wide(params, output)
     }
 
-    fn yaml(&self) -> String {
-        todo!()
+    fn yaml(&self, params: &ShowParams) -> String {
+        let mut objects = self.clone();
+        objects
+            .iter_mut()
+            .for_each(|k| k.strip_managed_fields(params));
+        yaml::to_string(&objects).unwrap_or_default()
     }
 
-    fn json(&self) -> String {
-        todo!()
+    fn json(&self, params: &ShowParams) -> String {
+        let mut objects = self.clone();
+        objects
+            .iter_mut()
+            .for_each(|k| k.strip_managed_fields(params));
+        json::to_string_pretty(&objects).unwrap_or_default()
     }
 
     fn name(&self) -> String {

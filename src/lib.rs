@@ -27,17 +27,17 @@ pub use ext::APIResourceExt;
 pub use ext::APIResourceListExt;
 pub use kubectl::Kubectl;
 pub use namespace::Namespace;
-pub use output::Output;
-pub use output::OutputArg;
 pub use resource::Resource;
 pub use resource::ResourceArg;
+pub use show::Output;
+pub use show::Show;
 
 mod cli;
 mod ext;
 mod kubectl;
 mod namespace;
-mod output;
 mod resource;
+mod show;
 
 fn default<T: Default>() -> T {
     T::default()

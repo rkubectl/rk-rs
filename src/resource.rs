@@ -53,7 +53,7 @@ impl ResourceArg {
         }
     }
 
-    pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Output>> {
+    pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
         match self {
             Self::Resource(resource) => resource.list(kubectl).await,
             Self::NamedResource(named_resource) => {
@@ -97,7 +97,7 @@ impl Resource {
         Ok(items)
     }
 
-    async fn list(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Output>> {
+    async fn list(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
         let lp = kubectl.list_params();
         match self {
             Self::Pods => {
@@ -118,7 +118,7 @@ impl Resource {
         }
     }
 
-    async fn get(&self, kubectl: &Kubectl, name: &str) -> kube::Result<Box<dyn Output>> {
+    async fn get(&self, kubectl: &Kubectl, name: &str) -> kube::Result<Box<dyn Show>> {
         match self {
             Self::Pods => {
                 let obj = kubectl.pods().get(name).await?;

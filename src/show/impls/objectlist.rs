@@ -1,22 +1,22 @@
 use super::*;
 
-impl<K> Output for kube::core::ObjectList<K>
+impl<K> Show for kube::core::ObjectList<K>
 where
-    K: Clone + Output,
+    K: Clone + Show,
 {
-    fn header(&self, output: &OutputArg) -> Vec<String> {
+    fn header(&self, output: &Output) -> Vec<String> {
         self.items.header(output)
     }
 
-    fn data(&self, show_kind: bool, output: &OutputArg) -> Vec<String> {
+    fn data(&self, show_kind: bool, output: &Output) -> Vec<String> {
         self.items.data(show_kind, output)
     }
 
-    fn normal(&self, show_kind: bool, output: &OutputArg) -> Table {
+    fn normal(&self, show_kind: bool, output: &Output) -> Table {
         self.items.normal(show_kind, output)
     }
 
-    fn wide(&self, show_kind: bool, output: &OutputArg) -> Table {
+    fn wide(&self, show_kind: bool, output: &Output) -> Table {
         self.items.wide(show_kind, output)
     }
 

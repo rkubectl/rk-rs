@@ -9,18 +9,18 @@ use super::*;
 
 mod impls;
 
-pub trait Output {
-    fn header(&self, output: &OutputArg) -> Vec<String>;
-    fn data(&self, show_kind: bool, output: &OutputArg) -> Vec<String>;
+pub trait Show {
+    fn header(&self, output: &Output) -> Vec<String>;
+    fn data(&self, show_kind: bool, output: &Output) -> Vec<String>;
     fn yaml(&self) -> String;
     fn json(&self) -> String;
     fn name(&self) -> String;
 
-    fn normal(&self, show_kind: bool, output: &OutputArg) -> Table {
+    fn normal(&self, show_kind: bool, output: &Output) -> Table {
         tabled::builder::Builder::from_iter([self.header(output), self.data(show_kind, output)])
             .build()
     }
-    fn wide(&self, show_kind: bool, output: &OutputArg) -> Table {
+    fn wide(&self, show_kind: bool, output: &Output) -> Table {
         tabled::builder::Builder::from_iter([self.header(output), self.data(show_kind, output)])
             .build()
     }
@@ -61,9 +61,9 @@ pub trait Output {
         todo!("This method is not supported yet")
     }
 
-    fn output(&self, namespace: bool, show_kind: bool, output: &OutputArg) -> String {
+    fn output(&self, namespace: bool, show_kind: bool, output: &Output) -> String {
         match output {
-            OutputArg::Normal => {
+            Output::Normal => {
                 let mut table = self.normal(show_kind, output);
                 if namespace {
                     table.with(Style::blank());
@@ -74,19 +74,19 @@ pub trait Output {
                 }
                 table.to_string()
             }
-            OutputArg::Json => self.json(),
-            OutputArg::Yaml => self.yaml(),
-            OutputArg::Name => self.name().to_string(),
-            OutputArg::GoTemplate => self.go_template(),
-            OutputArg::GoTemplateFile => self.go_template_file(),
-            OutputArg::Template => self.template(),
-            OutputArg::TemplateFile => self.template_file(),
-            OutputArg::JsonPath => self.json_path(),
-            OutputArg::JsonPathAsJson => self.json_path_as_json(),
-            OutputArg::JsonPathFile => self.json_path_file(),
-            OutputArg::CustomColumns => self.custom_columns(),
-            OutputArg::CustomColumnsFile => self.custom_columns_file(),
-            OutputArg::Wide => {
+            Output::Json => self.json(),
+            Output::Yaml => self.yaml(),
+            Output::Name => self.name().to_string(),
+            Output::GoTemplate => self.go_template(),
+            Output::GoTemplateFile => self.go_template_file(),
+            Output::Template => self.template(),
+            Output::TemplateFile => self.template_file(),
+            Output::JsonPath => self.json_path(),
+            Output::JsonPathAsJson => self.json_path_as_json(),
+            Output::JsonPathFile => self.json_path_file(),
+            Output::CustomColumns => self.custom_columns(),
+            Output::CustomColumnsFile => self.custom_columns_file(),
+            Output::Wide => {
                 let mut table = self.wide(show_kind, output);
                 if namespace {
                     table.with(Style::blank());
@@ -103,7 +103,7 @@ pub trait Output {
 
 // [(-o|--output=)json|yaml|name|go-template|go-template-file|template|templatefile|jsonpath|jsonpath-as-json|jsonpath-file|custom-columns|custom-columns-file|wide]
 #[derive(Clone, Copy, Debug, Default, PartialEq, clap::ValueEnum)]
-pub enum OutputArg {
+pub enum Output {
     #[default]
     #[value(skip)]
     Normal,
@@ -143,7 +143,7 @@ pub enum OutputArg {
 //     }
 // }
 
-impl OutputArg {
+impl Output {
     pub fn objects(&self, objects: &[api::DynamicObject]) {
         objects.iter().for_each(|object| self.object(object));
     }
@@ -190,19 +190,19 @@ impl OutputArg {
     }
 }
 
-impl<T> Output for Vec<T>
+impl<T> Show for Vec<T>
 where
-    T: Output,
+    T: Show,
 {
-    fn header(&self, output: &OutputArg) -> Vec<String> {
+    fn header(&self, output: &Output) -> Vec<String> {
         todo!("Not supported on Vec<T> for {output:?}")
     }
 
-    fn data(&self, _show_kind: bool, output: &OutputArg) -> Vec<String> {
+    fn data(&self, _show_kind: bool, output: &Output) -> Vec<String> {
         todo!("Not supported on Vec<T> for {output:?}")
     }
 
-    fn normal(&self, show_kind: bool, output: &OutputArg) -> tabled::Table {
+    fn normal(&self, show_kind: bool, output: &Output) -> tabled::Table {
         let header = self.first().map(|t| t.header(output));
         let data = self.iter().map(|t| t.data(show_kind, output));
         let builder = header
@@ -212,7 +212,7 @@ where
         builder.build()
     }
 
-    fn wide(&self, show_kind: bool, output: &OutputArg) -> Table {
+    fn wide(&self, show_kind: bool, output: &Output) -> Table {
         let header = self.first().map(|t| t.header(output));
         let data = self.iter().map(|t| t.data(show_kind, output));
         let builder = header

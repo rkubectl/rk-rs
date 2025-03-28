@@ -9,7 +9,7 @@ mod command;
 #[derive(Debug, Parser)]
 pub struct Cli {
     #[arg(short, long, value_enum, global = true)]
-    pub output: Option<OutputArg>,
+    pub output: Option<Output>,
 
     /// Debug on/off
     #[arg(short, long, global = true)]

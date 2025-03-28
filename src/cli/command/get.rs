@@ -20,7 +20,7 @@ pub struct Get {
 }
 
 impl Get {
-    pub async fn exec(&self, kubectl: &Kubectl, output: OutputArg) -> kube::Result<()> {
+    pub async fn exec(&self, kubectl: &Kubectl, output: Output) -> kube::Result<()> {
         let resources = ResourceArg::from_strings(&self.resources)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
         tracing::info!(args=?self.resources, ?resources);

@@ -1,16 +1,16 @@
 use super::*;
 
-impl Output for corev1::Node {
-    fn header(&self, output: &OutputArg) -> Vec<String> {
+impl Show for corev1::Pod {
+    fn header(&self, output: &Output) -> Vec<String> {
         let header = match output {
-            OutputArg::Normal => ["NAMESPACE", "NAME"].as_slice(),
-            OutputArg::Wide => ["NAMESPACE", "NAME", "AGE"].as_slice(),
+            Output::Normal => ["NAMESPACE", "NAME"].as_slice(),
+            Output::Wide => ["NAMESPACE", "NAME", "AGE"].as_slice(),
             _ => todo!("{output:?}"),
         };
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, show_kind: bool, output: &OutputArg) -> Vec<String> {
+    fn data(&self, show_kind: bool, output: &Output) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
         let name = name(self, show_kind);
         let age = self
@@ -19,8 +19,8 @@ impl Output for corev1::Node {
             .unwrap_or_default()
             .to_string();
         match output {
-            OutputArg::Normal => vec![namespace, name],
-            OutputArg::Wide => vec![namespace, name, age],
+            Output::Normal => vec![namespace, name],
+            Output::Wide => vec![namespace, name, age],
             _ => todo!("{output:?}"),
         }
     }

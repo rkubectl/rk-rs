@@ -34,12 +34,101 @@ impl Object {
     }
 
     async fn ask(&self, kubectl: &Kubectl, verb: &str) -> kube::Result<()> {
-        println!("{kubectl:?}");
-        match self {
-            Self::Resource(arg) => println!("{verb} {arg:?}"),
-            Self::NonResourceUrl(url) => println!("{verb} {url}"),
+        let ssar = authorizationv1::SelfSubjectAccessReview {
+            spec: self.spec(kubectl, verb).await?,
+            ..default()
+        };
+        let pp = kubectl.post_params();
+        let ssar = kubectl
+            .selfsubjectaccessreviews()
+            .create(&pp, &ssar)
+            .await?;
+        tracing::debug!(status = ?ssar.status, "authorizationv1::SelfSubjectAccessReview");
+        let authorizationv1::SubjectAccessReviewStatus {
+            allowed,
+            denied,
+            evaluation_error,
+            reason,
+        } = ssar.status.unwrap_or_default();
+        let reason = reason
+            .map(|reason| format!(" - {reason}"))
+            .unwrap_or_default();
+        if allowed {
+            println!("yes{reason}");
+        } else {
+            let denied = if denied.unwrap_or_default() {
+                " (denied)"
+            } else {
+                ""
+            };
+            let evaluation_error = evaluation_error
+                .map(|error| format!(" - {error}"))
+                .unwrap_or_default();
+            println!("no{denied}{reason}{evaluation_error}");
         }
         Ok(())
+    }
+
+    async fn spec(
+        &self,
+        kubectl: &Kubectl,
+        verb: &str,
+    ) -> kube::Result<authorizationv1::SelfSubjectAccessReviewSpec> {
+        Ok(authorizationv1::SelfSubjectAccessReviewSpec {
+            resource_attributes: self.resource_attributes(kubectl, verb).await?,
+            non_resource_attributes: self.non_resource_attributes(verb),
+        })
+    }
+
+    async fn resource_attributes(
+        &self,
+        kubectl: &Kubectl,
+        verb: &str,
+    ) -> kube::Result<Option<authorizationv1::ResourceAttributes>> {
+        let resource_attributes = if let Self::Resource(resource_arg) = self {
+            let Some(api::ApiResource {
+                group,
+                version,
+                // kind,
+                plural,
+                ..
+                // api_version,
+            }) = resource_arg.resource().api_resource(kubectl).await?
+            else {
+                panic!("No api resource found")
+            };
+            // let name = resource_arg.name().map(|name| name.to_string());
+            let namespace = kubectl.default_namespace().to_string();
+            Some(authorizationv1::ResourceAttributes {
+                verb: Some(verb.to_string()),
+                group: Some(group),
+                name: Some(String::new()),
+                namespace: Some(namespace),
+                resource: Some(plural),
+                subresource: Some(String::new()),
+                version: Some(version),
+                // field_selector: todo!(),
+                // label_selector: todo!(),
+                ..default()
+            })
+        } else {
+            None
+        };
+        Ok(resource_attributes)
+    }
+
+    fn non_resource_attributes(
+        &self,
+        verb: &str,
+    ) -> Option<authorizationv1::NonResourceAttributes> {
+        if let Self::NonResourceUrl(path) = self {
+            Some(authorizationv1::NonResourceAttributes {
+                path: Some(path.to_string()),
+                verb: Some(verb.to_string()),
+            })
+        } else {
+            None
+        }
     }
 }
 

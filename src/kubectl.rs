@@ -102,6 +102,14 @@ impl Kubectl {
         self.cluster_api()
     }
 
+    pub fn selfsubjectaccessreviews(&self) -> api::Api<authorizationv1::SelfSubjectAccessReview> {
+        self.cluster_api()
+    }
+
+    pub fn selfsubjectrulesreviews(&self) -> api::Api<authorizationv1::SelfSubjectRulesReview> {
+        self.cluster_api()
+    }
+
     fn cluster_api<K>(&self) -> api::Api<K>
     where
         K: kube::Resource<Scope = k8s::openapi::ClusterResourceScope>,

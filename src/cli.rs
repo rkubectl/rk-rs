@@ -55,3 +55,26 @@ impl Default for Cli {
         Self::new()
     }
 }
+
+#[expect(dead_code)]
+fn metadata(name: impl ToString) -> metav1::ObjectMeta {
+    let name = Some(name.to_string());
+    metav1::ObjectMeta {
+        name,
+        // annotations: todo!(),
+        // creation_timestamp: todo!(),
+        // deletion_grace_period_seconds: todo!(),
+        // deletion_timestamp: todo!(),
+        // finalizers: todo!(),
+        // generate_name: todo!(),
+        // generation: todo!(),
+        // labels: todo!(),
+        // managed_fields: todo!(),
+        // namespace: todo!(),
+        // owner_references: todo!(),
+        // resource_version: todo!(),
+        // self_link: todo!(),
+        // uid: todo!(),
+        ..default()
+    }
+}

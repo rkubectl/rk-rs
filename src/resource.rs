@@ -71,6 +71,13 @@ impl ResourceArg {
             Self::NamedResource(named_resource) => named_resource.resource(),
         }
     }
+
+    pub fn name(&self) -> Option<&str> {
+        match self {
+            Self::Resource(_resource) => None,
+            Self::NamedResource(named_resource) => Some(named_resource.name()),
+        }
+    }
 }
 
 impl std::str::FromStr for ResourceArg {

@@ -1,5 +1,3 @@
-use serde_json as json;
-use serde_yaml as yaml;
 use tabled::Table;
 use tabled::settings::Remove;
 use tabled::settings::Style;

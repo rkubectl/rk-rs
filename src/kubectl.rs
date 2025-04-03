@@ -125,6 +125,22 @@ impl Kubectl {
         self.cluster_api()
     }
 
+    pub fn inspect<K>(&self, k: &K)
+    where
+        K: serde::Serialize,
+    {
+        if self.debug {
+            let k = yaml::to_string(k).unwrap_or_default();
+            println!("{k}");
+        }
+    }
+
+    pub fn inspect_err(&self, err: &kube::Error) {
+        if self.debug {
+            println!("{err:?}");
+        }
+    }
+
     fn cluster_api<K>(&self) -> api::Api<K>
     where
         K: kube::Resource<Scope = k8s::openapi::ClusterResourceScope>,

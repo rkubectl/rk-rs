@@ -43,8 +43,9 @@ impl Object {
         let ssar = kubectl
             .selfsubjectaccessreviews()
             .create(&pp, &ssar)
-            .await?;
-        tracing::debug!(status = ?ssar.status, "authorizationv1::SelfSubjectAccessReview");
+            .await
+            .inspect(|k| kubectl.inspect(k))
+            .inspect_err(|err| kubectl.inspect_err(err))?;
 
         let show_params = default();
         println!("{}", ssar.output(false, &show_params, kubectl.output()));

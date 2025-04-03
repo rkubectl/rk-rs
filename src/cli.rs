@@ -38,12 +38,12 @@ impl Cli {
     }
 
     pub async fn exec(self, kubectl: Kubectl) -> kube::Result<()> {
-        let output = self.output.unwrap_or_default();
         let namespace = Namespace::new(self.all_namespaces, self.namespace);
-        let kubectl = kubectl.namespace(namespace);
+        let output = self.output.unwrap_or_default();
+        let kubectl = kubectl.with_namespace(namespace).with_output(output);
         match self.command {
             Command::ApiResources(api_resources) => api_resources.exec(&kubectl, output).await,
-            Command::Auth(auth) => auth.exec(&kubectl, output).await,
+            Command::Auth(auth) => auth.exec(&kubectl).await,
             Command::ApiVersions => kubectl.api_versions().await,
             Command::Get(get) => get.exec(&kubectl, output).await,
         }

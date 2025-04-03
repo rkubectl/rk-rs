@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use super::*;
 
+mod accessreview;
 mod configmap;
 mod node;
 mod objectlist;

@@ -12,8 +12,7 @@ pub enum Auth {
 }
 
 impl Auth {
-    pub async fn exec(&self, kubectl: &Kubectl, output: OutputFormat) -> kube::Result<()> {
-        println!("{kubectl:?} {output:?}");
+    pub async fn exec(&self, kubectl: &Kubectl) -> kube::Result<()> {
         match self {
             Self::CanI(can_i) => can_i.ask(kubectl).await,
             Self::Reconcile => Ok(()),

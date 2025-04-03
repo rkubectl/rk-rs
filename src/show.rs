@@ -15,8 +15,8 @@ mod params;
 pub trait Show {
     fn header(&self, output: &OutputFormat) -> Vec<String>;
     fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String>;
-    fn yaml(&self, params: &ShowParams) -> String;
     fn json(&self, params: &ShowParams) -> String;
+    fn yaml(&self, params: &ShowParams) -> String;
     fn name(&self) -> String;
 
     fn normal(&self, params: &ShowParams, output: &OutputFormat) -> Table {
@@ -169,6 +169,10 @@ impl OutputFormat {
                 println!("{kind}/{name} {data} {age}");
             }
         }
+    }
+
+    pub fn is_wide(&self) -> bool {
+        matches!(self, Self::Wide)
     }
 }
 

@@ -3,21 +3,36 @@ use super::*;
 pub struct Kubectl {
     client: kube::Client,
     namespace: Namespace,
+    output: OutputFormat,
     debug: bool,
 }
 
 impl Kubectl {
     pub async fn new(debug: bool) -> kube::Result<Self> {
         let namespace = default();
+        let output = default();
         kube::Client::try_default().await.map(|client| Self {
             client,
             namespace,
+            output,
             debug,
         })
     }
 
-    pub fn namespace(self, namespace: Namespace) -> Self {
+    pub fn with_namespace(self, namespace: Namespace) -> Self {
         Self { namespace, ..self }
+    }
+
+    pub fn with_output(self, output: OutputFormat) -> Self {
+        Self { output, ..self }
+    }
+
+    pub fn namespace(&self) -> &Namespace {
+        &self.namespace
+    }
+
+    pub fn output(&self) -> &OutputFormat {
+        &self.output
     }
 
     pub fn show_namespace(&self) -> bool {

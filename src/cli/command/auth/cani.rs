@@ -34,38 +34,20 @@ impl Object {
     }
 
     async fn ask(&self, kubectl: &Kubectl, verb: &str) -> kube::Result<()> {
-        let ssar = authorizationv1::SelfSubjectAccessReview {
-            spec: self.spec(kubectl, verb).await?,
-            ..default()
-        };
+        let ssar: authorizationv1::SelfSubjectAccessReview =
+            authorizationv1::SelfSubjectAccessReview {
+                spec: self.spec(kubectl, verb).await?,
+                ..default()
+            };
         let pp = kubectl.post_params();
         let ssar = kubectl
             .selfsubjectaccessreviews()
             .create(&pp, &ssar)
             .await?;
         tracing::debug!(status = ?ssar.status, "authorizationv1::SelfSubjectAccessReview");
-        let authorizationv1::SubjectAccessReviewStatus {
-            allowed,
-            denied,
-            evaluation_error,
-            reason,
-        } = ssar.status.unwrap_or_default();
-        let reason = reason
-            .map(|reason| format!(" - {reason}"))
-            .unwrap_or_default();
-        if allowed {
-            println!("yes{reason}");
-        } else {
-            let denied = if denied.unwrap_or_default() {
-                " (denied)"
-            } else {
-                ""
-            };
-            let evaluation_error = evaluation_error
-                .map(|error| format!(" - {error}"))
-                .unwrap_or_default();
-            println!("no{denied}{reason}{evaluation_error}");
-        }
+
+        let show_params = default();
+        println!("{}", ssar.output(false, &show_params, kubectl.output()));
         Ok(())
     }
 

@@ -4,6 +4,7 @@ use super::*;
 
 pub use command::ApiResource;
 pub use command::ApiResources;
+pub use command::Auth;
 pub use command::Command;
 pub use command::Get;
 
@@ -42,6 +43,7 @@ impl Cli {
         let kubectl = kubectl.namespace(namespace);
         match self.command {
             Command::ApiResources(api_resources) => api_resources.exec(&kubectl, output).await,
+            Command::Auth(auth) => auth.exec(&kubectl, output).await,
             Command::ApiVersions => kubectl.api_versions().await,
             Command::Get(get) => get.exec(&kubectl, output).await,
         }

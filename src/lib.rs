@@ -32,6 +32,7 @@ use k8s::metav1;
 
 pub use cli::ApiResource;
 pub use cli::ApiResources;
+pub use cli::Auth;
 pub use cli::Cli;
 pub use cli::Command;
 pub use cli::Get;

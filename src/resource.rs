@@ -73,6 +73,18 @@ impl ResourceArg {
     }
 }
 
+impl std::str::FromStr for ResourceArg {
+    type Err = InvalidResourceSpec;
+
+    fn from_str(text: &str) -> Result<Self, Self::Err> {
+        if text.contains("/") {
+            Self::named_resource(text)
+        } else {
+            Ok(Self::Resource(Resource::from(text)))
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Resource {
     Pods,

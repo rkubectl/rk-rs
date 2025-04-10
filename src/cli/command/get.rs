@@ -15,7 +15,7 @@ pub struct Get {
 }
 
 impl Get {
-    pub async fn exec(&self, kubectl: &Kubectl, output: OutputFormat) -> kube::Result<()> {
+    pub async fn exec(&self, kubectl: &Kubectl) -> kube::Result<()> {
         let resources = ResourceArg::from_strings(&self.resources)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
         let mut params = self.params.clone();
@@ -24,7 +24,7 @@ impl Get {
         let namespace = kubectl.show_namespace();
         for resource in resources {
             let data = resource.get(kubectl).await?;
-            println!("{}", data.output(namespace, &params, &output));
+            println!("{}", data.output(namespace, &params, kubectl.output()));
         }
         Ok(())
     }

@@ -42,10 +42,10 @@ impl Cli {
         let output = self.output.unwrap_or_default();
         let kubectl = kubectl.with_namespace(namespace).with_output(output);
         match self.command {
-            Command::ApiResources(api_resources) => api_resources.exec(&kubectl, output).await,
+            Command::ApiResources(api_resources) => api_resources.exec(&kubectl).await,
             Command::Auth(auth) => auth.exec(&kubectl).await,
             Command::ApiVersions => kubectl.api_versions().await,
-            Command::Get(get) => get.exec(&kubectl, output).await,
+            Command::Get(get) => get.exec(&kubectl).await,
             Command::Features => kubectl.features().await,
             Command::Info => kubectl.info().await,
             Command::Version => kubectl.version().await,

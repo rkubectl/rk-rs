@@ -7,7 +7,8 @@ pub enum Namespace {
 }
 
 impl Namespace {
-    pub fn new(all_namespaces: bool, namespace: Option<String>) -> Self {
+    pub fn new(all_namespaces: bool, namespace: Option<&str>) -> Self {
+        let namespace = namespace.map(ToString::to_string);
         match (all_namespaces, namespace) {
             (true, _) => Self::All,
             (false, None) => Self::Default,

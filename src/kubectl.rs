@@ -4,6 +4,7 @@ pub use features::Feature;
 
 mod features;
 mod info;
+mod kubeconfig;
 mod version;
 
 pub struct Kubectl {
@@ -14,15 +15,22 @@ pub struct Kubectl {
 }
 
 impl Kubectl {
-    pub async fn new(debug: bool) -> kube::Result<Self> {
+    pub fn with_config(config: kube::Config, debug: bool) -> kube::Result<Self> {
         let namespace = default();
         let output = default();
-        kube::Client::try_default().await.map(|client| Self {
+        kube::Client::try_from(config).map(|client| Self {
             client,
             namespace,
             output,
             debug,
         })
+    }
+
+    pub async fn new(debug: bool) -> kube::Result<Self> {
+        kube::Config::infer()
+            .await
+            .map_err(kube::Error::InferConfig)
+            .and_then(|config| Self::with_config(config, debug))
     }
 
     pub fn with_namespace(self, namespace: Namespace) -> Self {

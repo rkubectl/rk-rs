@@ -38,6 +38,7 @@ pub use cli::ApiResources;
 pub use cli::Auth;
 pub use cli::Cli;
 pub use cli::Command;
+pub use cli::Config;
 pub use cli::Get;
 pub use ext::APIResourceExt;
 pub use ext::APIResourceListExt;

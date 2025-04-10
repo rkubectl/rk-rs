@@ -4,6 +4,7 @@ use super::*;
 
 mod accessreview;
 mod configmap;
+mod feature;
 mod node;
 mod objectlist;
 mod pod;

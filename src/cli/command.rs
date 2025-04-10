@@ -26,4 +26,7 @@ pub enum Command {
     ApiVersions,
 
     Get(Get),
+
+    /// Print status of the K8s feaures in the current cluster.
+    Features,
 }

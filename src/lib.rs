@@ -41,6 +41,7 @@ pub use cli::Command;
 pub use cli::Get;
 pub use ext::APIResourceExt;
 pub use ext::APIResourceListExt;
+pub use kubectl::Feature;
 pub use kubectl::Kubectl;
 pub use namespace::Namespace;
 pub use resource::NamedResource;

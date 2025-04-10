@@ -46,6 +46,7 @@ impl Cli {
             Command::Auth(auth) => auth.exec(&kubectl).await,
             Command::ApiVersions => kubectl.api_versions().await,
             Command::Get(get) => get.exec(&kubectl, output).await,
+            Command::Features => kubectl.features().await,
         }
     }
 }

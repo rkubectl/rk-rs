@@ -1,5 +1,9 @@
 use super::*;
 
+pub use features::Feature;
+
+mod features;
+
 pub struct Kubectl {
     client: kube::Client,
     namespace: Namespace,

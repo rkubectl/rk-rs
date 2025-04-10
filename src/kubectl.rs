@@ -3,6 +3,8 @@ use super::*;
 pub use features::Feature;
 
 mod features;
+mod info;
+mod version;
 
 pub struct Kubectl {
     client: kube::Client,

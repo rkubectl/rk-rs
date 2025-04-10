@@ -29,4 +29,10 @@ pub enum Command {
 
     /// Print status of the K8s feaures in the current cluster.
     Features,
+
+    /// Print brief server info
+    Info,
+
+    /// Print client and server version
+    Version,
 }

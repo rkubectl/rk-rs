@@ -13,28 +13,14 @@ pub struct ApiResources {
 
 impl ApiResources {
     pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        let mut ar = Vec::new();
-        for version in kubectl.list_core_api_versions().await?.versions {
-            let list = kubectl.list_core_api_resources(&version).await?;
-            let resources = self.collect(list);
-            ar.extend(resources);
-        }
+        let core = kubectl.get_core_api_resources().await?;
+        let apis = kubectl.get_api_resources().await?;
+        let ar = core
+            .into_iter()
+            .chain(apis)
+            .flat_map(|group| self.collect(group))
+            .collect::<Vec<_>>();
 
-        for group in kubectl.list_api_groups().await?.groups {
-            let group_version = group
-                .preferred_version
-                .as_ref()
-                .or_else(|| group.versions.first());
-            if let Some(group_version) = group_version {
-                let list = kubectl
-                    .list_api_group_resources(&group_version.group_version)
-                    .await?;
-                let resources = self.collect(list);
-                ar.extend(resources);
-            } else {
-                continue;
-            }
-        }
         let mut table = tabled::Table::new(ar);
         table.with(Style::blank());
         if matches!(kubectl.output(), cli::OutputFormat::Normal) {

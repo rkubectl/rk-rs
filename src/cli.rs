@@ -61,7 +61,7 @@ impl Cli {
             Command::ApiResources(api_resources) => api_resources.exec(&kubectl).await,
             Command::Auth(auth) => auth.exec(&kubectl).await,
             Command::ApiVersions => kubectl.api_versions().await,
-            Command::Config(config) => config.exec(),
+            Command::Config(config) => config.exec(&kubectl),
             Command::Get(get) => get.exec(&kubectl).await,
             Command::Features => kubectl.features().await,
             Command::Info => kubectl.info().await,
@@ -72,18 +72,16 @@ impl Cli {
     async fn kubectl(&self) -> kube::Result<Kubectl> {
         let namespace = self.namespace();
         let output = self.output.unwrap_or_default();
-        let config = Kubectl::config(
+        let kubectl = Kubectl::new(
             self.context.as_deref(),
             self.cluster.as_deref(),
             self.user.as_deref(),
             self.debug,
         )
-        .await?;
-
-        let kubectl = Kubectl::with_config(config, self.debug)
-            .inspect(|kubectl| tracing::info!(?kubectl))?
-            .with_namespace(namespace)
-            .with_output(output);
+        .await
+        .inspect(|kubectl| tracing::info!(?kubectl))?
+        .with_namespace(namespace)
+        .with_output(output);
 
         Ok(kubectl)
     }

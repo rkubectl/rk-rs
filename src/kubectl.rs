@@ -7,30 +7,40 @@ mod info;
 mod kubeconfig;
 mod version;
 
+#[derive(Debug)]
 pub struct Kubectl {
-    client: kube::Client,
+    config: kube::Config,
+    kubeconfig: kube::config::Kubeconfig,
+    // client: kube::Client,
     namespace: Namespace,
     output: OutputFormat,
     debug: bool,
 }
 
 impl Kubectl {
-    pub fn with_config(config: kube::Config, debug: bool) -> kube::Result<Self> {
-        let namespace = default();
-        let output = default();
-        kube::Client::try_from(config).map(|client| Self {
-            client,
-            namespace,
-            output,
-            debug,
-        })
+    pub fn client(&self) -> kube::Result<kube::Client> {
+        kube::Client::try_from(self.config.clone())
     }
 
-    pub async fn new(debug: bool) -> kube::Result<Self> {
-        kube::Config::infer()
+    pub async fn new(
+        context: Option<&str>,
+        cluster: Option<&str>,
+        user: Option<&str>,
+        debug: bool,
+    ) -> kube::Result<Self> {
+        let namespace = default();
+        let output = default();
+        Self::kubeconfig(context, cluster, user, debug)
             .await
-            .map_err(kube::Error::InferConfig)
-            .and_then(|config| Self::with_config(config, debug))
+            .inspect_err(|err| tracing::error!(%err, "from_kubeconfig"))
+            .map_err(|_| kube::Error::LinesCodecMaxLineLengthExceeded)
+            .map(|(config, kubeconfig)| Self {
+                config,
+                kubeconfig,
+                namespace,
+                output,
+                debug,
+            })
     }
 
     pub fn with_namespace(self, namespace: Namespace) -> Self {
@@ -54,10 +64,11 @@ impl Kubectl {
     }
 
     pub async fn get_core_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
-        let versions = self.client.list_core_api_versions().await?.versions;
+        let client = self.client()?;
+        let versions = client.list_core_api_versions().await?.versions;
         let mut list = Vec::with_capacity(versions.len());
         for version in versions {
-            let arl = self.client.list_core_api_resources(&version).await?;
+            let arl = client.list_core_api_resources(&version).await?;
             list.push(arl)
         }
 
@@ -65,7 +76,8 @@ impl Kubectl {
     }
 
     pub async fn get_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
-        let groups = self.client.list_api_groups().await?.groups;
+        let client = self.client()?;
+        let groups = client.list_api_groups().await?.groups;
         let mut list = Vec::new();
         for group in groups {
             let apiversion = group
@@ -73,8 +85,7 @@ impl Kubectl {
                 .as_ref()
                 .or_else(|| group.versions.first());
             if let Some(apiversion) = apiversion {
-                let arl = self
-                    .client
+                let arl = client
                     .list_api_group_resources(&apiversion.group_version)
                     .await?;
                 list.push(arl);
@@ -87,8 +98,9 @@ impl Kubectl {
     }
 
     pub async fn api_versions(&self) -> kube::Result<()> {
-        let core = self.list_core_api_versions().await?;
-        let groups = self.list_api_groups().await?;
+        let client = self.client()?;
+        let core = client.list_core_api_versions().await?;
+        let groups = client.list_api_groups().await?;
         core.versions
             .into_iter()
             .for_each(|version| println!("{version}"));
@@ -102,7 +114,7 @@ impl Kubectl {
 
     pub fn dynamic_api(&self, resource: &api::ApiResource) -> api::Api<api::DynamicObject> {
         println!("{resource:?}");
-        let client = self.client.clone();
+        let client = self.client().unwrap();
         match &self.namespace {
             Namespace::All => api::Api::all_with(client, resource),
             Namespace::Default => api::Api::default_namespaced_with(client, resource),
@@ -116,26 +128,34 @@ impl Kubectl {
     }
 
     pub fn list_params(&self) -> api::ListParams {
-        self.client.list_params()
+        api::ListParams::default()
     }
 
-    pub fn pods(&self) -> api::Api<corev1::Pod> {
+    pub fn post_params(&self) -> api::PostParams {
+        api::PostParams::default()
+    }
+
+    pub fn pods(&self) -> kube::Result<api::Api<corev1::Pod>> {
         self.namespaced_api()
     }
 
-    pub fn configmaps(&self) -> api::Api<corev1::ConfigMap> {
+    pub fn configmaps(&self) -> kube::Result<api::Api<corev1::ConfigMap>> {
         self.namespaced_api()
     }
 
-    pub fn nodes(&self) -> api::Api<corev1::Node> {
+    pub fn nodes(&self) -> kube::Result<api::Api<corev1::Node>> {
         self.cluster_api()
     }
 
-    pub fn selfsubjectaccessreviews(&self) -> api::Api<authorizationv1::SelfSubjectAccessReview> {
+    pub fn selfsubjectaccessreviews(
+        &self,
+    ) -> kube::Result<api::Api<authorizationv1::SelfSubjectAccessReview>> {
         self.cluster_api()
     }
 
-    pub fn selfsubjectrulesreviews(&self) -> api::Api<authorizationv1::SelfSubjectRulesReview> {
+    pub fn selfsubjectrulesreviews(
+        &self,
+    ) -> kube::Result<api::Api<authorizationv1::SelfSubjectRulesReview>> {
         self.cluster_api()
     }
 
@@ -155,41 +175,35 @@ impl Kubectl {
         }
     }
 
-    fn cluster_api<K>(&self) -> api::Api<K>
+    fn cluster_api<K>(&self) -> kube::Result<api::Api<K>>
     where
         K: kube::Resource<Scope = k8s::openapi::ClusterResourceScope>,
         <K as kube::Resource>::DynamicType: Default,
     {
-        self.client.api()
+        self.client().map(|client| client.api())
     }
 
-    fn namespaced_api<K>(&self) -> api::Api<K>
+    fn namespaced_api<K>(&self) -> kube::Result<api::Api<K>>
     where
         K: kube::Resource<Scope = k8s::openapi::NamespaceResourceScope>,
         <K as kube::Resource>::DynamicType: Default,
     {
-        match &self.namespace {
-            Namespace::All => self.client.api(),
-            Namespace::Default => self.client.default_namespaced_api(),
-            Namespace::Namespace(namespace) => self.client.namespaced_api(namespace),
-        }
+        let client = self.client()?;
+        let api = match &self.namespace {
+            Namespace::All => client.api(),
+            Namespace::Default => client.default_namespaced_api(),
+            Namespace::Namespace(namespace) => client.namespaced_api(namespace),
+        };
+        Ok(api)
     }
 }
 
-impl std::fmt::Debug for Kubectl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Kubectl")
-            .field("client", &"kube::Client")
-            .field("namespace", &self.namespace)
-            .field("debug", &self.debug)
-            .finish()
-    }
-}
-
-impl std::ops::Deref for Kubectl {
-    type Target = kube::Client;
-
-    fn deref(&self) -> &Self::Target {
-        &self.client
-    }
-}
+// impl std::fmt::Debug for Kubectl {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         f.debug_struct("Kubectl")
+//             .field("client", &"kube::Client")
+//             .field("namespace", &self.namespace)
+//             .field("debug", &self.debug)
+//             .finish()
+//     }
+// }

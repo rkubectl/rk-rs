@@ -120,15 +120,15 @@ impl Resource {
         let lp = kubectl.list_params();
         match self {
             Self::Pods => {
-                let list = kubectl.pods().list(&lp).await?;
+                let list = kubectl.pods()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::Nodes => {
-                let list = kubectl.nodes().list(&lp).await?;
+                let list = kubectl.nodes()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::ConfigMaps => {
-                let list = kubectl.configmaps().list(&lp).await?;
+                let list = kubectl.configmaps()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::Other(name) => {
@@ -140,15 +140,15 @@ impl Resource {
     async fn get(&self, kubectl: &Kubectl, name: &str) -> kube::Result<Box<dyn Show>> {
         match self {
             Self::Pods => {
-                let obj = kubectl.pods().get(name).await?;
+                let obj = kubectl.pods()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::Nodes => {
-                let obj = kubectl.nodes().get(name).await?;
+                let obj = kubectl.nodes()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::ConfigMaps => {
-                let obj = kubectl.configmaps().get(name).await?;
+                let obj = kubectl.configmaps()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::Other(name) => {

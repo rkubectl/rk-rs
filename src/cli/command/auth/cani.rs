@@ -41,7 +41,7 @@ impl Object {
             };
         let pp = kubectl.post_params();
         let ssar = kubectl
-            .selfsubjectaccessreviews()
+            .selfsubjectaccessreviews()?
             .create(&pp, &ssar)
             .await
             .inspect(|k| kubectl.inspect(k))
@@ -80,13 +80,11 @@ impl Object {
             else {
                 panic!("No api resource found")
             };
-            // let name = resource_arg.name().map(|name| name.to_string());
-            let namespace = kubectl.default_namespace().to_string();
             Some(authorizationv1::ResourceAttributes {
                 verb: Some(verb.to_string()),
                 group: Some(group),
                 name: Some(String::new()),
-                namespace: Some(namespace),
+                namespace: kubectl.namespace().namespace(),
                 resource: Some(plural),
                 subresource: Some(String::new()),
                 version: Some(version),

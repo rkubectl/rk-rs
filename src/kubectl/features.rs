@@ -27,7 +27,7 @@ impl Kubectl {
         let request = api::Request::new("")
             .get("metrics", &gp)
             .map_err(kube::Error::BuildRequest)?;
-        let text = self.client.request_text(request).await?;
+        let text = self.client()?.request_text(request).await?;
         Scrape::parse(text.lines().map(String::from).map(Ok)).map_err(kube::Error::ReadEvents)
     }
 }

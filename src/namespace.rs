@@ -15,4 +15,12 @@ impl Namespace {
             (false, Some(namespace)) => Self::Namespace(namespace),
         }
     }
+
+    pub fn namespace(&self) -> Option<String> {
+        match self {
+            Self::All => None,
+            Self::Default => None,
+            Self::Namespace(namespace) => Some(namespace.clone()),
+        }
+    }
 }

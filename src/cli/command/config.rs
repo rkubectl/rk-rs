@@ -46,7 +46,23 @@ pub enum Config {
 }
 
 impl Config {
-    pub fn exec(self) -> kube::Result<()> {
-        Ok(())
+    pub fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
+        match self {
+            Self::CurrentContext => kubectl.current_context(),
+            Self::DeleteCluster => todo!(),
+            Self::DeleteContext => todo!(),
+            Self::DeleteUser => todo!(),
+            Self::GetClusters => todo!(),
+            Self::GetContexts => todo!(),
+            Self::GetUsers => todo!(),
+            Self::RenameContext => todo!(),
+            Self::Set => todo!(),
+            Self::SetCluster => todo!(),
+            Self::SetContext => todo!(),
+            Self::SetCredentials => todo!(),
+            Self::Unset => todo!(),
+            Self::UseContext => todo!(),
+            Self::View => todo!(),
+        }
     }
 }

@@ -2,7 +2,7 @@ use super::*;
 
 impl Kubectl {
     pub async fn info(&self) -> kube::Result<()> {
-        self.client.apiserver_version().await.map(|info| {
+        self.client()?.apiserver_version().await.map(|info| {
             println!("build date:     {}", info.build_date);
             println!("compiler:       {}", info.compiler);
             println!("git_commit:     {}", info.git_commit);

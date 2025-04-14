@@ -40,6 +40,7 @@ pub use cli::Cli;
 pub use cli::Command;
 pub use cli::Config;
 pub use cli::Get;
+pub use cli::Node;
 pub use ext::APIResourceExt;
 pub use ext::APIResourceListExt;
 pub use kubectl::Feature;

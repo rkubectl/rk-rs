@@ -9,11 +9,13 @@ pub use api_resource::ApiResources;
 pub use auth::Auth;
 pub use config::Config;
 pub use get::Get;
+pub use node::Node;
 
 mod api_resource;
 mod auth;
 mod config;
 mod get;
+mod node;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Command {
@@ -38,6 +40,10 @@ pub enum Command {
 
     /// Print brief server info
     Info,
+
+    /// Print Node related info
+    #[command(subcommand)]
+    Node(Node),
 
     /// Print client and server version
     Version,

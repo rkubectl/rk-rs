@@ -8,6 +8,7 @@ pub use command::Auth;
 pub use command::Command;
 pub use command::Config;
 pub use command::Get;
+pub use command::Node;
 
 mod command;
 
@@ -65,6 +66,7 @@ impl Cli {
             Command::Get(get) => get.exec(&kubectl).await,
             Command::Features => kubectl.features().await,
             Command::Info => kubectl.info().await,
+            Command::Node(node) => node.exec(&kubectl).await,
             Command::Version => kubectl.version().await,
         }
     }

@@ -5,14 +5,31 @@ use super::*;
 #[derive(Clone, Debug, Subcommand)]
 
 pub enum Node {
+    Info,
     ListImages,
 }
 
 impl Node {
     pub async fn exec(&self, kubectl: &Kubectl) -> kube::Result<()> {
-        let lp = kubectl.list_params();
-        let nodes = kubectl.nodes()?.list(&lp).await?;
-        for node in nodes {
+        match self {
+            Self::Info => self.info(kubectl).await,
+            Self::ListImages => self.list_images(kubectl).await,
+        }
+    }
+
+    pub async fn info(&self, kubectl: &Kubectl) -> kube::Result<()> {
+        for node in self.nodes(kubectl).await? {
+            println!("\n{}\n", node.name_any());
+            if let Some(info) = node.status {
+                println!("  Node Info: {:?}", info.node_info.unwrap_or_default());
+            }
+        }
+
+        Ok(())
+    }
+
+    pub async fn list_images(&self, kubectl: &Kubectl) -> kube::Result<()> {
+        for node in self.nodes(kubectl).await? {
             println!("\n{}\n", node.name_any());
             node.status
                 .unwrap_or_default()
@@ -24,6 +41,11 @@ impl Node {
         }
 
         Ok(())
+    }
+
+    async fn nodes(&self, kubectl: &Kubectl) -> kube::Result<Vec<corev1::Node>> {
+        let lp = kubectl.list_params();
+        kubectl.nodes()?.list(&lp).await.map(|list| list.items)
     }
 }
 

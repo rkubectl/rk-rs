@@ -1,3 +1,6 @@
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+
 use super::*;
 
 use image::ImageInfo;
@@ -20,9 +23,27 @@ impl Node {
 
     pub async fn info(&self, kubectl: &Kubectl) -> kube::Result<()> {
         for node in self.nodes(kubectl).await? {
-            println!("\n{}\n", node.name_any());
-            if let Some(info) = node.status {
-                println!("  Node Info: {:?}", info.node_info.unwrap_or_default());
+            let name = node.name_any();
+            if let Some(info) = node_info(node) {
+                let info = [
+                    ("Architecture", info.architecture),
+                    ("Boot ID", info.boot_id),
+                    ("Container Runtime Version", info.container_runtime_version),
+                    ("Kernel Version", info.kernel_version),
+                    ("Kube Proxy Version", info.kube_proxy_version),
+                    ("Kubelet Version", info.kubelet_version),
+                    ("Machine ID", info.machine_id),
+                    ("Operating System", info.operating_system),
+                    ("OS Image", info.os_image),
+                    ("System UUID", info.system_uuid),
+                ]
+                .into_iter()
+                .collect::<BTreeMap<_, _>>();
+
+                let mut table = tabled::builder::Builder::from(info).build();
+                table.with(tabled::settings::Style::empty());
+                println!("\n{name}\n");
+                println!("{table}");
             }
         }
 
@@ -48,4 +69,8 @@ impl Node {
         let lp = kubectl.list_params();
         kubectl.nodes()?.list(&lp).await.map(|list| list.items)
     }
+}
+
+fn node_info(node: corev1::Node) -> Option<corev1::NodeSystemInfo> {
+    node.status?.node_info
 }

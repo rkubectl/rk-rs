@@ -30,7 +30,7 @@ pub enum Command {
     ApiVersions,
 
     /// Modify kubeconfig file.
-    #[command(subcommand)]
+    #[command(subcommand, visible_alias = "cfg")]
     Config(Config),
 
     Get(Get),
@@ -42,7 +42,7 @@ pub enum Command {
     Info,
 
     /// Print Node related info
-    #[command(subcommand)]
+    #[command(subcommand, visible_aliases = ["no", "nodes"])]
     Node(Node),
 
     /// Print client and server version

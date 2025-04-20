@@ -3,8 +3,12 @@ use super::*;
 impl Show for corev1::Pod {
     fn header(&self, output: &OutputFormat) -> Vec<String> {
         let header = match output {
-            OutputFormat::Normal => ["NAMESPACE", "NAME"].as_slice(),
-            OutputFormat::Wide => ["NAMESPACE", "NAME", "AGE"].as_slice(),
+            OutputFormat::Normal => {
+                ["NAMESPACE", "NAME", "READY", "STATUS", "RESTARTS", "AGE"].as_slice()
+            }
+            OutputFormat::Wide => {
+                ["NAMESPACE", "NAME", "READY", "STATUS", "RESTARTS", "AGE"].as_slice()
+            }
             _ => todo!("{output:?}"),
         };
         header.iter().map(ToString::to_string).collect()
@@ -13,10 +17,15 @@ impl Show for corev1::Pod {
     fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
         let name = name(self, params);
+        let total = self.total_containers();
+        let ready = self.ready_containers();
+        let ready = format!("{ready}/{total}");
+        let status = self.kubectl_status();
+        let restarts = self.restarts().to_string();
         let age = self.creation_timestamp().map(age).unwrap_or_default();
         match output {
-            OutputFormat::Normal => vec![namespace, name],
-            OutputFormat::Wide => vec![namespace, name, age],
+            OutputFormat::Normal => vec![namespace, name, ready, status, restarts, age],
+            OutputFormat::Wide => vec![namespace, name, ready, status, restarts, age],
             _ => todo!("{output:?}"),
         }
     }

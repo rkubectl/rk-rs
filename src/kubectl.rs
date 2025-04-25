@@ -1,3 +1,5 @@
+use futures_util::stream::{self, StreamExt, TryStreamExt};
+
 use super::*;
 
 pub use features::Feature;
@@ -66,35 +68,25 @@ impl Kubectl {
     pub async fn get_core_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
         let client = self.client()?;
         let versions = client.list_core_api_versions().await?.versions;
-        let mut list = Vec::with_capacity(versions.len());
-        for version in versions {
-            let arl = client.list_core_api_resources(&version).await?;
-            list.push(arl)
-        }
-
-        Ok(list)
+        stream::iter(&versions)
+            .then(|version| client.list_core_api_resources(version))
+            .try_collect()
+            .await
     }
 
     pub async fn get_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
         let client = self.client()?;
         let groups = client.list_api_groups().await?.groups;
-        let mut list = Vec::new();
-        for group in groups {
-            let apiversion = group
+        let apiversions = groups.iter().filter_map(|group| {
+            group
                 .preferred_version
                 .as_ref()
-                .or_else(|| group.versions.first());
-            if let Some(apiversion) = apiversion {
-                let arl = client
-                    .list_api_group_resources(&apiversion.group_version)
-                    .await?;
-                list.push(arl);
-            } else {
-                continue;
-            }
-        }
-
-        Ok(list)
+                .or_else(|| group.versions.first())
+        });
+        stream::iter(apiversions)
+            .then(|apiversion| client.list_api_group_resources(&apiversion.group_version))
+            .try_collect()
+            .await
     }
 
     pub async fn api_versions(&self) -> kube::Result<()> {

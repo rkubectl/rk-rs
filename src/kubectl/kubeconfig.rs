@@ -46,4 +46,37 @@ impl Kubectl {
         );
         Ok(())
     }
+
+    pub fn get_clusters(&self) -> kube::Result<()> {
+        self.clusters()
+            .iter()
+            .for_each(|cluster| println!("{}", cluster.name));
+        Ok(())
+    }
+
+    pub fn get_contexts(&self) -> kube::Result<()> {
+        self.contexts()
+            .iter()
+            .for_each(|ctx| println!("{}", ctx.name));
+        Ok(())
+    }
+
+    pub fn get_users(&self) -> kube::Result<()> {
+        self.authinfo()
+            .iter()
+            .for_each(|ai| println!("{}", ai.name));
+        Ok(())
+    }
+
+    fn clusters(&self) -> &[kube::config::NamedCluster] {
+        &self.kubeconfig.clusters
+    }
+
+    fn contexts(&self) -> &[kube::config::NamedContext] {
+        &self.kubeconfig.contexts
+    }
+
+    fn authinfo(&self) -> &[kube::config::NamedAuthInfo] {
+        &self.kubeconfig.auth_infos
+    }
 }

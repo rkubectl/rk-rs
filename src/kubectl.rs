@@ -13,7 +13,6 @@ mod version;
 pub struct Kubectl {
     config: kube::Config,
     kubeconfig: kube::config::Kubeconfig,
-    // client: kube::Client,
     namespace: Namespace,
     output: OutputFormat,
     debug: bool,

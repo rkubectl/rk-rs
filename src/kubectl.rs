@@ -118,6 +118,10 @@ impl Kubectl {
         Ok(())
     }
 
+    pub fn get_params(&self) -> api::GetParams {
+        api::GetParams::default()
+    }
+
     pub fn list_params(&self) -> api::ListParams {
         api::ListParams::default()
     }
@@ -186,6 +190,14 @@ impl Kubectl {
             Namespace::Namespace(namespace) => client.namespaced_api(namespace),
         };
         Ok(api)
+    }
+
+    async fn raw(&self, name: &str) -> kube::Result<String> {
+        let gp = self.get_params();
+        let request = api::Request::new("")
+            .get(name, &gp)
+            .map_err(kube::Error::BuildRequest)?;
+        self.client()?.request_text(request).await
     }
 }
 

@@ -23,12 +23,9 @@ impl Kubectl {
     }
 
     pub async fn metrics(&self) -> kube::Result<Scrape> {
-        let gp = api::GetParams::default();
-        let request = api::Request::new("")
-            .get("metrics", &gp)
-            .map_err(kube::Error::BuildRequest)?;
-        let text = self.client()?.request_text(request).await?;
-        Scrape::parse(text.lines().map(String::from).map(Ok)).map_err(kube::Error::ReadEvents)
+        let text = self.raw("metrics").await?;
+        let lines = text.lines().map(String::from).map(Ok);
+        Scrape::parse(lines).map_err(kube::Error::ReadEvents)
     }
 }
 

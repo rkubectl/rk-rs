@@ -1,4 +1,4 @@
-#[derive(Clone, Debug, Default, clap::Args)]
+#[derive(Copy, Clone, Debug, Default, clap::Args)]
 pub struct ShowParams {
     /// If present, list the resource type for the requested object(s).
     #[arg(long)]

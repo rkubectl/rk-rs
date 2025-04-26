@@ -28,7 +28,7 @@ impl Get {
             let resources = self.resources.as_deref().unwrap_or_default();
             let resources = ResourceArg::from_strings(resources)
                 .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
-            let mut params = self.params.clone();
+            let mut params = self.params;
             params.show_kind |= resources.len() > 1;
             tracing::info!(args=?self.resources, ?resources);
             let namespace = kubectl.show_namespace();

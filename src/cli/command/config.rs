@@ -62,7 +62,7 @@ impl Config {
             Self::SetCredentials => todo!(),
             Self::Unset => todo!(),
             Self::UseContext => todo!(),
-            Self::View => todo!(),
+            Self::View => kubectl.view(),
         }
     }
 }

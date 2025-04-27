@@ -9,13 +9,15 @@ impl Kubectl {
         user: Option<&str>,
         debug: bool,
     ) -> Result<(kube::Config, kube::config::Kubeconfig), kube::config::KubeconfigError> {
-        let kubeconfig = kube::config::Kubeconfig::read().inspect(|kubeconfig| {
-            if debug {
-                eprintln!("{kubeconfig:#?}")
-            } else {
-                tracing::debug!(?kubeconfig)
-            }
-        })?;
+        let kubeconfig = kube::config::Kubeconfig::read()
+            .map(sanitize_kubeconfig)
+            .inspect(|kubeconfig| {
+                if debug {
+                    eprintln!("{kubeconfig:#?}")
+                } else {
+                    tracing::debug!(?kubeconfig)
+                }
+            })?;
 
         let options = KubeConfigOptions {
             context: context.map(ToString::to_string),
@@ -68,6 +70,12 @@ impl Kubectl {
         Ok(())
     }
 
+    pub fn view(&self) -> kube::Result<()> {
+        yaml::to_string(&self.kubeconfig)
+            .map(|config| println!("{config}"))
+            .map_err(|_| kube::Error::LinesCodecMaxLineLengthExceeded)
+    }
+
     fn clusters(&self) -> &[kube::config::NamedCluster] {
         &self.kubeconfig.clusters
     }
@@ -79,4 +87,23 @@ impl Kubectl {
     fn authinfo(&self) -> &[kube::config::NamedAuthInfo] {
         &self.kubeconfig.auth_infos
     }
+}
+
+fn sanitize_kubeconfig(mut kubeconfig: kube::config::Kubeconfig) -> kube::config::Kubeconfig {
+    if let Some(current_context) = kubeconfig.current_context.as_deref() {
+        if !kubeconfig
+            .contexts
+            .iter()
+            .any(|ctx| ctx.name == current_context)
+        {
+            let context = kubeconfig.contexts.first().map(|ctx| ctx.name.clone());
+            tracing::debug!(
+                current_context,
+                first = context,
+                "Using first context instead of invalid current_context"
+            );
+            kubeconfig.current_context = context;
+        }
+    }
+    kubeconfig
 }

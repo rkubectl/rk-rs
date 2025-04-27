@@ -146,6 +146,10 @@ impl Kubectl {
         self.namespaced_api()
     }
 
+    pub fn componentstatuses(&self) -> kube::Result<api::Api<corev1::ComponentStatus>> {
+        self.cluster_api()
+    }
+
     pub fn nodes(&self) -> kube::Result<api::Api<corev1::Node>> {
         self.cluster_api()
     }

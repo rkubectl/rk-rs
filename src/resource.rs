@@ -97,6 +97,7 @@ pub enum Resource {
     Pods,
     Nodes,
     ConfigMaps,
+    ComponentStatuses,
     Other(String),
 }
 
@@ -106,6 +107,7 @@ impl Resource {
             "po" | "pod" | "pods" => Some(Self::Pods),
             "no" | "node" | "nodes" => Some(Self::Nodes),
             "cm" | "configmap" | "configmaps" => Some(Self::ConfigMaps),
+            "cs" | "componentstatus" | "componentstatuses" => Some(Self::ComponentStatuses),
             _ => None,
         }
     }
@@ -131,6 +133,10 @@ impl Resource {
                 let list = kubectl.configmaps()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
+            Self::ComponentStatuses => {
+                let list = kubectl.componentstatuses()?.list(&lp).await?;
+                Ok(Box::new(list))
+            }
             Self::Other(name) => {
                 todo!("list not implemented yet for {name}")
             }
@@ -151,6 +157,10 @@ impl Resource {
                 let obj = kubectl.configmaps()?.get(name).await?;
                 Ok(Box::new(obj))
             }
+            Self::ComponentStatuses => {
+                let obj = kubectl.componentstatuses()?.get(name).await?;
+                Ok(Box::new(obj))
+            }
             Self::Other(name) => {
                 todo!("get not implemented yet for {name}")
             }
@@ -162,6 +172,7 @@ impl Resource {
             Self::Pods => Ok(Some(Self::erase::<corev1::Pod>())),
             Self::Nodes => Ok(Some(Self::erase::<corev1::Node>())),
             Self::ConfigMaps => Ok(Some(Self::erase::<corev1::ConfigMap>())),
+            Self::ComponentStatuses => Ok(Some(Self::erase::<corev1::ComponentStatus>())),
             Self::Other(name) => self.dynamic_api_resource(kubectl, name).await,
         }
     }

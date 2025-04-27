@@ -3,6 +3,7 @@ use std::borrow::Cow;
 use super::*;
 
 mod accessreview;
+mod componentstatus;
 mod configmap;
 mod feature;
 mod node;

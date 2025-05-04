@@ -29,6 +29,7 @@ use kube_client_ext::KubeClientExt;
 use serde_json as json;
 use serde_yaml as yaml;
 
+use k8s::authenticationv1;
 use k8s::authorizationv1;
 use k8s::corev1;
 use k8s::metav1;

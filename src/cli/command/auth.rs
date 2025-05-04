@@ -1,14 +1,16 @@
 use super::*;
 
 use cani::CanI;
+use whoami::WhoAmI;
 
 mod cani;
+mod whoami;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Auth {
     CanI(CanI),
     Reconcile,
-    Whoami,
+    Whoami(WhoAmI),
 }
 
 impl Auth {
@@ -16,7 +18,7 @@ impl Auth {
         match self {
             Self::CanI(can_i) => can_i.ask(kubectl).await,
             Self::Reconcile => Ok(()),
-            Self::Whoami => Ok(()),
+            Self::Whoami(whoami) => whoami.ask(kubectl).await,
         }
     }
 }

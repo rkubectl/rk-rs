@@ -166,6 +166,12 @@ impl Kubectl {
         self.cluster_api()
     }
 
+    pub fn selfsubjectreviews(
+        &self,
+    ) -> kube::Result<api::Api<authenticationv1::SelfSubjectReview>> {
+        self.cluster_api()
+    }
+
     pub fn inspect<K>(&self, k: &K)
     where
         K: serde::Serialize,

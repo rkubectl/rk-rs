@@ -21,6 +21,7 @@ pub trait Show {
         tabled::builder::Builder::from_iter([self.header(output), self.data(params, output)])
             .build()
     }
+
     fn wide(&self, params: &ShowParams, output: &OutputFormat) -> Table {
         tabled::builder::Builder::from_iter([self.header(output), self.data(params, output)])
             .build()

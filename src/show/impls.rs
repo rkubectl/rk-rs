@@ -9,6 +9,7 @@ mod feature;
 mod node;
 mod objectlist;
 mod pod;
+mod subjectreview;
 
 trait StripManagedFields<'a>: Clone + 'a {
     fn strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, Self>;

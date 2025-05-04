@@ -34,11 +34,10 @@ impl Object {
     }
 
     async fn ask(&self, kubectl: &Kubectl, verb: &str) -> kube::Result<()> {
-        let ssar: authorizationv1::SelfSubjectAccessReview =
-            authorizationv1::SelfSubjectAccessReview {
-                spec: self.spec(kubectl, verb).await?,
-                ..default()
-            };
+        let ssar = authorizationv1::SelfSubjectAccessReview {
+            spec: self.spec(kubectl, verb).await?,
+            ..default()
+        };
         let pp = kubectl.post_params();
         let ssar = kubectl
             .selfsubjectaccessreviews()?

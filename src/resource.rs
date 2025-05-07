@@ -191,11 +191,10 @@ impl Resource {
         kubectl: &Kubectl,
         name: &str,
     ) -> kube::Result<Option<api::ApiResource>> {
-        let core = kubectl.get_core_api_resources().await?;
-        let apis = kubectl.get_api_resources().await?;
-        let ar = core
+        let ar = kubectl
+            .server_api_resources()
+            .await?
             .into_iter()
-            .chain(apis)
             .find_map(|arl| arl.kube_api_resource(name));
         Ok(ar)
     }

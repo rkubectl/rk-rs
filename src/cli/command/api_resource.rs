@@ -13,11 +13,10 @@ pub struct ApiResources {
 
 impl ApiResources {
     pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        let core = kubectl.get_core_api_resources().await?;
-        let apis = kubectl.get_api_resources().await?;
-        let ar = core
+        let ar = kubectl
+            .server_preferred_resources()
+            .await?
             .into_iter()
-            .chain(apis)
             .flat_map(|group| self.collect(group))
             .collect::<Vec<_>>();
 

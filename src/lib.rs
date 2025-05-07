@@ -15,6 +15,7 @@
 #![warn(clippy::map_flatten)]
 #![deny(warnings)]
 
+use std::path::{Path, PathBuf};
 use std::str;
 
 use kube::Resource as _;
@@ -41,7 +42,9 @@ pub use cli::Cli;
 pub use cli::Command;
 pub use cli::Config;
 pub use cli::Get;
+pub use cli::GlobalOptions;
 pub use cli::Node;
+pub use kubectl::Cache;
 pub use kubectl::Feature;
 pub use kubectl::Kubectl;
 pub use namespace::Namespace;

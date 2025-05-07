@@ -58,17 +58,7 @@ impl Cli {
 
     pub async fn exec(self) -> kube::Result<()> {
         let kubectl = self.kubectl().await?;
-        match self.command {
-            Command::ApiResources(api_resources) => api_resources.exec(&kubectl).await,
-            Command::Auth(auth) => auth.exec(&kubectl).await,
-            Command::ApiVersions => kubectl.api_versions().await,
-            Command::Config(config) => config.exec(&kubectl),
-            Command::Get(get) => get.exec(&kubectl).await,
-            Command::Features => kubectl.features().await,
-            Command::Info => kubectl.info().await,
-            Command::Node(node) => node.exec(&kubectl).await,
-            Command::Version => kubectl.version().await,
-        }
+        self.command.exec(&kubectl).await
     }
 
     async fn kubectl(&self) -> kube::Result<Kubectl> {

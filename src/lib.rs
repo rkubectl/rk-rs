@@ -64,3 +64,14 @@ mod show;
 fn default<T: Default>() -> T {
     T::default()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn verify_cli() {
+        use clap::CommandFactory;
+        Cli::command().debug_assert();
+    }
+}

@@ -21,7 +21,7 @@ impl ApiResources {
             .collect::<Vec<_>>();
 
         let mut table = tabled::Table::new(ar);
-        table.with(Style::blank());
+        table.with(Style::blank()).with(Padding::new(0, 2, 0, 0));
         if matches!(kubectl.output(), cli::OutputFormat::Normal) {
             table
                 .with(Remove::column(ByColumnName::new("VERBS")))

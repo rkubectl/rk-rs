@@ -41,7 +41,9 @@ impl Node {
                 .collect::<BTreeMap<_, _>>();
 
                 let mut table = tabled::builder::Builder::from(info).build();
-                table.with(tabled::settings::Style::empty());
+                table
+                    .with(tabled::settings::Style::empty())
+                    .with(tabled::settings::Padding::zero());
                 println!("\n{name}\n");
                 println!("{table}");
             }

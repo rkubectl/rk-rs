@@ -1,7 +1,10 @@
 use tabled::Table;
+use tabled::settings::Padding;
 use tabled::settings::Remove;
+use tabled::settings::Settings;
 use tabled::settings::Style;
 use tabled::settings::location::ByColumnName;
+use tabled::settings::style::On;
 
 use super::*;
 
@@ -9,6 +12,8 @@ pub use params::ShowParams;
 
 mod impls;
 mod params;
+
+type TableSettings = Settings<Settings<Settings, Style<(), (), (), (), (), On, 0, 0>>, Padding>;
 
 pub trait Show {
     fn header(&self, output: &OutputFormat) -> Vec<String>;
@@ -67,12 +72,9 @@ pub trait Show {
         match output {
             OutputFormat::Normal => {
                 let mut table = self.normal(params, output);
-                if namespace {
-                    table.with(Style::blank());
-                } else {
-                    table
-                        .with(Style::blank())
-                        .with(Remove::column(ByColumnName::new("NAMESPACE")));
+                table.with(self.table_settings());
+                if !namespace {
+                    table.with(Remove::column(ByColumnName::new("NAMESPACE")));
                 }
                 table.to_string()
             }
@@ -90,16 +92,19 @@ pub trait Show {
             OutputFormat::CustomColumnsFile => self.custom_columns_file(),
             OutputFormat::Wide => {
                 let mut table = self.wide(params, output);
-                if namespace {
-                    table.with(Style::blank());
-                } else {
-                    table
-                        .with(Style::blank())
-                        .with(Remove::column(ByColumnName::new("NAMESPACE")));
+                table.with(self.table_settings());
+                if !namespace {
+                    table.with(Remove::column(ByColumnName::new("NAMESPACE")));
                 }
                 table.to_string()
             }
         }
+    }
+
+    fn table_settings(&self) -> TableSettings {
+        Settings::empty()
+            .with(Style::blank())
+            .with(Padding::new(0, 2, 0, 0))
     }
 }
 

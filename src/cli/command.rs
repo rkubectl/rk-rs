@@ -1,3 +1,4 @@
+use tabled::settings::Padding;
 use tabled::settings::Remove;
 use tabled::settings::Style;
 use tabled::settings::location::ByColumnName;

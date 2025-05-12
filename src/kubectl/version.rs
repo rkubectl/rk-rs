@@ -1,11 +1,5 @@
 use super::*;
 
-k8s_openapi::k8s_if_1_28! {
-    const K8S_VERSION: &str = "1.28";
-}
-k8s_openapi::k8s_if_1_29! {
-    const K8S_VERSION: &str = "1.29";
-}
 k8s_openapi::k8s_if_1_30! {
     const K8S_VERSION: &str = "1.30";
 }
@@ -15,6 +9,12 @@ k8s_openapi::k8s_if_1_31! {
 k8s_openapi::k8s_if_1_32! {
     const K8S_VERSION: &str = "1.32";
 }
+k8s_openapi::k8s_if_1_33! {
+    const K8S_VERSION: &str = "1.33";
+}
+// k8s_openapi::k8s_if_1_34! {
+//     const K8S_VERSION: &str = "1.34";
+// }
 
 impl Kubectl {
     pub async fn version(&self) -> kube::Result<()> {

@@ -1,6 +1,16 @@
 use super::*;
 
 /// Display one or many resources
+///
+///  Prints a table of the most important information about the specified resources. You can filter the list using a label
+/// selector and the --selector flag. If the desired resource type is namespaced you will only see results in the current
+/// namespace if you don't specify any namespace.
+///
+///  By specifying the output as 'template' and providing a Go template as the value of the --template flag, you can filter
+/// the attributes of the fetched resources.
+///
+/// Use "kubectl api-resources" for a complete list of supported resources.
+///
 #[derive(Clone, Debug, Args)]
 
 pub struct Get {
@@ -8,13 +18,15 @@ pub struct Get {
     params: ShowParams,
 
     /// Raw URI to request from the server.  Uses the transport specified by the kubeconfig file.
-    #[arg(long, conflicts_with = "resources")]
+    #[arg(long, conflicts_with = "regular")]
     raw: Option<String>,
 
-    #[arg(
-            // value_delimiter = ',',
-            required = true
-        )]
+    /// If specified, gets the subresource of the requested object.
+    #[arg(group = "regular", long)]
+    subresource: Option<String>,
+
+    /// Resources to fetch
+    #[arg(group = "regular", required = true)]
     resources: Option<Vec<String>>,
 }
 

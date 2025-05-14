@@ -114,7 +114,6 @@ impl Beginner {
 pub enum Intermediate {
     ///  Get documentation for a resource
     Explain,
-    /// Display one or many resources
     Get(Get),
     /// Edit a resource on the server
     Edit,

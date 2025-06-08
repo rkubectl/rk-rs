@@ -1,4 +1,9 @@
 use kube::config::KubeConfigOptions;
+use kube::config::Kubeconfig;
+use kube::config::KubeconfigError;
+use kube::config::NamedAuthInfo;
+use kube::config::NamedCluster;
+use kube::config::NamedContext;
 
 use super::*;
 
@@ -8,8 +13,8 @@ impl Kubectl {
         cluster: Option<&str>,
         user: Option<&str>,
         debug: bool,
-    ) -> Result<(kube::Config, kube::config::Kubeconfig), kube::config::KubeconfigError> {
-        let kubeconfig = kube::config::Kubeconfig::read()
+    ) -> Result<(kube::Config, Kubeconfig), KubeconfigError> {
+        let kubeconfig = Kubeconfig::read()
             .map(sanitize_kubeconfig)
             .inspect(|kubeconfig| {
                 if debug {
@@ -76,34 +81,43 @@ impl Kubectl {
             .map_err(|_| kube::Error::LinesCodecMaxLineLengthExceeded)
     }
 
-    fn clusters(&self) -> &[kube::config::NamedCluster] {
+    fn clusters(&self) -> &[NamedCluster] {
         &self.kubeconfig.clusters
     }
 
-    fn contexts(&self) -> &[kube::config::NamedContext] {
+    fn contexts(&self) -> &[NamedContext] {
         &self.kubeconfig.contexts
     }
 
-    fn authinfo(&self) -> &[kube::config::NamedAuthInfo] {
+    fn authinfo(&self) -> &[NamedAuthInfo] {
         &self.kubeconfig.auth_infos
     }
 }
 
-fn sanitize_kubeconfig(mut kubeconfig: kube::config::Kubeconfig) -> kube::config::Kubeconfig {
-    if let Some(current_context) = kubeconfig.current_context.as_deref() {
-        if !kubeconfig
-            .contexts
-            .iter()
-            .any(|ctx| ctx.name == current_context)
-        {
-            let context = kubeconfig.contexts.first().map(|ctx| ctx.name.clone());
-            tracing::debug!(
-                current_context,
-                first = context,
-                "Using first context instead of invalid current_context"
-            );
-            kubeconfig.current_context = context;
-        }
+fn sanitize_kubeconfig(mut kubeconfig: Kubeconfig) -> Kubeconfig {
+    if kubeconfig.current_context().is_none() {
+        let context = kubeconfig.contexts.first().map(|ctx| ctx.name.clone());
+        tracing::debug!(
+            first = context,
+            "Using first context instead of invalid current_context"
+        );
+        kubeconfig.current_context = context;
     }
     kubeconfig
+}
+
+trait KubeconfigExt {
+    fn get_context(&self, context: &str) -> Option<&NamedContext>;
+    fn current_context(&self) -> Option<&NamedContext>;
+}
+
+impl KubeconfigExt for Kubeconfig {
+    fn get_context(&self, context: &str) -> Option<&NamedContext> {
+        self.contexts.iter().find(|ctx| ctx.name == context)
+    }
+
+    fn current_context(&self) -> Option<&NamedContext> {
+        let context = self.current_context.as_deref()?;
+        self.get_context(context)
+    }
 }

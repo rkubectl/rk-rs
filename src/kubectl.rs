@@ -38,7 +38,7 @@ impl Kubectl {
         let cache = cache::Cache::default();
         Self::kubeconfig(context, cluster, user, debug)
             .await
-            .inspect_err(|err| tracing::error!(%err, "from_kubeconfig"))
+            .inspect_err(|err| error!(%err, "from_kubeconfig"))
             .map(|(config, kubeconfig)| Self {
                 config,
                 kubeconfig,

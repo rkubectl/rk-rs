@@ -18,7 +18,7 @@ impl Kubectl {
             .map(sanitize_kubeconfig)
             .inspect(|kubeconfig| {
                 if debug {
-                    tracing::debug!(kubeconfig = kubeconfig.debug())
+                    debug!(kubeconfig = kubeconfig.debug())
                 }
             })?;
 
@@ -32,10 +32,10 @@ impl Kubectl {
             .await
             .inspect(|config| {
                 if debug {
-                    tracing::debug!(?config)
+                    debug!(?config)
                 }
             })
-            .inspect_err(|err| tracing::error!(%err, "from_kubeconfig"))
+            .inspect_err(|err| error!(%err, "from_kubeconfig"))
             .map(|config| (config, kubeconfig))
     }
 
@@ -93,7 +93,7 @@ impl Kubectl {
 fn sanitize_kubeconfig(mut kubeconfig: Kubeconfig) -> Kubeconfig {
     if kubeconfig.current_context().is_none() {
         let context = kubeconfig.contexts.first().map(|ctx| ctx.name.clone());
-        tracing::debug!(
+        debug!(
             first = context,
             "Using first context instead of invalid current_context"
         );

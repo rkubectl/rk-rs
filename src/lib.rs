@@ -29,6 +29,9 @@ use k8s_openapi_ext as k8s;
 use kube_client_ext::KubeClientExt;
 use serde_json as json;
 use serde_yaml as yaml;
+use tracing::debug;
+use tracing::error;
+use tracing::info;
 
 use k8s::authenticationv1;
 use k8s::authorizationv1;

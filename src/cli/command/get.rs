@@ -42,7 +42,7 @@ impl Get {
                 .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
             let mut params = self.params;
             params.show_kind |= resources.len() > 1;
-            tracing::info!(args=?self.resources, ?resources);
+            info!(args=?self.resources, ?resources);
             let namespace = kubectl.show_namespace();
             for resource in resources {
                 let data = resource.get(kubectl).await?;

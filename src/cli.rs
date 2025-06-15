@@ -56,7 +56,7 @@ impl Cli {
     }
 
     pub fn inspect(self) -> Self {
-        tracing::debug!(cli = ?self, "rk");
+        debug!(cli = ?self, "rk");
         self
     }
 
@@ -76,7 +76,7 @@ impl Cli {
             &self.options,
         )
         .await
-        .inspect(|kubectl| tracing::info!(?kubectl))?
+        .inspect(|kubectl| info!(?kubectl))?
         .with_namespace(namespace)
         .with_output(output);
 

@@ -62,6 +62,7 @@ pub enum Command {
 
 impl Command {
     pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
+        kubectl.debug(&self);
         match self {
             Self::Basic(basic) => basic.exec(kubectl).await,
             Self::Intermediate(intermediate) => intermediate.exec(kubectl).await,
@@ -124,7 +125,6 @@ pub enum Intermediate {
 impl Intermediate {
     async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
         let _client = kubectl.client()?;
-        println!("{self:?}");
         match self {
             Self::Explain => Ok(()),
             Self::Get(get) => get.exec(kubectl).await,

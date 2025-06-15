@@ -25,14 +25,6 @@ pub struct Kubectl {
 }
 
 impl Kubectl {
-    pub fn _client(&self) -> kube::Result<kube::Client> {
-        kube::Client::try_from(self.config.clone())
-    }
-
-    pub fn client(&self) -> kube::Result<kube::Client> {
-        kube::Client::try_from(self.config.clone())
-    }
-
     pub async fn new(
         context: Option<&str>,
         cluster: Option<&str>,
@@ -58,6 +50,16 @@ impl Kubectl {
             })
             .and_then(Self::try_load_cache)
             .map_err(|_| kube::Error::LinesCodecMaxLineLengthExceeded)
+    }
+
+    pub fn debug(&self, item: impl std::fmt::Debug) {
+        if self.debug {
+            println!("{item:?}")
+        }
+    }
+
+    pub fn client(&self) -> kube::Result<kube::Client> {
+        kube::Client::try_from(self.config.clone())
     }
 
     fn cache_path(&self) -> Result<PathBuf, kube::config::KubeconfigError> {

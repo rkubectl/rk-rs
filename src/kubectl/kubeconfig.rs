@@ -18,9 +18,7 @@ impl Kubectl {
             .map(sanitize_kubeconfig)
             .inspect(|kubeconfig| {
                 if debug {
-                    eprintln!("{kubeconfig:#?}")
-                } else {
-                    tracing::debug!(?kubeconfig)
+                    tracing::debug!(kubeconfig = kubeconfig.debug())
                 }
             })?;
 
@@ -34,8 +32,6 @@ impl Kubectl {
             .await
             .inspect(|config| {
                 if debug {
-                    eprintln!("{config:#?}")
-                } else {
                     tracing::debug!(?config)
                 }
             })
@@ -107,11 +103,16 @@ fn sanitize_kubeconfig(mut kubeconfig: Kubeconfig) -> Kubeconfig {
 }
 
 trait KubeconfigExt {
+    fn debug(&self) -> String;
     fn get_context(&self, context: &str) -> Option<&NamedContext>;
     fn current_context(&self) -> Option<&NamedContext>;
 }
 
 impl KubeconfigExt for Kubeconfig {
+    fn debug(&self) -> String {
+        yaml::to_string(self).unwrap_or_default()
+    }
+
     fn get_context(&self, context: &str) -> Option<&NamedContext> {
         self.contexts.iter().find(|ctx| ctx.name == context)
     }

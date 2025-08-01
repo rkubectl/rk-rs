@@ -44,6 +44,8 @@ pub use cli::Auth;
 pub use cli::Cli;
 pub use cli::Command;
 pub use cli::Config;
+pub use cli::Create;
+pub use cli::CreateResource;
 pub use cli::Get;
 pub use cli::GlobalOptions;
 pub use cli::Node;

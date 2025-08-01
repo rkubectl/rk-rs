@@ -8,20 +8,23 @@ use super::*;
 pub use api_resource::ApiResource;
 pub use api_resource::ApiResources;
 pub use auth::Auth;
+pub use basic::Create;
+pub use basic::CreateResource;
 pub use config::Config;
 pub use get::Get;
 pub use node::Node;
 
 mod api_resource;
 mod auth;
+mod basic;
 mod config;
 mod get;
 mod node;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Command {
-    #[command(flatten)]
-    Basic(Beginner),
+    #[command(flatten, next_help_heading = "Basic Commands (Beginner)")]
+    Basic(Basic),
 
     #[command(flatten)]
     Intermediate(Intermediate),
@@ -82,9 +85,9 @@ impl Command {
 /// Basic Commands (Beginner)
 #[derive(Clone, Debug, Subcommand)]
 // #[command(subcommand_help_heading = "Basic Commands (Beginner)")]
-pub enum Beginner {
+pub enum Basic {
     /// Create a resource from a file or from stdin
-    Create,
+    Create(Create),
 
     /// Take a replication controller, service, deployment or pod and expose it as a new Kubernetes service
     Expose,
@@ -96,12 +99,12 @@ pub enum Beginner {
     Set,
 }
 
-impl Beginner {
+impl Basic {
     async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
         let _client = kubectl.client()?;
         println!("{self:?}");
         match self {
-            Self::Create => Ok(()),
+            Self::Create(create) => create.exec(kubectl).await,
             Self::Expose => Ok(()),
             Self::Run => Ok(()),
             Self::Set => Ok(()),

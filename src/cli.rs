@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, builder::PossibleValuesParser};
 
 use super::*;
 
@@ -7,6 +7,8 @@ pub use command::ApiResources;
 pub use command::Auth;
 pub use command::Command;
 pub use command::Config;
+pub use command::Create;
+pub use command::CreateResource;
 pub use command::Get;
 pub use command::Node;
 

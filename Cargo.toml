@@ -26,6 +26,6 @@ serde_yaml = "0.9"
 size = "0.5"
 tabled = "0.20"
 thiserror = "2.0"
-tokio = { version = "1.45", features = ["full"] }
+tokio = { version = "1.47", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

@@ -3,6 +3,8 @@ use tabled::settings::Remove;
 use tabled::settings::Style;
 use tabled::settings::location::ByColumnName;
 
+use k8s::NamespaceExt;
+
 use super::*;
 
 pub use api_resource::ApiResource;

@@ -1,5 +1,7 @@
 use super::*;
 
+mod namespace;
+
 /// Create a resource from a file or from stdin.
 ///
 ///  JSON and YAML formats are accepted.
@@ -71,7 +73,8 @@ pub enum CreateResource {
     /// Create a job with the specified name
     Job,
     /// Create a namespace with the specified name
-    Namespace,
+    #[command(visible_alias = "ns")]
+    Namespace { name: String },
     /// Create a pod disruption budget with the specified name
     PodDisruptionBudget,
     /// Create a priority class with the specified name
@@ -93,8 +96,50 @@ pub enum CreateResource {
 }
 
 impl Create {
-    pub async fn exec(self, _kubectl: &Kubectl) -> kube::Result<()> {
-        println!("{self:?}");
+    pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
+        if let Some(filename) = &self.filename {
+            self.create_from_file(filename, kubectl).await
+        } else {
+            self.create_resource(kubectl).await
+        }
+    }
+
+    async fn create_from_file(&self, filename: &str, kubectl: &Kubectl) -> kube::Result<()> {
+        let _pp = kubectl.post_params_with_manager(&self.field_manager);
+        println!("Creating from {filename}, ({kubectl:?})");
         Ok(())
+    }
+
+    async fn create_resource(&self, kubectl: &Kubectl) -> kube::Result<()> {
+        if let Some(command) = &self.command {
+            let pp = kubectl.post_params_with_manager(&self.field_manager);
+            command.exec(kubectl, &pp).await
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl CreateResource {
+    pub async fn exec(&self, kubectl: &Kubectl, pp: &api::PostParams) -> kube::Result<()> {
+        match self {
+            Self::ClusterRole => todo!(),
+            Self::ClusterRoleBinding => todo!(),
+            Self::ConfigMap => todo!(),
+            Self::CronJob => todo!(),
+            Self::Deployment => todo!(),
+            Self::Ingress => todo!(),
+            Self::Job => todo!(),
+            Self::Namespace { name } => self.namespace(name, kubectl, pp).await,
+            Self::PodDisruptionBudget => todo!(),
+            Self::PriorityClass => todo!(),
+            Self::Quota => todo!(),
+            Self::Role => todo!(),
+            Self::RoleBinding => todo!(),
+            Self::Secret => todo!(),
+            Self::Service => todo!(),
+            Self::ServiceAccount => todo!(),
+            Self::Token => todo!(),
+        }
     }
 }

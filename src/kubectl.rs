@@ -227,6 +227,17 @@ impl Kubectl {
         api::PostParams::default()
     }
 
+    pub fn post_params_with_manager(&self, manager: &str) -> api::PostParams {
+        api::PostParams {
+            field_manager: Some(manager.to_string()),
+            ..default()
+        }
+    }
+
+    pub fn namespaces(&self) -> kube::Result<api::Api<corev1::Namespace>> {
+        self.cluster_api()
+    }
+
     pub fn pods(&self) -> kube::Result<api::Api<corev1::Pod>> {
         self.namespaced_api()
     }
@@ -297,5 +308,15 @@ impl Kubectl {
             Namespace::Namespace(namespace) => client.namespaced_api(namespace),
         };
         Ok(api)
+    }
+
+    pub fn full_name<K>(&self, k: &K) -> String
+    where
+        K: kube::Resource,
+        <K as kube::Resource>::DynamicType: Default,
+    {
+        let kind = K::kind(&default()).to_lowercase();
+        let name = k.name_any();
+        format!("{kind}/{name}")
     }
 }

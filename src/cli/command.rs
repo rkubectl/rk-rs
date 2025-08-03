@@ -13,6 +13,8 @@ pub use auth::Auth;
 pub use basic::Create;
 pub use basic::CreateResource;
 pub use config::Config;
+pub use delete::Delete;
+pub use dryrun::DryRun;
 pub use get::Get;
 pub use node::Node;
 
@@ -20,6 +22,8 @@ mod api_resource;
 mod auth;
 mod basic;
 mod config;
+mod delete;
+mod dryrun;
 mod get;
 mod node;
 
@@ -124,7 +128,7 @@ pub enum Intermediate {
     /// Edit a resource on the server
     Edit,
     /// Delete resources by file names, stdin, resources and names, or by resources and label selector
-    Delete,
+    Delete(Delete),
 }
 
 impl Intermediate {
@@ -134,7 +138,7 @@ impl Intermediate {
             Self::Explain => Ok(()),
             Self::Get(get) => get.exec(kubectl).await,
             Self::Edit => Ok(()),
-            Self::Delete => Ok(()),
+            Self::Delete(delete) => delete.exec(kubectl).await,
         }
     }
 }

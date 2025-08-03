@@ -65,6 +65,13 @@ impl ResourceArg {
         }
     }
 
+    pub async fn delete(&self, _kubectl: &Kubectl, _dp: &api::DeleteParams) -> kube::Result<()> {
+        match self {
+            Self::Resource(resource) => todo!("Deleting {resource:?}"),
+            Self::NamedResource(resource) => todo!("Deleting {resource:?}"),
+        }
+    }
+
     pub fn resource(&self) -> &Resource {
         match self {
             Self::Resource(resource) => resource,

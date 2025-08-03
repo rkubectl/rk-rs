@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand, builder::PossibleValuesParser};
+use clap::{Args, Parser, Subcommand};
 
 use super::*;
 
@@ -9,12 +9,15 @@ pub use command::Command;
 pub use command::Config;
 pub use command::Create;
 pub use command::CreateResource;
+pub use command::Delete;
+pub use command::DryRun;
 pub use command::Get;
 pub use command::Node;
 
 mod command;
 
 #[derive(Debug, Parser)]
+#[command(next_line_help = true)]
 pub struct Cli {
     #[arg(short, long, value_enum, global = true)]
     pub output: Option<OutputFormat>,

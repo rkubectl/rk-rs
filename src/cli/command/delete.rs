@@ -164,10 +164,8 @@ pub struct Delete {
     #[arg(long, default_value_t = true)]
     wait: bool,
 
-    #[arg(name = "TYPE",
-    //  required_unless_present("filename")
-    )]
-    resources: Option<Vec<String>>,
+    #[arg(name = "TYPE", required_unless_present("filename"))]
+    resources: Option<Vec<ResourceArg>>,
 }
 
 impl Delete {
@@ -183,8 +181,8 @@ impl Delete {
     async fn delete_resources(&self, _kubectl: &Kubectl) -> kube::Result<()> {
         let _dp = api::DeleteParams::default();
         let resources = self.resources.as_deref().unwrap_or_default();
-        let resources = ResourceArg::from_strings(resources)
-            .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
+        // let resources = ResourceArg::from_strings(resources)
+        //     .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?;
 
         for resource in resources {
             println!("Deleting {resource:?}");

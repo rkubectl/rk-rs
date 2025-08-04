@@ -46,13 +46,6 @@ impl ResourceArg {
             .map(Self::NamedResource)
     }
 
-    pub async fn _get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
-        match self {
-            Self::Resource(resource) => resource._get(kubectl).await,
-            Self::NamedResource(named_resource) => named_resource._get(kubectl).await,
-        }
-    }
-
     pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
         match self {
             Self::Resource(resource) => resource.list(kubectl).await,
@@ -87,7 +80,7 @@ impl ResourceArg {
     }
 }
 
-impl std::str::FromStr for ResourceArg {
+impl str::FromStr for ResourceArg {
     type Err = InvalidResourceSpec;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {
@@ -117,12 +110,6 @@ impl Resource {
             "cs" | "componentstatus" | "componentstatuses" => Some(Self::ComponentStatuses),
             _ => None,
         }
-    }
-
-    async fn _get(&self, kubectl: &Kubectl) -> kube::Result<Vec<api::DynamicObject>> {
-        let lp = kubectl.list_params();
-        let items = self.api(kubectl).await?.list(&lp).await?.items;
-        Ok(items)
     }
 
     async fn list(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
@@ -182,15 +169,6 @@ impl Resource {
             Self::ComponentStatuses => Ok(Some(Self::erase::<corev1::ComponentStatus>())),
             Self::Other(name) => self.dynamic_api_resource(kubectl, name).await,
         }
-    }
-
-    async fn api(&self, kubectl: &Kubectl) -> kube::Result<api::Api<api::DynamicObject>> {
-        let ar = self
-            .api_resource(kubectl)
-            .await?
-            .ok_or(kube::Error::LinesCodecMaxLineLengthExceeded)?;
-        let api = kubectl.dynamic_api(&ar);
-        Ok(api)
     }
 
     async fn dynamic_api_resource(

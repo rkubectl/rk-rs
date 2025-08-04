@@ -112,7 +112,7 @@ impl Object {
     }
 }
 
-impl std::str::FromStr for Object {
+impl str::FromStr for Object {
     type Err = resource::InvalidResourceSpec;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {

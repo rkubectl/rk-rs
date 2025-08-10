@@ -6,20 +6,21 @@ mod accessreview;
 mod componentstatus;
 mod configmap;
 mod feature;
+mod namespace;
 mod node;
 mod objectlist;
 mod pod;
 mod subjectreview;
 
 trait StripManagedFields<'a>: Clone + 'a {
-    fn strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, Self>;
+    fn maybe_strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, Self>;
 }
 
 impl<'a, K> StripManagedFields<'a> for K
 where
     K: Clone + kube::ResourceExt + 'a,
 {
-    fn strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, K> {
+    fn maybe_strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, K> {
         if params.show_managed_fields {
             Cow::Borrowed(self)
         } else {

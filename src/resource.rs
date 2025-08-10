@@ -106,6 +106,7 @@ impl str::FromStr for ResourceArg {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Resource {
     Pods,
+    Namespaces,
     Nodes,
     ConfigMaps,
     ComponentStatuses,
@@ -117,6 +118,7 @@ impl Resource {
         match text {
             "po" | "pod" | "pods" => Some(Self::Pods),
             "no" | "node" | "nodes" => Some(Self::Nodes),
+            "ns" | "namespace" | "namespaces" => Some(Self::Namespaces),
             "cm" | "configmap" | "configmaps" => Some(Self::ConfigMaps),
             "cs" | "componentstatus" | "componentstatuses" => Some(Self::ComponentStatuses),
             _ => None,
@@ -128,6 +130,10 @@ impl Resource {
         match self {
             Self::Pods => {
                 let list = kubectl.pods()?.list(&lp).await?;
+                Ok(Box::new(list))
+            }
+            Self::Namespaces => {
+                let list = kubectl.namespaces()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::Nodes => {
@@ -154,6 +160,10 @@ impl Resource {
                 let obj = kubectl.pods()?.get(name).await?;
                 Ok(Box::new(obj))
             }
+            Self::Namespaces => {
+                let obj = kubectl.namespaces()?.get(name).await?;
+                Ok(Box::new(obj))
+            }
             Self::Nodes => {
                 let obj = kubectl.nodes()?.get(name).await?;
                 Ok(Box::new(obj))
@@ -175,6 +185,7 @@ impl Resource {
     pub async fn api_resource(&self, kubectl: &Kubectl) -> kube::Result<Option<api::ApiResource>> {
         match self {
             Self::Pods => Ok(Some(Self::erase::<corev1::Pod>())),
+            Self::Namespaces => Ok(Some(Self::erase::<corev1::Namespace>())),
             Self::Nodes => Ok(Some(Self::erase::<corev1::Node>())),
             Self::ConfigMaps => Ok(Some(Self::erase::<corev1::ConfigMap>())),
             Self::ComponentStatuses => Ok(Some(Self::erase::<corev1::ComponentStatus>())),

@@ -10,12 +10,12 @@ impl Show for authorizationv1::SelfSubjectAccessReview {
     }
 
     fn json(&self, params: &ShowParams) -> String {
-        let data = self.strip_managed_fields(params);
+        let data = self.maybe_strip_managed_fields(params);
         json::to_string_pretty(&data).unwrap_or_default()
     }
 
     fn yaml(&self, params: &ShowParams) -> String {
-        let data = self.strip_managed_fields(params);
+        let data = self.maybe_strip_managed_fields(params);
         yaml::to_string(&data).unwrap_or_default()
     }
 

@@ -52,7 +52,7 @@ impl Kubectl {
             .map_err(|_| kube::Error::LinesCodecMaxLineLengthExceeded)
     }
 
-    pub fn debug(&self, item: impl std::fmt::Debug) {
+    pub fn debug(&self, item: impl fmt::Debug) {
         if self.debug {
             println!("{item:?}")
         }

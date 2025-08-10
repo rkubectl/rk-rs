@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use super::*;
 
 pub use named::NamedResource;
@@ -76,6 +78,15 @@ impl ResourceArg {
         match self {
             Self::Resource(_resource) => None,
             Self::NamedResource(named_resource) => Some(named_resource.name()),
+        }
+    }
+}
+
+impl fmt::Display for ResourceArg {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Resource(resource) => resource.fmt(f),
+            Self::NamedResource(resource) => resource.fmt(f),
         }
     }
 }

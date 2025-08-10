@@ -15,6 +15,7 @@
 #![warn(clippy::map_flatten)]
 #![deny(warnings)]
 
+use std::fmt;
 use std::path::{Path, PathBuf};
 use std::str;
 

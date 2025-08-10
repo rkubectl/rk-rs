@@ -95,6 +95,10 @@ impl Kubectl {
         matches!(self.namespace, Namespace::All)
     }
 
+    pub fn cached_server_api_resources(&self) -> Vec<metav1::APIResourceList> {
+        self.cache.api_resources().unwrap_or_default()
+    }
+
     pub async fn server_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
         if let Some(resources) = self.cache.api_resources() {
             // resources.sort_by_key(|arl| arl.resources[0].group.as_deref());
@@ -193,7 +197,7 @@ impl Kubectl {
     }
 
     pub fn dynamic_api(&self, resource: &api::ApiResource) -> api::Api<api::DynamicObject> {
-        println!("{resource:?}");
+        trace!(?resource);
         let client = self.client().unwrap();
         match &self.namespace {
             Namespace::All => api::Api::all_with(client, resource),
@@ -225,6 +229,19 @@ impl Kubectl {
 
     pub fn post_params(&self) -> api::PostParams {
         api::PostParams::default()
+    }
+
+    pub fn delete_params(&self, cascade: Cascade, dry_run: DryRun) -> api::DeleteParams {
+        let dp = match cascade {
+            Cascade::Background => api::DeleteParams::background(),
+            Cascade::Foreground => api::DeleteParams::foreground(),
+            Cascade::Orphan => api::DeleteParams::orphan(),
+        };
+
+        match dry_run {
+            DryRun::Server => dp.dry_run(),
+            DryRun::None | DryRun::Client => dp,
+        }
     }
 
     pub fn post_params_with_manager(&self, manager: &str) -> api::PostParams {
@@ -318,5 +335,21 @@ impl Kubectl {
         let kind = K::kind(&default()).to_lowercase();
         let name = k.name_any();
         format!("{kind}/{name}")
+    }
+}
+
+#[cfg(test)]
+impl Kubectl {
+    pub fn local() -> Self {
+        let config = kube::Config::new("http://localhost:6443".parse().unwrap());
+        Self {
+            config,
+            kubeconfig: default(),
+            cache: default(),
+            namespace: default(),
+            output: default(),
+            debug: default(),
+            options: default(),
+        }
     }
 }

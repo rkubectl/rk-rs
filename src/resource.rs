@@ -13,15 +13,24 @@ pub enum ResourceArg {
 }
 
 impl ResourceArg {
-    pub fn from_strings(resources: &[String]) -> Result<Vec<Self>, InvalidResourceSpec> {
+    pub fn from_strings(
+        resources: &[String],
+        kubectl: &Kubectl,
+    ) -> Result<Vec<Self>, InvalidResourceSpec> {
         // Two possible formats
         // 1. resource/name - in which case all the items should be the same
         // 2. resource[,resource,..] [name] [..]
         if resources.iter().any(|resource| resource.contains('/')) {
-            resources.iter().map(Self::named_resource).collect()
+            resources
+                .iter()
+                .map(|text| Self::named_resource(text, kubectl))
+                .collect()
         } else {
             let (resource, names) = resources.split_first().ok_or(InvalidResourceSpec)?;
-            let resources = resource.split(",").map(Resource::from).collect::<Vec<_>>();
+            let resources = resource
+                .split(",")
+                .map(|resource| Resource::with_cache(resource, kubectl).ok_or(InvalidResourceSpec))
+                .collect::<Result<Vec<_>, _>>()?;
             let resources = if names.is_empty() {
                 // Just resources, no names
                 resources.into_iter().map(ResourceArg::Resource).collect()
@@ -40,12 +49,15 @@ impl ResourceArg {
         }
     }
 
-    fn named_resource(text: impl AsRef<str>) -> Result<Self, InvalidResourceSpec> {
-        text.as_ref()
-            .split_once("/")
-            .ok_or(InvalidResourceSpec)
-            .map(|(resource, name)| NamedResource::new(resource, name))
+    fn named_resource(
+        text: impl AsRef<str>,
+        kubectl: &Kubectl,
+    ) -> Result<Self, InvalidResourceSpec> {
+        let (resource, name) = text.as_ref().split_once("/").ok_or(InvalidResourceSpec)?;
+        Resource::with_cache(resource, kubectl)
+            .map(|resource| NamedResource::with_resource(resource, name))
             .map(Self::NamedResource)
+            .ok_or(InvalidResourceSpec)
     }
 
     pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
@@ -60,10 +72,20 @@ impl ResourceArg {
         }
     }
 
-    pub async fn delete(&self, _kubectl: &Kubectl, _dp: &api::DeleteParams) -> kube::Result<()> {
+    pub async fn delete(
+        &self,
+        kubectl: &Kubectl,
+        dp: &api::DeleteParams,
+        all: bool,
+    ) -> kube::Result<()> {
         match self {
-            Self::Resource(resource) => todo!("Deleting {resource:?}"),
-            Self::NamedResource(resource) => todo!("Deleting {resource:?}"),
+            Self::Resource(resource) if all => {
+                todo!("Deleting ALL resources {resource:?} is not implemented yet")
+            }
+            Self::Resource(resource) => {
+                todo!("Deleting SOME resources {resource:?} is not implemented yet")
+            }
+            Self::NamedResource(resource) => resource.delete(kubectl, dp).await,
         }
     }
 
@@ -91,18 +113,6 @@ impl fmt::Display for ResourceArg {
     }
 }
 
-impl str::FromStr for ResourceArg {
-    type Err = InvalidResourceSpec;
-
-    fn from_str(text: &str) -> Result<Self, Self::Err> {
-        if text.contains("/") {
-            Self::named_resource(text)
-        } else {
-            Ok(Self::Resource(Resource::from(text)))
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum Resource {
     Pods,
@@ -110,10 +120,14 @@ pub enum Resource {
     Nodes,
     ConfigMaps,
     ComponentStatuses,
-    Other(String),
+    Other(api::ApiResource),
 }
 
 impl Resource {
+    pub fn with_cache(resource: &str, kubectl: &Kubectl) -> Option<Self> {
+        Self::well_known(resource).or_else(|| Self::other(resource, kubectl))
+    }
+
     pub fn well_known(text: &str) -> Option<Self> {
         match text {
             "po" | "pod" | "pods" => Some(Self::Pods),
@@ -148,8 +162,8 @@ impl Resource {
                 let list = kubectl.componentstatuses()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
-            Self::Other(name) => {
-                todo!("list not implemented yet for {name}")
+            Self::Other(resource) => {
+                todo!("list not implemented yet for {resource:?}")
             }
         }
     }
@@ -176,25 +190,59 @@ impl Resource {
                 let obj = kubectl.componentstatuses()?.get(name).await?;
                 Ok(Box::new(obj))
             }
-            Self::Other(name) => {
-                todo!("get not implemented yet for {name}")
+            Self::Other(resource) => {
+                todo!("get not implemented yet for {resource:?}")
             }
         }
     }
 
-    pub async fn api_resource(&self, kubectl: &Kubectl) -> kube::Result<Option<api::ApiResource>> {
+    // async fn delete(
+    //     &self,
+    //     kubectl: &Kubectl,
+    //     name: &str,
+    //     dp: &api::DeleteParams,
+    // ) -> kube::Result<()> {
+    //     let deleted = |ok| {
+    //         ok.map_left(|k| println!("{k:?}"))
+    //             .map_right(|status| println!("{status:?}"))
+    //     };
+    //     let deleted = match self {
+    //         Self::Pods => kubectl.pods()?.delete(name, dp).await.map(deleted),
+    //         Self::Namespaces => kubectl.namespaces()?.delete(name, dp).await.map(deleted),
+    //         Self::Nodes => kubectl.nodes()?.delete(name, dp).await.map(deleted),
+    //         Self::ConfigMaps => kubectl.configmaps()?.delete(name, dp).await.map(deleted),
+    //         Self::ComponentStatuses => kubectl
+    //             .componentstatuses()?
+    //             .delete(name, dp)
+    //             .await
+    //             .map(deleted),
+    //         Self::Other(resource) => {
+    //             todo!("get not implemented yet for {resource:?}")
+    //         }
+    //     };
+
+    //     Ok(())
+    // }
+
+    pub fn api_resource(&self) -> api::ApiResource {
         match self {
-            Self::Pods => Ok(Some(Self::erase::<corev1::Pod>())),
-            Self::Namespaces => Ok(Some(Self::erase::<corev1::Namespace>())),
-            Self::Nodes => Ok(Some(Self::erase::<corev1::Node>())),
-            Self::ConfigMaps => Ok(Some(Self::erase::<corev1::ConfigMap>())),
-            Self::ComponentStatuses => Ok(Some(Self::erase::<corev1::ComponentStatus>())),
-            Self::Other(name) => self.dynamic_api_resource(kubectl, name).await,
+            Self::Pods => Self::erase::<corev1::Pod>(),
+            Self::Namespaces => Self::erase::<corev1::Namespace>(),
+            Self::Nodes => Self::erase::<corev1::Node>(),
+            Self::ConfigMaps => Self::erase::<corev1::ConfigMap>(),
+            Self::ComponentStatuses => Self::erase::<corev1::ComponentStatus>(),
+            Self::Other(resource) => resource.clone(),
         }
     }
 
-    async fn dynamic_api_resource(
-        &self,
+    fn cached_dynamic_api_resource(kubectl: &Kubectl, name: &str) -> Option<api::ApiResource> {
+        kubectl
+            .cached_server_api_resources()
+            .into_iter()
+            .find_map(|arl| arl.kube_api_resource(name))
+    }
+
+    async fn _dynamic_api_resource(
         kubectl: &Kubectl,
         name: &str,
     ) -> kube::Result<Option<api::ApiResource>> {
@@ -214,20 +262,8 @@ impl Resource {
         api::ApiResource::erase::<K>(&<K as kube::Resource>::DynamicType::default())
     }
 
-    fn other(other: impl ToString) -> Self {
-        Self::Other(other.to_string())
-    }
-}
-
-impl From<String> for Resource {
-    fn from(text: String) -> Self {
-        Self::well_known(&text).unwrap_or_else(|| Self::other(text))
-    }
-}
-
-impl From<&str> for Resource {
-    fn from(text: &str) -> Self {
-        Self::well_known(text).unwrap_or_else(|| Self::other(text))
+    fn other(resource: &str, kubectl: &Kubectl) -> Option<Self> {
+        Self::cached_dynamic_api_resource(kubectl, resource).map(Self::Other)
     }
 }
 
@@ -243,7 +279,8 @@ mod tests {
 
     fn args(s: &[&str]) -> Result<Vec<ResourceArg>, InvalidResourceSpec> {
         let resources = s.iter().map(ToString::to_string).collect::<Vec<_>>();
-        ResourceArg::from_strings(&resources)
+        let kubectl = Kubectl::local();
+        ResourceArg::from_strings(&resources, &kubectl)
     }
 
     #[test]

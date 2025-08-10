@@ -1,6 +1,6 @@
 // use super::*;
 
-#[derive(Clone, Copy, Debug, Default, clap::ValueEnum)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, clap::ValueEnum)]
 pub enum DryRun {
     /// Default value, just show the object
     #[default]

@@ -5,6 +5,7 @@ use super::*;
 pub use command::ApiResource;
 pub use command::ApiResources;
 pub use command::Auth;
+pub use command::Cascade;
 pub use command::Command;
 pub use command::Config;
 pub use command::Create;
@@ -99,7 +100,7 @@ impl Default for Cli {
     }
 }
 
-#[derive(Clone, Debug, Args)]
+#[derive(Clone, Debug, Default, Args)]
 pub struct GlobalOptions {
     /// Default cache directory
     #[arg(long, global = true)]

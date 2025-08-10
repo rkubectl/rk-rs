@@ -5,7 +5,7 @@ use super::*;
 pub struct CanI {
     verb: String,
 
-    object: Object,
+    object: String,
 
     /// If true, prints all allowed actions.
     #[arg(long)]
@@ -23,14 +23,24 @@ enum Object {
 }
 
 impl CanI {
-    pub async fn ask(&self, kubectl: &Kubectl) -> kube::Result<()> {
-        self.object.ask(kubectl, &self.verb).await
+    pub async fn ask(self, kubectl: &Kubectl) -> kube::Result<()> {
+        Object::from_text(self.object, kubectl)
+            .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?
+            .ask(kubectl, &self.verb)
+            .await
     }
 }
 
 impl Object {
-    fn non_resource_url(text: &str) -> Self {
-        Self::NonResourceUrl(text.to_string())
+    fn from_text(text: String, kubectl: &Kubectl) -> Result<Self, resource::InvalidResourceSpec> {
+        if text.starts_with("/") {
+            Ok(Self::NonResourceUrl(text))
+        } else {
+            ResourceArg::from_strings(&[text], kubectl)?
+                .pop()
+                .map(Self::Resource)
+                .ok_or(resource::InvalidResourceSpec)
+        }
     }
 
     async fn ask(&self, kubectl: &Kubectl, verb: &str) -> kube::Result<()> {
@@ -68,17 +78,15 @@ impl Object {
         verb: &str,
     ) -> kube::Result<Option<authorizationv1::ResourceAttributes>> {
         let resource_attributes = if let Self::Resource(resource_arg) = self {
-            let Some(api::ApiResource {
+            let api::ApiResource {
                 group,
                 version,
                 // kind,
                 plural,
                 ..
                 // api_version,
-            }) = resource_arg.resource().api_resource(kubectl).await?
-            else {
-                panic!("No api resource found")
-            };
+            } = resource_arg.resource().api_resource()
+;
             Some(authorizationv1::ResourceAttributes {
                 verb: Some(verb.to_string()),
                 group: Some(group),
@@ -108,18 +116,6 @@ impl Object {
             })
         } else {
             None
-        }
-    }
-}
-
-impl str::FromStr for Object {
-    type Err = resource::InvalidResourceSpec;
-
-    fn from_str(text: &str) -> Result<Self, Self::Err> {
-        if text.starts_with("/") {
-            Ok(Self::non_resource_url(text))
-        } else {
-            text.parse().map(Self::Resource)
         }
     }
 }

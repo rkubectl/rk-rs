@@ -1,3 +1,5 @@
+use clap::builder::ArgPredicate;
+
 use super::*;
 
 // Delete resources by file names, stdin, resources and names, or by resources and label selector.
@@ -130,6 +132,12 @@ use super::*;
 #[derive(Clone, Debug, Args)]
 #[command(arg_required_else_help(true))]
 pub struct Delete {
+    /// Selects the deletion cascading strategy for the dependents
+    /// Must be "background", "orphan", or "foreground".
+    /// (e.g. Pods created by a ReplicationController). Defaults to background.
+    #[arg(long, value_enum, default_value_t = Cascade::Background)]
+    cascade: Cascade,
+
     /// If client strategy, only print the object that would be sent, without sending it.
     /// If server strategy, submit server-side request without persisting the resource.
     #[arg(
@@ -140,15 +148,19 @@ pub struct Delete {
     )]
     dry_run: DryRun,
 
+    /// Filename, directory, or URL to files to use to create the resource
+    #[arg(short, long, required_unless_present("TYPE"))]
+    filename: Option<String>,
+
     /// If true, immediately remove resources from API and bypass graceful deletion.
     /// Note that immediate deletion of some resources may result in inconsistency
     /// or data loss and requires confirmation.
     #[arg(long)]
     force: bool,
 
-    /// Filename, directory, or URL to files to use to create the resource
-    #[arg(short, long, required_unless_present("TYPE"))]
-    filename: Option<String>,
+    /// Treat "resource not found" as a successful delete. Defaults to "true" when --all is specified.
+    #[arg(long, default_value_if("all", ArgPredicate::IsPresent, "true"))]
+    ignore_not_found: bool,
 
     /// Process the directory used in -f, --filename recursively.
     /// Useful when you want to manage related manifests organized within the same directory.
@@ -178,19 +190,41 @@ impl Delete {
         }
     }
 
-    async fn delete_resources(&self, _kubectl: &Kubectl) -> kube::Result<()> {
-        let _dp = api::DeleteParams::default();
-        for resource in self.resources()? {
-            println!("Deleting {resource}");
+    async fn delete_resources(&self, kubectl: &Kubectl) -> kube::Result<()> {
+        let dp = kubectl.delete_params(self.cascade, self.dry_run);
+        for resource in self.resources(kubectl)? {
+            if self.dry_run == DryRun::Client {
+                println!("{resource} deleted (dry run)");
+            } else {
+                resource
+                    .delete(kubectl, &dp, self.all)
+                    .await
+                    .or_else(|err| self.ignore_not_found(err))
+                    // .inspect_err(|err| println!("{err:?}"))
+                    ?;
+            }
         }
 
         Ok(())
     }
 
-    fn resources(&self) -> kube::Result<Vec<ResourceArg>> {
+    fn resources(&self, kubectl: &Kubectl) -> kube::Result<Vec<ResourceArg>> {
         let resources = self.resources.as_deref().unwrap_or_default();
-        ResourceArg::from_strings(resources)
-            .inspect(|resources| info!(args=?self.resources, ?resources))
+        ResourceArg::from_strings(resources, kubectl)
+            // .inspect(|resources| info!(args=?self.resources, ?resources))
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)
+    }
+
+    fn ignore_not_found(&self, err: kube::Error) -> kube::Result<()> {
+        if self.ignore_not_found
+            && matches!(
+                err,
+                kube::Error::Api(kube::error::ErrorResponse { code: 404, .. })
+            )
+        {
+            Ok(())
+        } else {
+            Err(err)
+        }
     }
 }

@@ -37,7 +37,7 @@ impl Get {
             let text = kubectl.raw(name).await?;
             println!("{text}");
         } else {
-            let resources = self.resources()?;
+            let resources = self.resources(kubectl)?;
             let mut params = self.params;
             params.show_kind |= resources.len() > 1;
             let namespace = kubectl.show_namespace();
@@ -49,9 +49,9 @@ impl Get {
         Ok(())
     }
 
-    fn resources(&self) -> kube::Result<Vec<ResourceArg>> {
+    fn resources(&self, kubectl: &Kubectl) -> kube::Result<Vec<ResourceArg>> {
         let resources = self.resources.as_deref().unwrap_or_default();
-        ResourceArg::from_strings(resources)
+        ResourceArg::from_strings(resources, kubectl)
             .inspect(|resources| info!(args=?self.resources, ?resources))
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)
     }

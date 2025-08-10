@@ -33,6 +33,7 @@ use serde_yaml as yaml;
 use tracing::debug;
 use tracing::error;
 use tracing::info;
+use tracing::trace;
 
 use k8s::authenticationv1;
 use k8s::authorizationv1;
@@ -42,6 +43,7 @@ use k8s::metav1;
 pub use cli::ApiResource;
 pub use cli::ApiResources;
 pub use cli::Auth;
+pub use cli::Cascade;
 pub use cli::Cli;
 pub use cli::Command;
 pub use cli::Config;

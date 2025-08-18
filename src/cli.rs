@@ -9,7 +9,6 @@ pub use command::Cascade;
 pub use command::Command;
 pub use command::Config;
 pub use command::Create;
-pub use command::CreateNamespace;
 pub use command::CreateResource;
 pub use command::Created;
 pub use command::Delete;

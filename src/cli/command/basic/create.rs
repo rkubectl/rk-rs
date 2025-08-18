@@ -1,8 +1,10 @@
 use super::*;
 
-pub use namespace::CreateNamespace;
+use namespace::CreateNamespace;
+use secret::CreateSecret;
 
 mod namespace;
+mod secret;
 
 /// Create a resource from a file or from stdin.
 ///
@@ -93,7 +95,8 @@ pub enum CreateResource {
     /// Create a role binding for a particular role or cluster role
     RoleBinding,
     /// Create a secret using a specified subcommand
-    Secret,
+    #[command(subcommand)]
+    Secret(CreateSecret),
     /// Create a service using a specified subcommand
     Service,
     /// Create a service account with the specified name
@@ -164,7 +167,7 @@ impl CreateResource {
             Self::Quota => todo!(),
             Self::Role => todo!(),
             Self::RoleBinding => todo!(),
-            Self::Secret => todo!(),
+            Self::Secret(create_secret) => create_secret.exec(kubectl, pp).await,
             Self::Service => todo!(),
             Self::ServiceAccount => todo!(),
             Self::Token => todo!(),

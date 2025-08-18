@@ -10,6 +10,7 @@ pub use command::Command;
 pub use command::Config;
 pub use command::Create;
 pub use command::CreateResource;
+pub use command::Created;
 pub use command::Delete;
 pub use command::DryRun;
 pub use command::Get;

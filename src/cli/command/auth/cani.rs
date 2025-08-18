@@ -45,7 +45,7 @@ impl Object {
 
     async fn ask(&self, kubectl: &Kubectl, verb: &str) -> kube::Result<()> {
         let ssar = authorizationv1::SelfSubjectAccessReview {
-            spec: self.spec(kubectl, verb).await?,
+            spec: self.spec(kubectl, verb),
             ..default()
         };
         let pp = kubectl.post_params();
@@ -61,61 +61,62 @@ impl Object {
         Ok(())
     }
 
-    async fn spec(
-        &self,
-        kubectl: &Kubectl,
-        verb: &str,
-    ) -> kube::Result<authorizationv1::SelfSubjectAccessReviewSpec> {
-        Ok(authorizationv1::SelfSubjectAccessReviewSpec {
-            resource_attributes: self.resource_attributes(kubectl, verb).await?,
-            non_resource_attributes: self.non_resource_attributes(verb),
-        })
+    fn spec(&self, kubectl: &Kubectl, verb: &str) -> authorizationv1::SelfSubjectAccessReviewSpec {
+        match self {
+            Self::Resource(resource_arg) => authorizationv1::SelfSubjectAccessReviewSpec {
+                resource_attributes: Some(self.resource_attributes(kubectl, resource_arg, verb)),
+                ..default()
+            },
+            Self::NonResourceUrl(path) => authorizationv1::SelfSubjectAccessReviewSpec {
+                non_resource_attributes: Some(self.non_resource_attributes(path, verb)),
+                ..default()
+            },
+        }
     }
 
-    async fn resource_attributes(
+    fn resource_attributes(
         &self,
         kubectl: &Kubectl,
+        resource_arg: &ResourceArg,
         verb: &str,
-    ) -> kube::Result<Option<authorizationv1::ResourceAttributes>> {
-        let resource_attributes = if let Self::Resource(resource_arg) = self {
-            let api::ApiResource {
+    ) -> authorizationv1::ResourceAttributes {
+        let (scope, resource) = resource_arg.resource().api_resource();
+        let api::ApiResource {
                 group,
                 version,
-                // kind,
                 plural,
                 ..
+                // kind,
                 // api_version,
-            } = resource_arg.resource().api_resource()
-;
-            Some(authorizationv1::ResourceAttributes {
-                verb: Some(verb.to_string()),
-                group: Some(group),
-                name: Some(String::new()),
-                namespace: kubectl.namespace().namespace(),
-                resource: Some(plural),
-                subresource: Some(String::new()),
-                version: Some(version),
-                // field_selector: todo!(),
-                // label_selector: todo!(),
-                ..default()
-            })
-        } else {
-            None
+            } = resource;
+
+        let namespace = match scope {
+            discovery::Scope::Cluster => None,
+            discovery::Scope::Namespaced => kubectl.namespace().namespace(),
         };
-        Ok(resource_attributes)
+
+        authorizationv1::ResourceAttributes {
+            verb: Some(verb.to_string()),
+            group: Some(group),
+            name: Some(String::new()),
+            namespace,
+            resource: Some(plural),
+            subresource: Some(String::new()),
+            version: Some(version),
+            // field_selector: todo!(),
+            // label_selector: todo!(),
+            ..default()
+        }
     }
 
     fn non_resource_attributes(
         &self,
+        path: &str,
         verb: &str,
-    ) -> Option<authorizationv1::NonResourceAttributes> {
-        if let Self::NonResourceUrl(path) = self {
-            Some(authorizationv1::NonResourceAttributes {
-                path: Some(path.to_string()),
-                verb: Some(verb.to_string()),
-            })
-        } else {
-            None
+    ) -> authorizationv1::NonResourceAttributes {
+        authorizationv1::NonResourceAttributes {
+            path: Some(path.to_string()),
+            verb: Some(verb.to_string()),
         }
     }
 }

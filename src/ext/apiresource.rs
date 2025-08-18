@@ -3,9 +3,10 @@ use super::*;
 pub trait APIResourceListExt: Sized {
     fn group_version(&self) -> Result<gvk::GroupVersion, gvk::ParseGroupVersionError>;
     fn find(self, name: &str) -> Option<metav1::APIResource>;
-    fn kube_api_resource(self, name: &str) -> Option<api::ApiResource> {
+    fn kube_api_resource(self, name: &str) -> Option<(discovery::Scope, api::ApiResource)> {
         let gv = self.group_version().ok()?;
-        self.find(name).map(|ar| ar.kube_api_resource(gv))
+        self.find(name)
+            .map(|ar| (ar.scope(), ar.kube_api_resource(gv)))
     }
 }
 
@@ -22,6 +23,7 @@ impl APIResourceListExt for metav1::APIResourceList {
 pub trait APIResourceExt {
     fn matches_name(&self, name: &str) -> bool;
     fn kube_api_resource(self, gv: gvk::GroupVersion) -> api::ApiResource;
+    fn scope(&self) -> discovery::Scope;
 }
 
 impl APIResourceExt for metav1::APIResource {
@@ -44,6 +46,14 @@ impl APIResourceExt for metav1::APIResource {
             api_version,
             kind: self.kind,
             plural: self.name,
+        }
+    }
+
+    fn scope(&self) -> discovery::Scope {
+        if self.namespaced {
+            discovery::Scope::Namespaced
+        } else {
+            discovery::Scope::Cluster
         }
     }
 }

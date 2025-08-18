@@ -2,7 +2,7 @@ use clap::builder::ArgPredicate;
 
 use super::*;
 
-// Delete resources by file names, stdin, resources and names, or by resources and label selector.
+/// Delete resources by file names, stdin, resources and names, or by resources and label selector.
 
 //  JSON and YAML formats are accepted. Only one type of argument may be specified: file names, resources and names, or
 // resources and label selector.
@@ -199,9 +199,7 @@ impl Delete {
                 resource
                     .delete(kubectl, &dp, self.all)
                     .await
-                    .or_else(|err| self.ignore_not_found(err))
-                    // .inspect_err(|err| println!("{err:?}"))
-                    ?;
+                    .or_else(|err| self.ignore_not_found(err))?;
             }
         }
 
@@ -211,7 +209,6 @@ impl Delete {
     fn resources(&self, kubectl: &Kubectl) -> kube::Result<Vec<ResourceArg>> {
         let resources = self.resources.as_deref().unwrap_or_default();
         ResourceArg::from_strings(resources, kubectl)
-            // .inspect(|resources| info!(args=?self.resources, ?resources))
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)
     }
 

@@ -40,21 +40,6 @@ use k8s::authorizationv1;
 use k8s::corev1;
 use k8s::metav1;
 
-pub use cli::ApiResource;
-pub use cli::ApiResources;
-pub use cli::Auth;
-pub use cli::Cascade;
-pub use cli::Cli;
-pub use cli::Command;
-pub use cli::Config;
-pub use cli::Create;
-pub use cli::CreateResource;
-pub use cli::Created;
-pub use cli::Delete;
-pub use cli::DryRun;
-pub use cli::Get;
-pub use cli::GlobalOptions;
-pub use cli::Node;
 pub use kubectl::Cache;
 pub use kubectl::Feature;
 pub use kubectl::Kubectl;
@@ -66,6 +51,7 @@ pub use show::OutputFormat;
 pub use show::Show;
 pub use show::ShowParams;
 
+pub use cli::*;
 pub use ext::*;
 
 mod cli;

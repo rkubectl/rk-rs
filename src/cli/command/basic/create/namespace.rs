@@ -1,13 +1,27 @@
 use super::*;
 
-impl CreateResource {
-    pub async fn namespace(
+/// Create a namespace with the specified name.
+///
+/// Aliases:
+/// namespace, ns
+///
+/// Examples:
+///   # Create a new namespace named my-namespace
+///   kubectl create namespace my-namespace
+
+#[derive(Clone, Debug, Args)]
+#[command(rename_all = "lowercase")]
+pub struct CreateNamespace {
+    name: String,
+}
+
+impl CreateNamespace {
+    pub async fn exec(
         &self,
-        name: &str,
         kubectl: &Kubectl,
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
-        let data = corev1::Namespace::new(name);
+        let data = corev1::Namespace::new(&self.name);
         let k = kubectl
             .namespaces()?
             .create(pp, &data)
@@ -17,8 +31,6 @@ impl CreateResource {
         Ok(Box::new(created))
     }
 }
-
-// Create a namespace with the specified name.
 
 // Aliases:
 // namespace, ns

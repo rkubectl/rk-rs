@@ -11,6 +11,7 @@ pub use api_resource::ApiResource;
 pub use api_resource::ApiResources;
 pub use auth::Auth;
 pub use basic::Create;
+pub use basic::CreateNamespace;
 pub use basic::CreateResource;
 pub use basic::Created;
 pub use cascade::Cascade;

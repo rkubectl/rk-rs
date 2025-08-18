@@ -52,6 +52,10 @@ pub struct Create {
     #[arg(long)]
     save_config: bool,
 
+    /// If true, keep the managedFields when printing objects in JSON or YAML format.
+    #[arg(long)]
+    show_managed_fields: bool,
+
     #[command(subcommand)]
     command: Option<CreateResource>,
 }
@@ -98,31 +102,52 @@ pub enum CreateResource {
 
 impl Create {
     pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        if let Some(filename) = &self.filename {
+        let created = if let Some(filename) = &self.filename {
             self.create_from_file(filename, kubectl).await
         } else {
             self.create_resource(kubectl).await
-        }
-    }
+        }?;
 
-    async fn create_from_file(&self, filename: &str, kubectl: &Kubectl) -> kube::Result<()> {
-        let _pp = kubectl.post_params_with_manager(&self.field_manager);
-        println!("Creating from {filename}, ({kubectl:?})");
+        let namespace = kubectl.show_namespace();
+        let params = self.params();
+        let output = kubectl.output();
+        println!("{}", created.output(namespace, &params, output));
         Ok(())
     }
 
-    async fn create_resource(&self, kubectl: &Kubectl) -> kube::Result<()> {
+    async fn create_from_file(
+        &self,
+        filename: &str,
+        kubectl: &Kubectl,
+    ) -> kube::Result<Box<dyn Show>> {
+        let _pp = kubectl.post_params_with_manager(&self.field_manager);
+        println!("Creating from {filename}, ({kubectl:?})");
+        todo!()
+    }
+
+    async fn create_resource(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
         if let Some(command) = &self.command {
             let pp = kubectl.post_params_with_manager(&self.field_manager);
             command.exec(kubectl, &pp).await
         } else {
-            Ok(())
+            unreachable!()
+        }
+    }
+
+    fn params(&self) -> ShowParams {
+        ShowParams {
+            show_managed_fields: self.show_managed_fields,
+            ..default()
         }
     }
 }
 
 impl CreateResource {
-    pub async fn exec(&self, kubectl: &Kubectl, pp: &api::PostParams) -> kube::Result<()> {
+    pub async fn exec(
+        &self,
+        kubectl: &Kubectl,
+        pp: &api::PostParams,
+    ) -> kube::Result<Box<dyn Show>> {
         match self {
             Self::ClusterRole => todo!(),
             Self::ClusterRoleBinding => todo!(),
@@ -143,4 +168,10 @@ impl CreateResource {
             Self::Token => todo!(),
         }
     }
+}
+
+#[derive(Debug)]
+pub struct Created<K> {
+    // pub resource: CreateResource,
+    pub k: K,
 }

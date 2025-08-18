@@ -196,14 +196,25 @@ impl Kubectl {
         Ok(())
     }
 
-    pub fn dynamic_api(&self, resource: &api::ApiResource) -> api::Api<api::DynamicObject> {
-        trace!(?resource);
-        let client = self.client().unwrap();
-        match &self.namespace {
-            Namespace::All => api::Api::all_with(client, resource),
-            Namespace::Default => api::Api::default_namespaced_with(client, resource),
-            Namespace::Namespace(ns) => api::Api::namespaced_with(client, ns, resource),
-        }
+    pub fn dynamic_object_api(
+        &self,
+        resource: &Resource,
+    ) -> kube::Result<api::Api<api::DynamicObject>> {
+        let client = self.client()?;
+        let (scope, ref dyntype) = resource.api_resource();
+
+        trace!(?dyntype, "dynamic_object_api");
+
+        let dynamic_api = match scope {
+            discovery::Scope::Cluster => api::Api::all_with(client, dyntype),
+            discovery::Scope::Namespaced => match &self.namespace {
+                Namespace::All => api::Api::all_with(client, dyntype),
+                Namespace::Default => api::Api::default_namespaced_with(client, dyntype),
+                Namespace::Namespace(ns) => api::Api::namespaced_with(client, ns, dyntype),
+            },
+        };
+
+        Ok(dynamic_api)
     }
 
     pub async fn raw(&self, name: &str) -> kube::Result<String> {

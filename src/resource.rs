@@ -120,7 +120,10 @@ pub enum Resource {
     Nodes,
     ConfigMaps,
     ComponentStatuses,
-    Other(api::ApiResource),
+    Other {
+        scope: discovery::Scope,
+        resource: api::ApiResource,
+    },
 }
 
 impl Resource {
@@ -162,8 +165,8 @@ impl Resource {
                 let list = kubectl.componentstatuses()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
-            Self::Other(resource) => {
-                todo!("list not implemented yet for {resource:?}")
+            Self::Other { scope, resource } => {
+                todo!("list not implemented yet for {scope:?} {resource:?}")
             }
         }
     }
@@ -190,8 +193,8 @@ impl Resource {
                 let obj = kubectl.componentstatuses()?.get(name).await?;
                 Ok(Box::new(obj))
             }
-            Self::Other(resource) => {
-                todo!("get not implemented yet for {resource:?}")
+            Self::Other { scope, resource } => {
+                todo!("get not implemented yet for {scope:?} {resource:?}")
             }
         }
     }
@@ -224,18 +227,23 @@ impl Resource {
     //     Ok(())
     // }
 
-    pub fn api_resource(&self) -> api::ApiResource {
+    pub fn api_resource(&self) -> (discovery::Scope, api::ApiResource) {
+        use discovery::Scope::{Cluster, Namespaced};
+
         match self {
-            Self::Pods => Self::erase::<corev1::Pod>(),
-            Self::Namespaces => Self::erase::<corev1::Namespace>(),
-            Self::Nodes => Self::erase::<corev1::Node>(),
-            Self::ConfigMaps => Self::erase::<corev1::ConfigMap>(),
-            Self::ComponentStatuses => Self::erase::<corev1::ComponentStatus>(),
-            Self::Other(resource) => resource.clone(),
+            Self::Pods => (Namespaced, Self::erase::<corev1::Pod>()),
+            Self::Namespaces => (Cluster, Self::erase::<corev1::Namespace>()),
+            Self::Nodes => (Cluster, Self::erase::<corev1::Node>()),
+            Self::ConfigMaps => (Namespaced, Self::erase::<corev1::ConfigMap>()),
+            Self::ComponentStatuses => (Namespaced, Self::erase::<corev1::ComponentStatus>()),
+            Self::Other { scope, resource } => (scope.clone(), resource.clone()),
         }
     }
 
-    fn cached_dynamic_api_resource(kubectl: &Kubectl, name: &str) -> Option<api::ApiResource> {
+    fn cached_dynamic_api_resource(
+        kubectl: &Kubectl,
+        name: &str,
+    ) -> Option<(discovery::Scope, api::ApiResource)> {
         kubectl
             .cached_server_api_resources()
             .into_iter()
@@ -245,7 +253,7 @@ impl Resource {
     async fn _dynamic_api_resource(
         kubectl: &Kubectl,
         name: &str,
-    ) -> kube::Result<Option<api::ApiResource>> {
+    ) -> kube::Result<Option<(discovery::Scope, api::ApiResource)>> {
         let ar = kubectl
             .server_api_resources()
             .await?
@@ -263,7 +271,8 @@ impl Resource {
     }
 
     fn other(resource: &str, kubectl: &Kubectl) -> Option<Self> {
-        Self::cached_dynamic_api_resource(kubectl, resource).map(Self::Other)
+        Self::cached_dynamic_api_resource(kubectl, resource)
+            .map(|(scope, resource)| Self::Other { scope, resource })
     }
 }
 

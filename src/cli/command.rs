@@ -12,6 +12,7 @@ pub use api_resource::ApiResources;
 pub use auth::Auth;
 pub use basic::Create;
 pub use basic::CreateResource;
+pub use basic::Created;
 pub use cascade::Cascade;
 pub use config::Config;
 pub use delete::Delete;
@@ -110,7 +111,7 @@ pub enum Basic {
 impl Basic {
     async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
         let _client = kubectl.client()?;
-        println!("{self:?}");
+        println!("Basic::exec: {self:?}");
         match self {
             Self::Create(create) => create.exec(kubectl).await,
             Self::Expose => Ok(()),

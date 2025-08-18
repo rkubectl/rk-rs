@@ -6,14 +6,15 @@ impl CreateResource {
         name: &str,
         kubectl: &Kubectl,
         pp: &api::PostParams,
-    ) -> kube::Result<()> {
+    ) -> kube::Result<Box<dyn Show>> {
         let data = corev1::Namespace::new(name);
-        kubectl
+        let k = kubectl
             .namespaces()?
             .create(pp, &data)
             .await
-            .inspect(|ns| kubectl.inspect(ns))
-            .map(|ns| println!("{} created", kubectl.full_name(&ns)))
+            .inspect(|ns| kubectl.inspect(ns))?;
+        let created = Created { k };
+        Ok(Box::new(created))
     }
 }
 

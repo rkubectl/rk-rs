@@ -5,6 +5,7 @@ use super::*;
 mod accessreview;
 mod componentstatus;
 mod configmap;
+mod created;
 mod feature;
 mod namespace;
 mod node;

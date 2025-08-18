@@ -4,6 +4,7 @@ use tabled::settings::Style;
 use tabled::settings::location::ByColumnName;
 
 use k8s::NamespaceExt;
+use k8s::SecretExt;
 
 use super::*;
 
@@ -11,7 +12,6 @@ pub use api_resource::ApiResource;
 pub use api_resource::ApiResources;
 pub use auth::Auth;
 pub use basic::Create;
-pub use basic::CreateNamespace;
 pub use basic::CreateResource;
 pub use basic::Created;
 pub use cascade::Cascade;

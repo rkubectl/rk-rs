@@ -1,5 +1,7 @@
 use super::*;
 
+pub use namespace::CreateNamespace;
+
 mod namespace;
 
 /// Create a resource from a file or from stdin.
@@ -79,7 +81,7 @@ pub enum CreateResource {
     Job,
     /// Create a namespace with the specified name
     #[command(visible_alias = "ns")]
-    Namespace { name: String },
+    Namespace(CreateNamespace),
     /// Create a pod disruption budget with the specified name
     PodDisruptionBudget,
     /// Create a priority class with the specified name
@@ -156,7 +158,7 @@ impl CreateResource {
             Self::Deployment => todo!(),
             Self::Ingress => todo!(),
             Self::Job => todo!(),
-            Self::Namespace { name } => self.namespace(name, kubectl, pp).await,
+            Self::Namespace(create_namespace) => create_namespace.exec(kubectl, pp).await,
             Self::PodDisruptionBudget => todo!(),
             Self::PriorityClass => todo!(),
             Self::Quota => todo!(),

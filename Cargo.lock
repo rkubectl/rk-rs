@@ -882,9 +882,9 @@ dependencies = [
 
 [[package]]
 name = "k8s-openapi-ext"
-version = "0.0.52"
+version = "0.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "877577765b085285fb98cc7ebb56c09e77eeaaaa4fc9ff7aeefc19301ad9c3ff"
+checksum = "6b254b125af759add67424bd675c1a64582656659a7d86a83921550fcec52602"
 dependencies = [
  "base64",
  "chrono",
@@ -941,9 +941,9 @@ dependencies = [
 
 [[package]]
 name = "kube-client-ext"
-version = "0.0.52"
+version = "0.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53bea79db24f827624313c99431c49cc837a3a1443fc4d68243c77b28d3217c0"
+checksum = "4b11c66b3ca96a0bc47e6042c6bb4b9eeb4c734d72de8a4f79cc91a6700dcd09"
 dependencies = [
  "async-trait",
  "k8s-openapi",
@@ -1381,6 +1381,7 @@ dependencies = [
 name = "rk"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "clap",
  "etcetera",
  "futures-util",

@@ -28,16 +28,15 @@ use super::*;
 ///   kubectl create secret generic my-secret --from-env-file=path/to/foo.env --from-env-file=path/to/bar.env
 ///
 #[derive(Clone, Debug, Args)]
+#[command(arg_required_else_help(true), verbatim_doc_comment)]
 pub struct CreateGenericSecret {
     name: String,
     /// Specify the path to a file to read lines of key=val pairs to create a secret.
     #[arg(long, value_parser = EnvFile::value_parser())]
     from_env_file: Vec<EnvFile>,
 
-    /// Key files can be specified using their file path,
-    /// in which case a default name will be given to them,
-    /// or optionally with a name and file path,
-    /// in which case the given name will be used.
+    /// Key files can be specified using their file path, in which case a default name will be given to them,
+    /// or optionally with a name and file path, in which case the given name will be used.
     /// Specifying a directory will iterate each named file in the directory that is a valid secret key.
     #[arg(long, value_parser = File::value_parser())]
     from_file: Vec<File>,

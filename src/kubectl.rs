@@ -26,9 +26,7 @@ pub struct Kubectl {
 
 impl Kubectl {
     pub async fn new(
-        context: Option<&str>,
-        cluster: Option<&str>,
-        user: Option<&str>,
+        config: &ConfigOptions,
         debug: bool,
         options: &GlobalOptions,
     ) -> kube::Result<Self> {
@@ -36,7 +34,7 @@ impl Kubectl {
         let namespace = default();
         let output = default();
         let cache = cache::Cache::default();
-        Self::kubeconfig(context, cluster, user, debug)
+        Self::kubeconfig(config.kube_config_options(), debug)
             .await
             .inspect_err(|err| error!(%err, "from_kubeconfig"))
             .map(|(config, kubeconfig)| Self {

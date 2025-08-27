@@ -9,9 +9,7 @@ use super::*;
 
 impl Kubectl {
     pub async fn kubeconfig(
-        context: Option<&str>,
-        cluster: Option<&str>,
-        user: Option<&str>,
+        options: KubeConfigOptions,
         debug: bool,
     ) -> Result<(kube::Config, Kubeconfig), KubeconfigError> {
         let kubeconfig = Kubeconfig::read()
@@ -21,12 +19,6 @@ impl Kubectl {
                     debug!(kubeconfig = kubeconfig.debug())
                 }
             })?;
-
-        let options = KubeConfigOptions {
-            context: context.map(ToString::to_string),
-            cluster: cluster.map(ToString::to_string),
-            user: user.map(ToString::to_string),
-        };
 
         kube::Config::from_custom_kubeconfig(kubeconfig.clone(), &options)
             .await

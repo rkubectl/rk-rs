@@ -23,39 +23,23 @@ mod args;
 mod command;
 
 #[derive(Debug, Parser)]
-#[command(next_line_help = true)]
+#[command(next_line_help = true, max_term_width = 120)]
 pub struct Cli {
-    #[arg(short, long, value_enum, global = true)]
-    pub output: Option<OutputFormat>,
-
-    // #[arg(flatten, global = true)]
-    #[command(flatten)]
-    pub options: GlobalOptions,
-
     /// Debug on/off
     #[arg(short, long, global = true)]
     pub debug: bool,
 
-    /// If present, list the requested object(s) across all namespaces.
-    /// Namespace in current context is ignored even if specified with --namespace.
-    #[arg(short = 'A', long, global = true)]
-    pub all_namespaces: bool,
+    #[command(flatten, next_display_order = 1000)]
+    pub options: GlobalOptions,
 
-    /// If present, the namespace scope for this CLI request
-    #[arg(short = 'n', long, global = true)]
-    pub namespace: Option<String>,
+    #[command(flatten, next_display_order = 2000)]
+    pub namespace: NamespaceOptions,
 
-    /// The name of the kubeconfig cluster to use
-    #[arg(long, global = true)]
-    pub cluster: Option<String>,
+    #[command(flatten, next_display_order = 3000)]
+    pub config: ConfigOptions,
 
-    /// The name of the kubeconfig context to use
-    #[arg(long, global = true)]
-    pub context: Option<String>,
-
-    /// The name of the kubeconfig user to use
-    #[arg(long, global = true)]
-    pub user: Option<String>,
+    #[arg(short, long, value_enum, global = true, display_order = 10000)]
+    pub output: Option<OutputFormat>,
 
     #[command(subcommand)]
     pub command: Command,
@@ -77,25 +61,15 @@ impl Cli {
     }
 
     async fn kubectl(&self) -> kube::Result<Kubectl> {
-        let namespace: Namespace = self.namespace();
+        let namespace = self.namespace.namespace();
         let output = self.output.unwrap_or_default();
-        let kubectl = Kubectl::new(
-            self.context.as_deref(),
-            self.cluster.as_deref(),
-            self.user.as_deref(),
-            self.debug,
-            &self.options,
-        )
-        .await
-        .inspect(|kubectl| info!(?kubectl))?
-        .with_namespace(namespace)
-        .with_output(output);
+        let kubectl = Kubectl::new(&self.config, self.debug, &self.options)
+            .await
+            .inspect(|kubectl| info!(?kubectl))?
+            .with_namespace(namespace)
+            .with_output(output);
 
         Ok(kubectl)
-    }
-
-    fn namespace(&self) -> Namespace {
-        Namespace::new(self.all_namespaces, self.namespace.as_deref())
     }
 }
 
@@ -143,6 +117,50 @@ impl GlobalOptions {
             .host()
             .map(|server| self.cache_dir().join("discovery").join(server))
             .ok_or(kube::config::KubeconfigError::MissingClusterUrl)
+    }
+}
+
+#[derive(Clone, Debug, Default, Args)]
+pub struct ConfigOptions {
+    /// The name of the kubeconfig cluster to use
+    #[arg(long, global = true)]
+    pub cluster: Option<String>,
+
+    /// The name of the kubeconfig context to use
+    #[arg(long, global = true)]
+    pub context: Option<String>,
+
+    /// The name of the kubeconfig user to use
+    #[arg(long, global = true)]
+    pub user: Option<String>,
+}
+
+impl ConfigOptions {
+    pub fn kube_config_options(&self) -> kube::config::KubeConfigOptions {
+        kube::config::KubeConfigOptions {
+            context: self.context.clone(),
+            cluster: self.cluster.clone(),
+            user: self.user.clone(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, Args)]
+
+pub struct NamespaceOptions {
+    /// If present, list the requested object(s) across all namespaces.
+    /// Namespace in current context is ignored even if specified with --namespace.
+    #[arg(short = 'A', long, global = true, conflicts_with = "namespace")]
+    pub all_namespaces: bool,
+
+    /// If present, the namespace scope for this CLI request
+    #[arg(short = 'n', long, global = true)]
+    pub namespace: Option<String>,
+}
+
+impl NamespaceOptions {
+    fn namespace(&self) -> Namespace {
+        Namespace::new(self.all_namespaces, self.namespace.as_deref())
     }
 }
 

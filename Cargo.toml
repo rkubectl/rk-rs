@@ -6,7 +6,7 @@ edition = "2024"
 
 [dependencies]
 base64 = "0.22"
-clap = { version = "4.5", features = ["derive"] }
+clap = { version = "4.5", features = ["derive", "wrap_help", "unstable-v5"] }
 etcetera = "0.10.0"
 futures-util = "0.3"
 indexmap = "2.9"

@@ -33,7 +33,9 @@ mod node;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Command {
-    #[command(flatten, next_help_heading = "Basic Commands (Beginner)")]
+    #[command(flatten,
+        // next_help_heading = "Basic Commands (Beginner)"
+    )]
     Basic(Basic),
 
     #[command(flatten)]
@@ -92,9 +94,11 @@ impl Command {
         }
     }
 }
+
+#[expect(clippy::large_enum_variant)]
 /// Basic Commands (Beginner)
 #[derive(Clone, Debug, Subcommand)]
-// #[command(subcommand_help_heading = "Basic Commands (Beginner)")]
+#[command(subcommand_help_heading = "Basic Commands (Beginner)")]
 pub enum Basic {
     /// Create a resource from a file or from stdin
     Create(Create),

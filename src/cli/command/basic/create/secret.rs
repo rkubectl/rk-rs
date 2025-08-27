@@ -1,13 +1,21 @@
 use super::*;
 
+use docker::CreateDockerRegistrySecret;
 use generic::CreateGenericSecret;
 
+mod docker;
 mod generic;
 
 /// Create a secret with specified type.
+///
+///  A docker-registry type secret is for accessing a container registry.
+///
+///  A generic type secret indicate an Opaque secret type.
+///
+///  A tls type secret holds TLS certificate and its associated key.
 #[derive(Clone, Debug, Subcommand)]
 pub enum CreateSecret {
-    DockerRegistry,
+    DockerRegistry(CreateDockerRegistrySecret),
     Generic(CreateGenericSecret),
     Tls,
 }
@@ -19,8 +27,8 @@ impl CreateSecret {
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
         let k = match self {
-            Self::DockerRegistry => todo!(),
-            Self::Generic(create_generic_secret) => create_generic_secret.exec(kubectl, pp).await,
+            Self::DockerRegistry(docker_registry) => docker_registry.exec(kubectl, pp).await,
+            Self::Generic(generic) => generic.exec(kubectl, pp).await,
             Self::Tls => todo!(),
         }?;
         let created = Created { k };

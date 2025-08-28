@@ -2,9 +2,11 @@ use super::*;
 
 use docker::CreateDockerRegistrySecret;
 use generic::CreateGenericSecret;
+use tls::CreateTlsSecret;
 
 mod docker;
 mod generic;
+mod tls;
 
 /// Create a secret with specified type.
 ///
@@ -17,7 +19,7 @@ mod generic;
 pub enum CreateSecret {
     DockerRegistry(CreateDockerRegistrySecret),
     Generic(CreateGenericSecret),
-    Tls,
+    Tls(CreateTlsSecret),
 }
 
 impl CreateSecret {
@@ -26,11 +28,19 @@ impl CreateSecret {
         kubectl: &Kubectl,
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
-        let k = match self {
+        trace!(?kubectl, ?pp);
+        let data = match self {
             Self::DockerRegistry(docker_registry) => docker_registry.exec(kubectl, pp).await,
-            Self::Generic(generic) => generic.exec(kubectl, pp).await,
-            Self::Tls => todo!(),
+            Self::Generic(generic) => generic.exec().await,
+            Self::Tls(tls) => tls.secret(),
         }?;
+
+        let k = kubectl
+            .secrets()?
+            .create(pp, &data)
+            .await
+            .inspect(|ns| kubectl.inspect(ns))?;
+
         let created = Created { k };
         Ok(Box::new(created))
     }

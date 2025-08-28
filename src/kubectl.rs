@@ -272,6 +272,10 @@ impl Kubectl {
         self.namespaced_api()
     }
 
+    pub fn secrets(&self) -> kube::Result<api::Api<corev1::Secret>> {
+        self.namespaced_api()
+    }
+
     pub fn componentstatuses(&self) -> kube::Result<api::Api<corev1::ComponentStatus>> {
         self.cluster_api()
     }

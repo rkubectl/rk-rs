@@ -30,6 +30,7 @@ use super::*;
 #[derive(Clone, Debug, Args)]
 #[command(arg_required_else_help(true), verbatim_doc_comment)]
 pub struct CreateGenericSecret {
+    /// Secret name
     name: String,
     /// Specify the path to a file to read lines of key=val pairs to create a secret.
     #[arg(long, value_parser = EnvFile::value_parser())]
@@ -47,12 +48,7 @@ pub struct CreateGenericSecret {
 }
 
 impl CreateGenericSecret {
-    pub async fn exec(
-        &self,
-        kubectl: &Kubectl,
-        pp: &api::PostParams,
-    ) -> kube::Result<corev1::Secret> {
-        trace!(?kubectl, ?pp, name = self.name);
+    pub async fn exec(&self) -> kube::Result<corev1::Secret> {
         let data = self
             .all_inputs()
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?

@@ -18,11 +18,27 @@ impl File {
         StringValueParser::new().try_map(Self::from_text)
     }
 
+    pub fn validating_value_parser<F>(validate: F) -> impl TypedValueParser
+    where
+        F: Fn(Self) -> Result<Self, String> + Clone + Send + Sync + 'static,
+    {
+        StringValueParser::new()
+            .try_map(Self::from_text)
+            .try_map(validate)
+    }
+
     pub fn load(&self) -> io::Result<Vec<KeyValue<Vec<u8>>>> {
         match self {
             Self::Directory(path) => load_directory(path),
             Self::File(path) => load_file(path).map(|kv| vec![kv]),
             Self::KeyedFile(key, path) => load_keyed_file(key, path).map(|kv| vec![kv]),
+        }
+    }
+
+    pub fn key(&self) -> Option<&str> {
+        match self {
+            Self::KeyedFile(key, _) => Some(key.as_str()),
+            _ => None,
         }
     }
 

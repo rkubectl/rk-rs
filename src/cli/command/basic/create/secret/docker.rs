@@ -20,16 +20,15 @@ use super::*;
 ///
 ///   # Create a new secret named my-secret from ~/.docker/config.json
 ///   kubectl create secret docker-registry my-secret --from-file=path/to/.docker/config.json
+///
 #[derive(Clone, Debug, Args)]
 #[command(arg_required_else_help(true), verbatim_doc_comment)]
 pub struct CreateDockerRegistrySecret {
+    /// Secret name
     name: String,
 
-    #[command(flatten, next_display_order = 0)]
-    direct: Option<DirectDockerRegistry>,
-
-    #[command(flatten, next_display_order = 10)]
-    from_file: Option<FromFileDockerRegistry>,
+    #[command(flatten)]
+    args: CreateDockerRegistrySecretArgs,
 }
 
 impl CreateDockerRegistrySecret {
@@ -39,18 +38,37 @@ impl CreateDockerRegistrySecret {
         pp: &api::PostParams,
     ) -> kube::Result<corev1::Secret> {
         trace!(?kubectl, ?pp, name = self.name);
-        let secret = if let Some(from_file) = self.from_file.as_ref() {
-            from_file.load().await?
+        let secret = self.args.exec(&self.name).await?;
+        // Create secret here
+        Ok(secret)
+    }
+}
+
+#[derive(Clone, Debug, Default, Args)]
+#[group(multiple = false, required = true)]
+struct CreateDockerRegistrySecretArgs {
+    #[command(flatten)]
+    direct: Option<DirectDockerRegistry>,
+    // direct: DirectDockerRegistry,
+    #[command(flatten)]
+    file: Option<FromFileDockerRegistry>,
+}
+
+impl CreateDockerRegistrySecretArgs {
+    async fn exec(&self, name: &str) -> kube::Result<corev1::Secret> {
+        let secret = if let Some(file) = self.file.as_ref() {
+            file.load(name)?
+        } else if let Some(direct) = self.direct.as_ref() {
+            direct.load(name)
         } else {
-            todo!()
+            unreachable!()
         };
-        // let secret = corev1::Secret::new(&self.name).data(data);
         Ok(secret)
     }
 }
 
 #[derive(Clone, Debug, Args)]
-#[group(id = "direct")]
+// #[group(id = "direct")]
 struct DirectDockerRegistry {
     /// Server location for Docker registry
     #[arg(
@@ -73,20 +91,52 @@ struct DirectDockerRegistry {
     docker_email: Option<String>,
 }
 
+impl DirectDockerRegistry {
+    fn load(&self, name: &str) -> corev1::Secret {
+        let registry = &self.docker_server;
+        let username = &self.docker_username;
+        let password = &self.docker_password;
+        corev1::Secret::image_pull_secret(name, registry, username, password)
+    }
+}
+
 #[derive(Clone, Debug, Args)]
-#[group(conflicts_with = "direct")]
+// #[group(conflicts_with = "direct")]
 struct FromFileDockerRegistry {
     /// Key files can be specified using their file path, in which case a default name
     /// of .dockerconfigjson will be given to them, or optionally with a name and file path,
     /// in which case the given name will be used.
     /// Specifying a directory will iterate each named file in the directory that is a valid secret key.
     /// For this command, the key should always be .dockerconfigjson.
-    #[arg(long, value_parser = File::value_parser())]
+    #[arg(long, value_parser = File::validating_value_parser(FromFileDockerRegistry::validate))]
     from_file: File,
 }
 
 impl FromFileDockerRegistry {
-    async fn load(&self) -> kube::Result<corev1::Secret> {
-        todo!()
+    fn validate(file: File) -> Result<File, String> {
+        match file.key() {
+            Some(".dockerconfigjson") => Ok(file),
+            Some(other) => Err(format!("key '{other}' is invalid for this operation")),
+            None => Ok(file),
+        }
+    }
+
+    fn load(&self, name: &str) -> kube::Result<corev1::Secret> {
+        let (key, config) = self.load_data()?.into_pair();
+        debug_assert_eq!(key, corev1::Secret::SECRET_TYPE_DOCKER_CONFIG_JSON);
+        let secret = corev1::Secret::docker_config_json_base64_encoded(name, config);
+        Ok(secret)
+    }
+
+    fn load_data(&self) -> kube::Result<KeyValue<k8s::ByteString>> {
+        let items = self
+            .from_file
+            .load()
+            .map_err(serde::ser::Error::custom)
+            .map_err(kube::Error::SerdeError)?;
+        let Result::<[_; 1], _>::Ok([item]) = items.try_into() else {
+            return Err(kube::Error::LinesCodecMaxLineLengthExceeded);
+        };
+        Ok(item.base64_encoded())
     }
 }

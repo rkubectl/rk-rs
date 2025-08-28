@@ -11,7 +11,7 @@ etcetera = "0.10.0"
 futures-util = "0.3"
 indexmap = "2.9"
 k8s-openapi = { version = "0.25", features = ["latest", "schemars"] }
-k8s-openapi-ext = "0.0.53"
+k8s-openapi-ext = "0.0.54"
 kube = { version = "1.0", default-features = false, features = [
     "client",
     # "derive",
@@ -19,7 +19,7 @@ kube = { version = "1.0", default-features = false, features = [
     "rustls-tls",
     "aws-lc-rs",
 ] }
-kube-client-ext = "0.0.53"
+kube-client-ext = "0.0.54"
 prometheus-parse = "0.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

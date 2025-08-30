@@ -2,6 +2,7 @@ use base64::prelude::*;
 use clap::builder::PathBufValueParser;
 use clap::builder::StringValueParser;
 use clap::builder::TypedValueParser;
+use k8s::LabelSelectorExt;
 
 use super::*;
 
@@ -19,13 +20,17 @@ pub struct KeyValue<T> {
 
 impl<T> KeyValue<T> {
     const DELIMITER: &str = "=";
-}
 
-impl KeyValue<k8s::ByteString> {
-    pub fn into_pair(self) -> (String, k8s::ByteString) {
+    pub fn as_pair(&self) -> (&String, &T) {
+        (&self.key, &self.value)
+    }
+
+    pub fn into_pair(self) -> (String, T) {
         (self.key, self.value)
     }
 }
+
+impl KeyValue<k8s::ByteString> {}
 
 impl KeyValue<String> {
     pub fn value_parser() -> impl TypedValueParser {
@@ -38,6 +43,10 @@ impl KeyValue<String> {
         let value = BASE64_STANDARD.encode(value).into_bytes();
         let value = k8s::ByteString(value);
         KeyValue { key, value }
+    }
+
+    pub fn label_selector(&self) -> metav1::LabelSelector {
+        metav1::LabelSelector::new().match_labels([(&self.key, &self.value)])
     }
 
     fn from_text(text: impl AsRef<str>) -> Result<Self, String> {

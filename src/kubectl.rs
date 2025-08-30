@@ -260,6 +260,10 @@ impl Kubectl {
         }
     }
 
+    pub fn clusterroles(&self) -> kube::Result<api::Api<rbacv1::ClusterRole>> {
+        self.cluster_api()
+    }
+
     pub fn namespaces(&self) -> kube::Result<api::Api<corev1::Namespace>> {
         self.cluster_api()
     }

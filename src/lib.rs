@@ -41,6 +41,7 @@ use k8s::authenticationv1;
 use k8s::authorizationv1;
 use k8s::corev1;
 use k8s::metav1;
+use k8s::rbacv1;
 
 pub use kubectl::Cache;
 pub use kubectl::Feature;

@@ -1,8 +1,10 @@
 use super::*;
 
+use clusterrole::CreateClusterRole;
 use namespace::CreateNamespace;
 use secret::CreateSecret;
 
+mod clusterrole;
 mod namespace;
 mod secret;
 
@@ -68,7 +70,7 @@ pub struct Create {
 #[command(rename_all = "lowercase")]
 pub enum CreateResource {
     /// Create a cluster role
-    ClusterRole,
+    ClusterRole(CreateClusterRole),
     /// Create a cluster role binding for a particular cluster role
     ClusterRoleBinding,
     /// Create a config map from a local file, directory or literal value
@@ -154,20 +156,20 @@ impl CreateResource {
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
         match self {
-            Self::ClusterRole => todo!(),
+            Self::ClusterRole(cluster_role) => cluster_role.exec(kubectl, pp).await,
             Self::ClusterRoleBinding => todo!(),
             Self::ConfigMap => todo!(),
             Self::CronJob => todo!(),
             Self::Deployment => todo!(),
             Self::Ingress => todo!(),
             Self::Job => todo!(),
-            Self::Namespace(create_namespace) => create_namespace.exec(kubectl, pp).await,
+            Self::Namespace(namespace) => namespace.exec(kubectl, pp).await,
             Self::PodDisruptionBudget => todo!(),
             Self::PriorityClass => todo!(),
             Self::Quota => todo!(),
             Self::Role => todo!(),
             Self::RoleBinding => todo!(),
-            Self::Secret(create_secret) => create_secret.exec(kubectl, pp).await,
+            Self::Secret(secret) => secret.exec(kubectl, pp).await,
             Self::Service => todo!(),
             Self::ServiceAccount => todo!(),
             Self::Token => todo!(),

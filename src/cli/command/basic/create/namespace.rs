@@ -10,7 +10,6 @@ use super::*;
 ///   kubectl create namespace my-namespace
 
 #[derive(Clone, Debug, Args)]
-#[command(rename_all = "lowercase")]
 pub struct CreateNamespace {
     name: String,
 }

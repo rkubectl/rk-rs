@@ -3,7 +3,9 @@ use tabled::settings::Remove;
 use tabled::settings::Style;
 use tabled::settings::location::ByColumnName;
 
+use k8s::ClusterRoleExt;
 use k8s::NamespaceExt;
+use k8s::PolicyRuleExt;
 use k8s::SecretExt;
 
 use super::*;

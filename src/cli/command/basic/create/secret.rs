@@ -30,8 +30,8 @@ impl CreateSecret {
     ) -> kube::Result<Box<dyn Show>> {
         trace!(?kubectl, ?pp);
         let data = match self {
-            Self::DockerRegistry(docker_registry) => docker_registry.exec(kubectl, pp).await,
-            Self::Generic(generic) => generic.exec().await,
+            Self::DockerRegistry(docker_registry) => docker_registry.secret().await,
+            Self::Generic(generic) => generic.secret().await,
             Self::Tls(tls) => tls.secret(),
         }?;
 

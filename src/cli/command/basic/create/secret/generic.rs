@@ -48,12 +48,12 @@ pub struct CreateGenericSecret {
 }
 
 impl CreateGenericSecret {
-    pub async fn exec(&self) -> kube::Result<corev1::Secret> {
+    pub async fn secret(&self) -> kube::Result<corev1::Secret> {
         let data = self
             .all_inputs()
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?
             .map(|kv| kv.into_pair());
-        let secret = corev1::Secret::new(&self.name).data(data);
+        let secret = corev1::Secret::opaque(&self.name).data(data);
         Ok(secret)
     }
 

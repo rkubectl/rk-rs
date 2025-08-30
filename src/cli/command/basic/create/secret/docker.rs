@@ -32,15 +32,8 @@ pub struct CreateDockerRegistrySecret {
 }
 
 impl CreateDockerRegistrySecret {
-    pub async fn exec(
-        &self,
-        kubectl: &Kubectl,
-        pp: &api::PostParams,
-    ) -> kube::Result<corev1::Secret> {
-        trace!(?kubectl, ?pp, name = self.name);
-        let secret = self.args.exec(&self.name).await?;
-        // Create secret here
-        Ok(secret)
+    pub async fn secret(&self) -> kube::Result<corev1::Secret> {
+        self.args.secret(&self.name).await
     }
 }
 
@@ -55,7 +48,7 @@ struct CreateDockerRegistrySecretArgs {
 }
 
 impl CreateDockerRegistrySecretArgs {
-    async fn exec(&self, name: &str) -> kube::Result<corev1::Secret> {
+    async fn secret(&self, name: &str) -> kube::Result<corev1::Secret> {
         let secret = if let Some(file) = self.file.as_ref() {
             file.load(name)?
         } else if let Some(direct) = self.direct.as_ref() {

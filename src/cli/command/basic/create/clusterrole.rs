@@ -52,7 +52,7 @@ struct PolicyRulesArgs {
     #[arg(long, value_delimiter = ',')]
     resource_name: Vec<String>,
 
-    #[arg(long, value_delimiter = ',')]
+    #[arg(long, num_args(1..), value_delimiter = ',')]
     verb: Vec<String>,
 }
 
@@ -95,6 +95,7 @@ impl CreateClusterRole {
             .map(|kv| kv.as_pair());
         let label_selector = metav1::LabelSelector::new().match_labels(labels);
         let cluster_role_selectors = Some(vec![label_selector]);
+
         Some(rbacv1::AggregationRule {
             cluster_role_selectors,
         })

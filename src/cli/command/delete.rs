@@ -176,7 +176,7 @@ pub struct Delete {
     #[arg(long, default_value_t = true)]
     wait: bool,
 
-    #[arg(value_name = "TYPE", required_unless_present("filename"))]
+    #[arg(id = "TYPE", value_name = "TYPE", required_unless_present("filename"))]
     resources: Option<Vec<String>>,
 }
 

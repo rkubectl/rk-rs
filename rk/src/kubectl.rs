@@ -5,7 +5,6 @@ use futures_util::stream::{self, StreamExt, TryStreamExt};
 use super::*;
 
 pub use cache::Cache;
-pub use features::Feature;
 
 mod cache;
 mod features;

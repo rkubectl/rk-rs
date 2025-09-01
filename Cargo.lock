@@ -1364,7 +1364,7 @@ dependencies = [
 
 [[package]]
 name = "rk"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "base64",
  "clap",
@@ -1384,6 +1384,15 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "rkubectl"
+version = "0.0.0"
+dependencies = [
+ "kube",
+ "rk",
+ "tokio",
  "tracing-subscriber",
 ]
 

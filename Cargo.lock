@@ -1376,6 +1376,7 @@ dependencies = [
  "kube",
  "kube-client-ext",
  "prometheus-parse",
+ "rk-args",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -1384,6 +1385,15 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "rk-args"
+version = "0.0.0"
+dependencies = [
+ "base64",
+ "clap",
+ "k8s-openapi-ext",
 ]
 
 [[package]]

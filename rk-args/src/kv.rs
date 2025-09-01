@@ -1,7 +1,3 @@
-use base64::prelude::*;
-use clap::builder::PathBufValueParser;
-use clap::builder::StringValueParser;
-use clap::builder::TypedValueParser;
 use k8s::LabelSelectorExt;
 
 use super::*;

@@ -1,5 +1,5 @@
 [workspace]
-members = ["rk", "rkubectl"]
+members = ["rk", "rk-args", "rkubectl"]
 resolver = "3"
 
 
@@ -41,3 +41,4 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 rk = { path = "./rk" }
+rk-args = { path = "./rk-args" }

@@ -13,3 +13,7 @@ readme.workspace = true
 base64.workspace = true
 clap.workspace = true
 k8s-openapi-ext.workspace = true
+
+
+[lints]
+workspace = true

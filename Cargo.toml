@@ -42,3 +42,24 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 rk = { path = "./rk" }
 rk-args = { path = "./rk-args" }
+
+
+[workspace.lints.rust]
+deprecated = "warn"
+rust_2018_idioms = "warn"
+rust_2018_compatibility = "warn"
+rust_2021_compatibility = "warn"
+rust_2024_compatibility = "warn"
+future_incompatible = "warn"
+deprecated_in_future = "warn"
+noop_method_call = "warn"
+unreachable_pub = "warn"
+missing_debug_implementations = "warn"
+unused = "warn"
+warnings = "deny"
+
+
+[workspace.lints.clippy]
+use_self = "warn"
+map_unwrap_or = "warn"
+map_flatten = "warn"

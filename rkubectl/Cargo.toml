@@ -1,0 +1,18 @@
+[package]
+name = "rkubectl"
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+keywords.workspace = true
+repository.workspace = true
+readme.workspace = true
+
+
+[dependencies]
+kube.workspace = true
+tokio.workspace = true
+tracing-subscriber.workspace = true
+
+rk.workspace = true

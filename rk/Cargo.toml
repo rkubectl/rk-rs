@@ -30,6 +30,7 @@ tokio.workspace = true
 tracing.workspace = true
 
 rk-args.workspace = true
+rk-features.workspace = true
 
 
 [lints]

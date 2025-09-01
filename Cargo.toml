@@ -1,5 +1,5 @@
 [workspace]
-members = ["rk", "rk-args", "rkubectl"]
+members = ["rk", "rk-args", "rk-features", "rkubectl"]
 resolver = "3"
 
 
@@ -42,6 +42,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 rk = { path = "./rk" }
 rk-args = { path = "./rk-args" }
+rk-features = { path = "./rk-features" }
 
 
 [workspace.lints.rust]

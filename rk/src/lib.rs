@@ -26,8 +26,9 @@ use k8s::corev1;
 use k8s::metav1;
 use k8s::rbacv1;
 
+use rk_features::Feature;
+
 pub use kubectl::Cache;
-pub use kubectl::Feature;
 pub use kubectl::Kubectl;
 pub use namespace::Namespace;
 pub use resource::NamedResource;

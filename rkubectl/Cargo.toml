@@ -16,3 +16,7 @@ tokio.workspace = true
 tracing-subscriber.workspace = true
 
 rk.workspace = true
+
+
+[lints]
+workspace = true

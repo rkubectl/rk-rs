@@ -34,3 +34,9 @@ impl NamedResource {
         Ok(())
     }
 }
+
+impl fmt::Display for NamedResource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        format_args!("{}/{}", self.resource, self.name).fmt(f)
+    }
+}

@@ -1,5 +1,3 @@
-use std::fmt::Debug;
-
 use super::*;
 
 pub use named::NamedResource;
@@ -273,6 +271,19 @@ impl Resource {
     fn other(resource: &str, kubectl: &Kubectl) -> Option<Self> {
         Self::cached_dynamic_api_resource(kubectl, resource)
             .map(|(scope, resource)| Self::Other { scope, resource })
+    }
+}
+
+impl fmt::Display for Resource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Pods => "pod".fmt(f),
+            Self::Namespaces => "namespace".fmt(f),
+            Self::Nodes => "node".fmt(f),
+            Self::ConfigMaps => "configmap".fmt(f),
+            Self::ComponentStatuses => "componentstatus".fmt(f),
+            Self::Other { resource, .. } => resource.kind.to_lowercase().fmt(f),
+        }
     }
 }
 

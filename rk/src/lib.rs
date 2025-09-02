@@ -25,8 +25,13 @@ use k8s::corev1;
 use k8s::metav1;
 use k8s::rbacv1;
 
+use k8s::ComponentConditionGetExt;
+use k8s::ComponentStatusGetExt;
+
 // use rk_ext::APIResourceExt;
 use rk_ext::APIResourceListExt;
+use rk_ext::NamespaceGetExt2;
+use rk_ext::PodGetExt2;
 use rk_features::Feature;
 
 pub use kubectl::Cache;
@@ -40,10 +45,8 @@ pub use show::Show;
 pub use show::ShowParams;
 
 pub use cli::*;
-pub use ext::*;
 
 mod cli;
-mod ext;
 mod kubectl;
 mod namespace;
 mod resource;

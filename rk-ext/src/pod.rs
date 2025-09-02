@@ -1,7 +1,8 @@
 use super::*;
 
 pub trait PodGetExt2 {
-    fn pod_scheduled_reason(&self) -> Option<&str>;
+    const POD_REASON_SCHEDULING_GATED: &str = "SchedulingGated";
+
     fn ready_containers(&self) -> usize;
     fn total_containers(&self) -> usize;
     fn restarts(&self) -> i32;
@@ -10,10 +11,6 @@ pub trait PodGetExt2 {
 }
 
 impl PodGetExt2 for corev1::Pod {
-    fn pod_scheduled_reason(&self) -> Option<&str> {
-        self.condition(POD_SCHEDULED_CONDITION)?.reason()
-    }
-
     fn ready_containers(&self) -> usize {
         self.container_statuses()
             .unwrap_or_default()
@@ -46,7 +43,7 @@ impl PodGetExt2 for corev1::Pod {
         let reason = self.reason().unwrap_or(reason);
         let reason = self
             .pod_scheduled_reason()
-            .filter(|reason| *reason == POD_REASON_SCHEDULING_GATED)
+            .filter(|reason| *reason == Self::POD_REASON_SCHEDULING_GATED)
             .unwrap_or(reason);
         self.init_container_kubectl_status()
             .map_or_else(|| reason.to_string(), |reason| format!("Init:{reason}"))
@@ -76,7 +73,7 @@ impl PodGetExt2 for corev1::Pod {
                     // Take the termination reason if any
                     .terminated_reason()
                     // Or wating reason
-                    .or_else(|| status.waiting_reason())
+                    .or_else(|| status.waiting_reason().map(String::from))
                     // Or just its position in the list
                     .unwrap_or_else(|| format!("{idx}/{total_init_containers}"))
             })

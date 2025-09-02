@@ -1,5 +1,7 @@
 use super::*;
 
+use rk_ui::Created;
+
 use clusterrole::CreateClusterRole;
 use namespace::CreateNamespace;
 use secret::CreateSecret;
@@ -175,10 +177,4 @@ impl CreateResource {
             Self::Token => todo!(),
         }
     }
-}
-
-#[derive(Debug)]
-pub struct Created<K> {
-    // pub resource: CreateResource,
-    pub k: K,
 }

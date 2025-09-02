@@ -1,8 +1,6 @@
-use tabled::Tabled;
-
 use super::*;
 
-impl Show for Feature {
+impl Show for rk_features::Feature {
     fn header(&self, _output: &OutputFormat) -> Vec<String> {
         Self::headers().into_iter().map(Into::into).collect()
     }

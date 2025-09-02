@@ -4,7 +4,6 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::str;
 
-use kube::Resource as _;
 use kube::ResourceExt;
 use kube::api;
 use kube::discovery;
@@ -25,14 +24,12 @@ use k8s::corev1;
 use k8s::metav1;
 use k8s::rbacv1;
 
-use k8s::ComponentConditionGetExt;
-use k8s::ComponentStatusGetExt;
-
 // use rk_ext::APIResourceExt;
 use rk_ext::APIResourceListExt;
-use rk_ext::NamespaceGetExt2;
-use rk_ext::PodGetExt2;
 use rk_features::Feature;
+use rk_ui::OutputFormat;
+use rk_ui::Show;
+use rk_ui::ShowParams;
 
 pub use kubectl::Cache;
 pub use kubectl::Kubectl;
@@ -40,9 +37,6 @@ pub use namespace::Namespace;
 pub use resource::NamedResource;
 pub use resource::Resource;
 pub use resource::ResourceArg;
-pub use show::OutputFormat;
-pub use show::Show;
-pub use show::ShowParams;
 
 pub use cli::*;
 
@@ -50,7 +44,6 @@ mod cli;
 mod kubectl;
 mod namespace;
 mod resource;
-mod show;
 
 fn default<T: Default>() -> T {
     T::default()

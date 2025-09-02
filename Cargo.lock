@@ -1386,6 +1386,7 @@ dependencies = [
  "rk-args",
  "rk-ext",
  "rk-features",
+ "rk-ui",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -1419,6 +1420,21 @@ version = "0.0.0"
 dependencies = [
  "prometheus-parse",
  "serde",
+ "tabled",
+]
+
+[[package]]
+name = "rk-ui"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "k8s-openapi-ext",
+ "kube",
+ "rk-ext",
+ "rk-features",
+ "serde",
+ "serde_json",
+ "serde_yaml",
  "tabled",
 ]
 

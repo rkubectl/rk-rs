@@ -1,5 +1,3 @@
-use crate::cli::Created;
-
 use super::*;
 
 impl<K> Show for Created<K>

@@ -15,7 +15,6 @@ pub use api_resource::ApiResources;
 pub use auth::Auth;
 pub use basic::Create;
 pub use basic::CreateResource;
-pub use basic::Created;
 pub use cascade::Cascade;
 pub use config::Config;
 pub use delete::Delete;

@@ -60,7 +60,8 @@ impl Cli {
     async fn kubectl(&self) -> kube::Result<Kubectl> {
         let namespace = self.namespace.namespace();
         let output = self.output.unwrap_or_default();
-        let kubectl = Kubectl::new(&self.config, self.debug, &self.options)
+        let config_options = self.config.kube_config_options();
+        let kubectl = Kubectl::new(config_options, self.debug, &self.options)
             .await
             .inspect(|kubectl| info!(?kubectl))?
             .with_namespace(namespace)

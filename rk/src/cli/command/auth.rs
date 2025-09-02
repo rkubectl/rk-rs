@@ -14,11 +14,11 @@ pub enum Auth {
 }
 
 impl Auth {
-    pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
+    pub async fn exec(self, context: &Context) -> kube::Result<()> {
         match self {
-            Self::CanI(can_i) => can_i.ask(kubectl).await,
+            Self::CanI(can_i) => can_i.ask(context).await,
             Self::Reconcile => Ok(()),
-            Self::Whoami(whoami) => whoami.ask(kubectl).await,
+            Self::Whoami(whoami) => whoami.ask(context).await,
         }
     }
 }

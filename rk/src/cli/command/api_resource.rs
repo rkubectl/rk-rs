@@ -12,8 +12,9 @@ pub struct ApiResources {
 }
 
 impl ApiResources {
-    pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        let ar = kubectl
+    pub async fn exec(self, context: &Context) -> kube::Result<()> {
+        let ar = context
+            .kubectl()
             .server_preferred_resources()
             .await?
             .into_iter()
@@ -22,7 +23,7 @@ impl ApiResources {
 
         let mut table = tabled::Table::new(ar);
         table.with(Style::blank()).with(Padding::new(0, 2, 0, 0));
-        if matches!(kubectl.output(), cli::OutputFormat::Normal) {
+        if matches!(context.output_deprecated(), cli::OutputFormat::Normal) {
             table
                 .with(Remove::column(ByColumnName::new("VERBS")))
                 .with(Remove::column(ByColumnName::new("CATEGORIES")));

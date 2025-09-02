@@ -23,11 +23,17 @@ enum Object {
 }
 
 impl CanI {
-    pub async fn ask(self, kubectl: &Kubectl) -> kube::Result<()> {
-        Object::from_text(self.object, kubectl)
+    pub async fn ask(self, context: &Context) -> kube::Result<()> {
+        let kubectl = context.kubectl();
+        let ssar = Object::from_text(self.object, kubectl)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?
             .ask(kubectl, &self.verb)
-            .await
+            .await?;
+
+        let show_params = default();
+        let output = context.output_deprecated();
+        println!("{}", ssar.output(false, &show_params, output));
+        Ok(())
     }
 }
 
@@ -43,22 +49,22 @@ impl Object {
         }
     }
 
-    async fn ask(&self, kubectl: &Kubectl, verb: &str) -> kube::Result<()> {
+    async fn ask(
+        &self,
+        kubectl: &Kubectl,
+        verb: &str,
+    ) -> kube::Result<authorizationv1::SelfSubjectAccessReview> {
         let ssar = authorizationv1::SelfSubjectAccessReview {
             spec: self.spec(kubectl, verb),
             ..default()
         };
         let pp = kubectl.post_params();
-        let ssar = kubectl
+        kubectl
             .selfsubjectaccessreviews()?
             .create(&pp, &ssar)
             .await
             .inspect(|k| kubectl.inspect(k))
-            .inspect_err(|err| kubectl.inspect_err(err))?;
-
-        let show_params = default();
-        println!("{}", ssar.output(false, &show_params, kubectl.output()));
-        Ok(())
+            .inspect_err(|err| kubectl.inspect_err(err))
     }
 
     fn spec(&self, kubectl: &Kubectl, verb: &str) -> authorizationv1::SelfSubjectAccessReviewSpec {

@@ -18,7 +18,6 @@ pub struct Kubectl {
     kubeconfig: kube::config::Kubeconfig,
     cache: Cache,
     namespace: Namespace,
-    output: OutputFormat,
     debug: bool,
     options: GlobalOptions,
 }
@@ -31,7 +30,6 @@ impl Kubectl {
     ) -> kube::Result<Self> {
         let options = options.clone();
         let namespace = default();
-        let output = default();
         let cache = cache::Cache::default();
         Self::kubeconfig(config_options, debug)
             .await
@@ -41,7 +39,6 @@ impl Kubectl {
                 kubeconfig,
                 cache,
                 namespace,
-                output,
                 debug,
                 options,
             })
@@ -76,16 +73,8 @@ impl Kubectl {
         Self { namespace, ..self }
     }
 
-    pub fn with_output(self, output: OutputFormat) -> Self {
-        Self { output, ..self }
-    }
-
     pub fn namespace(&self) -> &Namespace {
         &self.namespace
-    }
-
-    pub fn output(&self) -> &OutputFormat {
-        &self.output
     }
 
     pub fn show_namespace(&self) -> bool {
@@ -183,7 +172,7 @@ impl Kubectl {
         Ok(core.into_iter().chain(groups).collect())
     }
 
-    pub async fn api_versions(&self) -> kube::Result<()> {
+    pub async fn api_versions(&self, _output: &OutputFormat) -> kube::Result<()> {
         self.server_api_groups()
             .await?
             .groups
@@ -363,7 +352,6 @@ impl Kubectl {
             kubeconfig: default(),
             cache: default(),
             namespace: default(),
-            output: default(),
             debug: default(),
             options: default(),
         }

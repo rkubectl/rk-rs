@@ -13,10 +13,10 @@ impl FeaturesExt for Scrape {
 }
 
 impl Kubectl {
-    pub async fn features(&self) -> kube::Result<()> {
+    pub async fn features(&self, output: &OutputFormat) -> kube::Result<()> {
         let features = self.metrics().await?.features();
         let show_params = default();
-        println!("{}", features.output(false, &show_params, self.output()));
+        println!("{}", features.output(false, &show_params, output));
         Ok(())
     }
 

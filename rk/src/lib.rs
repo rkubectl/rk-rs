@@ -30,6 +30,7 @@ use rk_features::Feature;
 use rk_ui::OutputFormat;
 use rk_ui::Show;
 use rk_ui::ShowParams;
+use rk_ui::Ui;
 
 pub use kubectl::Cache;
 pub use kubectl::Kubectl;

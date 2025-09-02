@@ -46,7 +46,8 @@ pub enum Config {
 }
 
 impl Config {
-    pub fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
+    pub fn exec(self, context: &Context) -> kube::Result<()> {
+        let kubectl = context.kubectl();
         match self {
             Self::CurrentContext => kubectl.current_context(),
             Self::DeleteCluster => todo!(),

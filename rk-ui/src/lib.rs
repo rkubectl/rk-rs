@@ -1,3 +1,5 @@
+use std::fmt;
+
 use k8s_openapi_ext as k8s;
 use kube::Resource;
 use kube::ResourceExt;
@@ -37,6 +39,18 @@ impl Ui {
 
     pub fn show(&self, item: Box<dyn Show>, params: &ShowParams) {
         item.output(self.namespace, params, &self.output);
+    }
+
+    pub fn print(&self, text: impl fmt::Display) {
+        println!("{text}");
+    }
+
+    pub fn output_deprecated(&self) -> &OutputFormat {
+        &self.output
+    }
+
+    pub fn not_implemented(&self, item: impl fmt::Debug) {
+        println!("{item:?} not implemented yet");
     }
 }
 

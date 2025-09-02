@@ -17,14 +17,16 @@ k8s_openapi::k8s_if_1_33! {
 // }
 
 impl Kubectl {
-    pub async fn version(&self) -> kube::Result<()> {
+    pub async fn version(&self) -> kube::Result<String> {
         let info = self.client()?.apiserver_version().await?;
+        let text = [
+            format!("Client k8s version: {K8S_VERSION}"),
+            format!("Server k8s version: {}.{}", info.major, info.minor),
+            format!("Server git version: {}", info.git_version),
+            format!("Server git commit:  {}", info.git_commit),
+        ]
+        .join("\n");
 
-        println!("Client k8s version: {K8S_VERSION}");
-        println!("Server k8s version: {}.{}", info.major, info.minor);
-        println!("Server git version: {}", info.git_version);
-        println!("Server git commit:  {}", info.git_commit);
-
-        Ok(())
+        Ok(text)
     }
 }

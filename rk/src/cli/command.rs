@@ -77,22 +77,44 @@ pub enum Command {
 }
 
 impl Command {
-    pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        kubectl.debug(&self);
+    pub async fn exec(self, context: &Context) -> kube::Result<()> {
+        context.kubectl().debug(&self);
+        // let kubectl = context.kubectl();
         match self {
-            Self::Basic(basic) => basic.exec(kubectl).await,
-            Self::Intermediate(intermediate) => intermediate.exec(kubectl).await,
-            Self::Deploy(deploy) => deploy.exec(kubectl).await,
-            Self::ClusterManagement(cluster_management) => cluster_management.exec(kubectl).await,
-            Self::ApiResources(api_resources) => api_resources.exec(kubectl).await,
-            Self::Auth(auth) => auth.exec(kubectl).await,
-            Self::ApiVersions => kubectl.api_versions().await,
-            Self::Config(config) => config.exec(kubectl),
-            Self::Features => kubectl.features().await,
-            Self::Info => kubectl.info().await,
-            Self::Node(node) => node.exec(kubectl).await,
-            Self::Version => kubectl.version().await,
+            Self::Basic(basic) => basic.exec(context).await,
+            Self::Intermediate(intermediate) => intermediate.exec(context).await,
+            Self::Deploy(deploy) => deploy.exec(context).await,
+            Self::ClusterManagement(cluster_management) => cluster_management.exec(context).await,
+            Self::ApiResources(api_resources) => api_resources.exec(context).await,
+            Self::Auth(auth) => auth.exec(context).await,
+            Self::ApiVersions => self.api_versions(context).await,
+            Self::Config(config) => config.exec(context),
+            Self::Features => self.features(context).await,
+            Self::Info => self.info(context).await,
+            Self::Node(node) => node.exec(context).await,
+            Self::Version => self.version(context).await,
         }
+    }
+
+    async fn api_versions(&self, context: &Context) -> kube::Result<()> {
+        let output = context.output_deprecated();
+        context.kubectl().api_versions(output).await
+    }
+
+    async fn features(&self, context: &Context) -> kube::Result<()> {
+        let output = context.output_deprecated();
+        context.kubectl().features(output).await
+    }
+
+    async fn info(&self, context: &Context) -> kube::Result<()> {
+        let output = context.output_deprecated();
+        context.kubectl().info(output).await
+    }
+
+    async fn version(&self, context: &Context) -> kube::Result<()> {
+        let text = context.kubectl().version().await?;
+        context.ui().print(text);
+        Ok(())
     }
 }
 
@@ -115,11 +137,11 @@ pub enum Basic {
 }
 
 impl Basic {
-    async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        let _client = kubectl.client()?;
+    async fn exec(self, context: &Context) -> kube::Result<()> {
+        let _client = context.kubectl().client()?;
         println!("Basic::exec: {self:?}");
         match self {
-            Self::Create(create) => create.exec(kubectl).await,
+            Self::Create(create) => create.exec(context).await,
             Self::Expose => Ok(()),
             Self::Run => Ok(()),
             Self::Set => Ok(()),
@@ -141,13 +163,12 @@ pub enum Intermediate {
 }
 
 impl Intermediate {
-    async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        let _client = kubectl.client()?;
+    async fn exec(self, context: &Context) -> kube::Result<()> {
         match self {
             Self::Explain => Ok(()),
-            Self::Get(get) => get.exec(kubectl).await,
+            Self::Get(get) => get.exec(context).await,
             Self::Edit => Ok(()),
-            Self::Delete(delete) => delete.exec(kubectl).await,
+            Self::Delete(delete) => delete.exec(context).await,
         }
     }
 }
@@ -167,9 +188,8 @@ pub enum Deploy {
 }
 
 impl Deploy {
-    async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        let _client = kubectl.client()?;
-        println!("{self:?}");
+    async fn exec(self, context: &Context) -> kube::Result<()> {
+        context.ui().not_implemented(&self);
         match self {
             Self::Rollout => Ok(()),
             Self::Scale => Ok(()),
@@ -204,9 +224,8 @@ pub enum ClusterManagement {
 }
 
 impl ClusterManagement {
-    async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
-        let _client = kubectl.client()?;
-        println!("{self:?} not implemented yet");
+    async fn exec(self, context: &Context) -> kube::Result<()> {
+        context.ui().not_implemented(&self);
         match self {
             Self::Certificate => Ok(()),
             Self::ClusterInfo => Ok(()),

@@ -16,7 +16,10 @@ pub use command::DryRun;
 pub use command::Get;
 pub use command::Node;
 
+use context::Context;
+
 mod command;
+mod context;
 
 #[derive(Debug, Parser)]
 #[command(next_line_help = true, max_term_width = 120)]
@@ -53,20 +56,25 @@ impl Cli {
 
     pub async fn exec(self) -> kube::Result<()> {
         let kubectl = self.kubectl().await?;
-        self.command.exec(&kubectl).await
+        let ui = self.ui();
+        let context = Context::new(kubectl, ui);
+        self.command.exec(&context).await
     }
 
     async fn kubectl(&self) -> kube::Result<Kubectl> {
         let namespace = self.namespace.namespace();
-        let output = self.output.unwrap_or_default();
         let config_options = self.config.kube_config_options();
         let kubectl = Kubectl::new(config_options, self.debug, &self.options)
             .await
             .inspect(|kubectl| info!(?kubectl))?
-            .with_namespace(namespace)
-            .with_output(output);
+            .with_namespace(namespace);
 
         Ok(kubectl)
+    }
+
+    fn ui(&self) -> Ui {
+        let output = self.output.unwrap_or_default();
+        Ui::new(output)
     }
 }
 

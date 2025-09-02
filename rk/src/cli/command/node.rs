@@ -14,14 +14,15 @@ pub enum Node {
 }
 
 impl Node {
-    pub async fn exec(&self, kubectl: &Kubectl) -> kube::Result<()> {
+    pub async fn exec(&self, context: &Context) -> kube::Result<()> {
         match self {
-            Self::Info => self.info(kubectl).await,
-            Self::ListImages => self.list_images(kubectl).await,
+            Self::Info => self.info(context).await,
+            Self::ListImages => self.list_images(context).await,
         }
     }
 
-    pub async fn info(&self, kubectl: &Kubectl) -> kube::Result<()> {
+    pub async fn info(&self, context: &Context) -> kube::Result<()> {
+        let kubectl = context.kubectl();
         for node in self.nodes(kubectl).await? {
             let name = node.name_any();
             if let Some(info) = node_info(node) {
@@ -41,9 +42,7 @@ impl Node {
                 .collect::<BTreeMap<_, _>>();
 
                 let mut table = tabled::builder::Builder::from(info).build();
-                table
-                    .with(tabled::settings::Style::empty())
-                    .with(tabled::settings::Padding::zero());
+                table.with(tabled::settings::Style::blank());
                 println!("\n{name}\n");
                 println!("{table}");
             }
@@ -52,7 +51,8 @@ impl Node {
         Ok(())
     }
 
-    pub async fn list_images(&self, kubectl: &Kubectl) -> kube::Result<()> {
+    pub async fn list_images(&self, context: &Context) -> kube::Result<()> {
+        let kubectl = context.kubectl();
         for node in self.nodes(kubectl).await? {
             println!("\n{}\n", node.name_any());
             node.status

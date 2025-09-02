@@ -31,7 +31,8 @@ pub struct Get {
 }
 
 impl Get {
-    pub async fn exec(&self, kubectl: &Kubectl) -> kube::Result<()> {
+    pub async fn exec(&self, context: &Context) -> kube::Result<()> {
+        let kubectl = context.kubectl();
         if let Some(raw) = self.raw.as_deref() {
             let name = raw.strip_prefix("/").unwrap_or(raw);
             let text = kubectl.raw(name).await?;
@@ -43,7 +44,8 @@ impl Get {
             let namespace = kubectl.show_namespace();
             for resource in resources {
                 let data = resource.get(kubectl).await?;
-                println!("{}", data.output(namespace, &params, kubectl.output()));
+                let output = context.output_deprecated();
+                println!("{}", data.output(namespace, &params, output));
             }
         }
         Ok(())

@@ -110,7 +110,8 @@ pub enum CreateResource {
 }
 
 impl Create {
-    pub async fn exec(self, kubectl: &Kubectl) -> kube::Result<()> {
+    pub async fn exec(self, context: &Context) -> kube::Result<()> {
+        let kubectl = context.kubectl();
         let created = if let Some(filename) = &self.filename {
             self.create_from_file(filename, kubectl).await
         } else {
@@ -119,7 +120,7 @@ impl Create {
 
         let namespace = kubectl.show_namespace();
         let params = self.params();
-        let output = kubectl.output();
+        let output = context.output_deprecated();
         println!("{}", created.output(namespace, &params, output));
         Ok(())
     }

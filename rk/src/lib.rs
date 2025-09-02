@@ -7,7 +7,6 @@ use std::str;
 use kube::Resource as _;
 use kube::ResourceExt;
 use kube::api;
-use kube::core::gvk;
 use kube::discovery;
 // use kube::discovery::verbs;
 use k8s_openapi_ext as k8s;
@@ -26,6 +25,8 @@ use k8s::corev1;
 use k8s::metav1;
 use k8s::rbacv1;
 
+// use rk_ext::APIResourceExt;
+use rk_ext::APIResourceListExt;
 use rk_features::Feature;
 
 pub use kubectl::Cache;

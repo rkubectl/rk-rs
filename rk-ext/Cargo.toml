@@ -1,0 +1,19 @@
+[package]
+name = "rk-ext"
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+keywords.workspace = true
+repository.workspace = true
+readme.workspace = true
+
+
+[dependencies]
+k8s-openapi-ext.workspace = true
+kube.workspace = true
+
+
+[lints]
+workspace = true

@@ -15,20 +15,16 @@ pub use api_resource::ApiResources;
 pub use auth::Auth;
 pub use basic::Create;
 pub use basic::CreateResource;
-pub use cascade::Cascade;
 pub use config::Config;
 pub use delete::Delete;
-pub use dryrun::DryRun;
 pub use get::Get;
 pub use node::Node;
 
 mod api_resource;
 mod auth;
 mod basic;
-mod cascade;
 mod config;
 mod delete;
-mod dryrun;
 mod get;
 mod node;
 
@@ -97,8 +93,8 @@ impl Command {
     }
 
     async fn api_versions(&self, context: &Context) -> kube::Result<()> {
-        let output = context.output_deprecated();
-        context.kubectl().api_versions(output).await
+        let _output = context.output_deprecated();
+        context.kubectl().api_versions().await
     }
 
     async fn features(&self, context: &Context) -> kube::Result<()> {
@@ -107,8 +103,8 @@ impl Command {
     }
 
     async fn info(&self, context: &Context) -> kube::Result<()> {
-        let output = context.output_deprecated();
-        context.kubectl().info(output).await
+        let _output = context.output_deprecated();
+        context.kubectl().info().await
     }
 
     async fn version(&self, context: &Context) -> kube::Result<()> {

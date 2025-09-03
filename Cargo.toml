@@ -1,5 +1,13 @@
 [workspace]
-members = ["rk", "rk-args", "rk-ext", "rk-features", "rk-ui", "rkubectl"]
+members = [
+    "rk",
+    "rk-args",
+    "rk-ext",
+    "rk-features",
+    "rk-kubeapi",
+    "rk-ui",
+    "rkubectl",
+]
 resolver = "3"
 
 
@@ -44,6 +52,7 @@ rk = { path = "./rk" }
 rk-args = { path = "./rk-args" }
 rk-ext = { path = "./rk-ext" }
 rk-features = { path = "./rk-features" }
+rk-kubeapi = { path = "./rk-kubeapi" }
 rk-ui = { path = "./rk-ui" }
 
 

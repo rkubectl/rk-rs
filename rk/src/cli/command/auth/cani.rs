@@ -38,14 +38,14 @@ impl CanI {
 }
 
 impl Object {
-    fn from_text(text: String, kubectl: &Kubectl) -> Result<Self, resource::InvalidResourceSpec> {
+    fn from_text(text: String, kubectl: &Kubectl) -> Result<Self, InvalidResourceSpec> {
         if text.starts_with("/") {
             Ok(Self::NonResourceUrl(text))
         } else {
             ResourceArg::from_strings(&[text], kubectl)?
                 .pop()
                 .map(Self::Resource)
-                .ok_or(resource::InvalidResourceSpec)
+                .ok_or(InvalidResourceSpec)
         }
     }
 

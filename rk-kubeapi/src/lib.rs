@@ -1,15 +1,55 @@
 use std::collections::BTreeSet;
+use std::fmt;
+use std::fs;
+use std::io;
+use std::path::Path;
+use std::path::PathBuf;
+use std::time;
 
 use futures_util::stream::{self, StreamExt, TryStreamExt};
+use k8s_openapi_ext as k8s;
+use kube::api;
+use kube::discovery;
+use kube_client_ext::KubeClientExt;
+use serde_json as json;
+use serde_yaml as yaml;
+use tracing::debug;
+use tracing::error;
+// use tracing::info;
+use tracing::trace;
 
-use super::*;
+use k8s::authenticationv1;
+use k8s::authorizationv1;
+use k8s::corev1;
+use k8s::metav1;
+use k8s::rbacv1;
+
+// use rk_ext::APIResourceExt;
+use rk_ext::APIResourceListExt;
+use rk_features::Feature;
+use rk_ui::OutputFormat;
+use rk_ui::Show;
 
 pub use cache::Cache;
+pub use cascade::Cascade;
+pub use dryrun::DryRun;
+pub use namespace::Namespace;
+pub use options::ConfigOptions;
+pub use options::GlobalKubeapiOptions;
+pub use resource::InvalidResourceSpec;
+pub use resource::NamedResource;
+pub use resource::Resource;
+pub use resource::ResourceArg;
 
 mod cache;
+mod cascade;
+mod dryrun;
 mod features;
 mod info;
 mod kubeconfig;
+mod namespace;
+mod options;
+mod resource;
 mod version;
 
 #[derive(Debug)]
@@ -19,14 +59,14 @@ pub struct Kubectl {
     cache: Cache,
     namespace: Namespace,
     debug: bool,
-    options: GlobalOptions,
+    options: GlobalKubeapiOptions,
 }
 
 impl Kubectl {
     pub async fn new(
         config_options: kube::config::KubeConfigOptions,
         debug: bool,
-        options: &GlobalOptions,
+        options: &GlobalKubeapiOptions,
     ) -> kube::Result<Self> {
         let options = options.clone();
         let namespace = default();
@@ -172,7 +212,7 @@ impl Kubectl {
         Ok(core.into_iter().chain(groups).collect())
     }
 
-    pub async fn api_versions(&self, _output: &OutputFormat) -> kube::Result<()> {
+    pub async fn api_versions(&self) -> kube::Result<()> {
         self.server_api_groups()
             .await?
             .groups
@@ -334,7 +374,7 @@ impl Kubectl {
 
     pub fn full_name<K>(&self, k: &K) -> String
     where
-        K: kube::Resource,
+        K: kube::Resource + kube::ResourceExt,
         <K as kube::Resource>::DynamicType: Default,
     {
         let kind = K::kind(&default()).to_lowercase();
@@ -356,4 +396,8 @@ impl Kubectl {
             options: default(),
         }
     }
+}
+
+fn default<T: Default>() -> T {
+    T::default()
 }

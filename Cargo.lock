@@ -1373,26 +1373,17 @@ dependencies = [
 name = "rk"
 version = "0.0.0"
 dependencies = [
- "base64",
  "clap",
- "etcetera",
- "futures-util",
  "indexmap",
  "k8s-openapi",
  "k8s-openapi-ext",
  "kube",
- "kube-client-ext",
- "prometheus-parse",
  "rk-args",
- "rk-ext",
- "rk-features",
+ "rk-kubeapi",
  "rk-ui",
  "serde",
- "serde_json",
- "serde_yaml",
  "size",
  "tabled",
- "thiserror",
  "tokio",
  "tracing",
 ]
@@ -1421,6 +1412,29 @@ dependencies = [
  "prometheus-parse",
  "serde",
  "tabled",
+]
+
+[[package]]
+name = "rk-kubeapi"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "etcetera",
+ "futures-util",
+ "indexmap",
+ "k8s-openapi",
+ "k8s-openapi-ext",
+ "kube",
+ "kube-client-ext",
+ "prometheus-parse",
+ "rk-ext",
+ "rk-features",
+ "rk-ui",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]

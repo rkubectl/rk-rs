@@ -12,7 +12,7 @@ impl FeaturesExt for Scrape {
     }
 }
 
-impl Kubectl {
+impl Kubeapi {
     pub async fn features(&self, output: &OutputFormat) -> kube::Result<()> {
         let features = self.metrics().await?.features();
         let show_params = default();

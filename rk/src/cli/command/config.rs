@@ -47,15 +47,15 @@ pub enum Config {
 
 impl Config {
     pub fn exec(self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
+        let kubeapi = context.kubeapi();
         match self {
-            Self::CurrentContext => kubectl.current_context(),
+            Self::CurrentContext => kubeapi.current_context(),
             Self::DeleteCluster => todo!(),
             Self::DeleteContext => todo!(),
             Self::DeleteUser => todo!(),
-            Self::GetClusters => kubectl.get_clusters(),
-            Self::GetContexts => kubectl.get_contexts(),
-            Self::GetUsers => kubectl.get_users(),
+            Self::GetClusters => kubeapi.get_clusters(),
+            Self::GetContexts => kubeapi.get_contexts(),
+            Self::GetUsers => kubeapi.get_users(),
             Self::RenameContext => todo!(),
             Self::Set => todo!(),
             Self::SetCluster => todo!(),
@@ -63,7 +63,7 @@ impl Config {
             Self::SetCredentials => todo!(),
             Self::Unset => todo!(),
             Self::UseContext => todo!(),
-            Self::View => kubectl.view(),
+            Self::View => kubeapi.view(),
         }
     }
 }

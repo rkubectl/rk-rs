@@ -22,8 +22,8 @@ impl Node {
     }
 
     pub async fn info(&self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
-        for node in self.nodes(kubectl).await? {
+        let kubeapi = context.kubeapi();
+        for node in self.nodes(kubeapi).await? {
             let name = node.name_any();
             if let Some(info) = node_info(node) {
                 let info = [
@@ -52,8 +52,8 @@ impl Node {
     }
 
     pub async fn list_images(&self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
-        for node in self.nodes(kubectl).await? {
+        let kubeapi = context.kubeapi();
+        for node in self.nodes(kubeapi).await? {
             println!("\n{}\n", node.name_any());
             node.status
                 .unwrap_or_default()
@@ -67,9 +67,9 @@ impl Node {
         Ok(())
     }
 
-    async fn nodes(&self, kubectl: &Kubectl) -> kube::Result<Vec<corev1::Node>> {
-        let lp = kubectl.list_params();
-        kubectl.nodes()?.list(&lp).await.map(|list| list.items)
+    async fn nodes(&self, kubeapi: &Kubeapi) -> kube::Result<Vec<corev1::Node>> {
+        let lp = kubeapi.list_params();
+        kubeapi.nodes()?.list(&lp).await.map(|list| list.items)
     }
 }
 

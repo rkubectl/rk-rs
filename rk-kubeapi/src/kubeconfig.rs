@@ -7,7 +7,7 @@ use kube::config::NamedContext;
 
 use super::*;
 
-impl Kubectl {
+impl Kubeapi {
     pub async fn kubeconfig(
         options: KubeConfigOptions,
         debug: bool,

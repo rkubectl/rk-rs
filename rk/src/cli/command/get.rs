@@ -32,18 +32,18 @@ pub struct Get {
 
 impl Get {
     pub async fn exec(&self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
+        let kubeapi = context.kubeapi();
         if let Some(raw) = self.raw.as_deref() {
             let name = raw.strip_prefix("/").unwrap_or(raw);
-            let text = kubectl.raw(name).await?;
+            let text = kubeapi.raw(name).await?;
             println!("{text}");
         } else {
-            let resources = self.resources(kubectl)?;
+            let resources = self.resources(kubeapi)?;
             let mut params = self.params;
             params.show_kind |= resources.len() > 1;
-            let namespace = kubectl.show_namespace();
+            let namespace = kubeapi.show_namespace();
             for resource in resources {
-                let data = resource.get(kubectl).await?;
+                let data = resource.get(kubeapi).await?;
                 let output = context.output_deprecated();
                 println!("{}", data.output(namespace, &params, output));
             }
@@ -51,9 +51,9 @@ impl Get {
         Ok(())
     }
 
-    fn resources(&self, kubectl: &Kubectl) -> kube::Result<Vec<ResourceArg>> {
+    fn resources(&self, kubeapi: &Kubeapi) -> kube::Result<Vec<ResourceArg>> {
         let resources = self.resources.as_deref().unwrap_or_default();
-        ResourceArg::from_strings(resources, kubectl)
+        ResourceArg::from_strings(resources, kubeapi)
             .inspect(|resources| info!(args=?self.resources, ?resources))
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)
     }

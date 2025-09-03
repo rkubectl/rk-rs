@@ -59,16 +59,16 @@ struct PolicyRulesArgs {
 impl CreateClusterRole {
     pub async fn exec(
         &self,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
         let data = self.cluster_role();
 
-        let k = kubectl
+        let k = kubeapi
             .clusterroles()?
             .create(pp, &data)
             .await
-            .inspect(|ns| kubectl.inspect(ns))?;
+            .inspect(|ns| kubeapi.inspect(ns))?;
 
         let created = Created { k };
         Ok(Box::new(created))

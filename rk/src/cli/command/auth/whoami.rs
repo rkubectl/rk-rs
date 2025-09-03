@@ -6,15 +6,15 @@ pub struct WhoAmI;
 
 impl WhoAmI {
     pub async fn ask(&self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
+        let kubeapi = context.kubeapi();
         let ssr = authenticationv1::SelfSubjectReview::default();
-        let pp = kubectl.post_params();
-        let ssr = kubectl
+        let pp = kubeapi.post_params();
+        let ssr = kubeapi
             .selfsubjectreviews()?
             .create(&pp, &ssr)
             .await
-            .inspect(|k| kubectl.inspect(k))
-            .inspect_err(|err| kubectl.inspect_err(err))?;
+            .inspect(|k| kubeapi.inspect(k))
+            .inspect_err(|err| kubeapi.inspect_err(err))?;
         let show_params = default();
         let output = context.output_deprecated();
         println!("{}", ssr.output(false, &show_params, output));

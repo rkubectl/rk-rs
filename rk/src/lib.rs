@@ -22,7 +22,7 @@ use rk_kubeapi::ConfigOptions;
 use rk_kubeapi::DryRun;
 use rk_kubeapi::GlobalKubeapiOptions;
 use rk_kubeapi::InvalidResourceSpec;
-use rk_kubeapi::Kubectl;
+use rk_kubeapi::Kubeapi;
 use rk_kubeapi::Namespace;
 use rk_kubeapi::ResourceArg;
 use rk_ui::OutputFormat;

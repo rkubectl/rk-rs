@@ -1,6 +1,6 @@
 use super::*;
 
-impl Kubectl {
+impl Kubeapi {
     pub async fn info(&self) -> kube::Result<()> {
         self.client()?.apiserver_version().await.map(|info| {
             println!("build date:     {}", info.build_date);

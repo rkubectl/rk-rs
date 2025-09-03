@@ -25,21 +25,21 @@ pub enum CreateSecret {
 impl CreateSecret {
     pub async fn exec(
         &self,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
-        trace!(?kubectl, ?pp);
+        trace!(?kubeapi, ?pp);
         let data = match self {
             Self::DockerRegistry(docker_registry) => docker_registry.secret().await,
             Self::Generic(generic) => generic.secret().await,
             Self::Tls(tls) => tls.secret(),
         }?;
 
-        let k = kubectl
+        let k = kubeapi
             .secrets()?
             .create(pp, &data)
             .await
-            .inspect(|ns| kubectl.inspect(ns))?;
+            .inspect(|ns| kubeapi.inspect(ns))?;
 
         let created = Created { k };
         Ok(Box::new(created))

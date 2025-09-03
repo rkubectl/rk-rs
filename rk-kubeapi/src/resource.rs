@@ -13,7 +13,7 @@ pub enum ResourceArg {
 impl ResourceArg {
     pub fn from_strings(
         resources: &[String],
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
     ) -> Result<Vec<Self>, InvalidResourceSpec> {
         // Two possible formats
         // 1. resource/name - in which case all the items should be the same
@@ -21,13 +21,13 @@ impl ResourceArg {
         if resources.iter().any(|resource| resource.contains('/')) {
             resources
                 .iter()
-                .map(|text| Self::named_resource(text, kubectl))
+                .map(|text| Self::named_resource(text, kubeapi))
                 .collect()
         } else {
             let (resource, names) = resources.split_first().ok_or(InvalidResourceSpec)?;
             let resources = resource
                 .split(",")
-                .map(|resource| Resource::with_cache(resource, kubectl).ok_or(InvalidResourceSpec))
+                .map(|resource| Resource::with_cache(resource, kubeapi).ok_or(InvalidResourceSpec))
                 .collect::<Result<Vec<_>, _>>()?;
             let resources = if names.is_empty() {
                 // Just resources, no names
@@ -49,22 +49,22 @@ impl ResourceArg {
 
     fn named_resource(
         text: impl AsRef<str>,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
     ) -> Result<Self, InvalidResourceSpec> {
         let (resource, name) = text.as_ref().split_once("/").ok_or(InvalidResourceSpec)?;
-        Resource::with_cache(resource, kubectl)
+        Resource::with_cache(resource, kubeapi)
             .map(|resource| NamedResource::with_resource(resource, name))
             .map(Self::NamedResource)
             .ok_or(InvalidResourceSpec)
     }
 
-    pub async fn get(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
+    pub async fn get(&self, kubeapi: &Kubeapi) -> kube::Result<Box<dyn Show>> {
         match self {
-            Self::Resource(resource) => resource.list(kubectl).await,
+            Self::Resource(resource) => resource.list(kubeapi).await,
             Self::NamedResource(named_resource) => {
                 named_resource
                     .resource()
-                    .get(kubectl, named_resource.name())
+                    .get(kubeapi, named_resource.name())
                     .await
             }
         }
@@ -72,7 +72,7 @@ impl ResourceArg {
 
     pub async fn delete(
         &self,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         dp: &api::DeleteParams,
         all: bool,
     ) -> kube::Result<()> {
@@ -83,7 +83,7 @@ impl ResourceArg {
             Self::Resource(resource) => {
                 todo!("Deleting SOME resources {resource:?} is not implemented yet")
             }
-            Self::NamedResource(resource) => resource.delete(kubectl, dp).await,
+            Self::NamedResource(resource) => resource.delete(kubeapi, dp).await,
         }
     }
 
@@ -125,8 +125,8 @@ pub enum Resource {
 }
 
 impl Resource {
-    pub fn with_cache(resource: &str, kubectl: &Kubectl) -> Option<Self> {
-        Self::well_known(resource).or_else(|| Self::other(resource, kubectl))
+    pub fn with_cache(resource: &str, kubeapi: &Kubeapi) -> Option<Self> {
+        Self::well_known(resource).or_else(|| Self::other(resource, kubeapi))
     }
 
     pub fn well_known(text: &str) -> Option<Self> {
@@ -140,27 +140,27 @@ impl Resource {
         }
     }
 
-    async fn list(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
-        let lp = kubectl.list_params();
+    async fn list(&self, kubeapi: &Kubeapi) -> kube::Result<Box<dyn Show>> {
+        let lp = kubeapi.list_params();
         match self {
             Self::Pods => {
-                let list = kubectl.pods()?.list(&lp).await?;
+                let list = kubeapi.pods()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::Namespaces => {
-                let list = kubectl.namespaces()?.list(&lp).await?;
+                let list = kubeapi.namespaces()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::Nodes => {
-                let list = kubectl.nodes()?.list(&lp).await?;
+                let list = kubeapi.nodes()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::ConfigMaps => {
-                let list = kubectl.configmaps()?.list(&lp).await?;
+                let list = kubeapi.configmaps()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::ComponentStatuses => {
-                let list = kubectl.componentstatuses()?.list(&lp).await?;
+                let list = kubeapi.componentstatuses()?.list(&lp).await?;
                 Ok(Box::new(list))
             }
             Self::Other { scope, resource } => {
@@ -169,26 +169,26 @@ impl Resource {
         }
     }
 
-    async fn get(&self, kubectl: &Kubectl, name: &str) -> kube::Result<Box<dyn Show>> {
+    async fn get(&self, kubeapi: &Kubeapi, name: &str) -> kube::Result<Box<dyn Show>> {
         match self {
             Self::Pods => {
-                let obj = kubectl.pods()?.get(name).await?;
+                let obj = kubeapi.pods()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::Namespaces => {
-                let obj = kubectl.namespaces()?.get(name).await?;
+                let obj = kubeapi.namespaces()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::Nodes => {
-                let obj = kubectl.nodes()?.get(name).await?;
+                let obj = kubeapi.nodes()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::ConfigMaps => {
-                let obj = kubectl.configmaps()?.get(name).await?;
+                let obj = kubeapi.configmaps()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::ComponentStatuses => {
-                let obj = kubectl.componentstatuses()?.get(name).await?;
+                let obj = kubeapi.componentstatuses()?.get(name).await?;
                 Ok(Box::new(obj))
             }
             Self::Other { scope, resource } => {
@@ -239,20 +239,20 @@ impl Resource {
     }
 
     fn cached_dynamic_api_resource(
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         name: &str,
     ) -> Option<(discovery::Scope, api::ApiResource)> {
-        kubectl
+        kubeapi
             .cached_server_api_resources()
             .into_iter()
             .find_map(|arl| arl.kube_api_resource(name))
     }
 
     async fn _dynamic_api_resource(
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         name: &str,
     ) -> kube::Result<Option<(discovery::Scope, api::ApiResource)>> {
-        let ar = kubectl
+        let ar = kubeapi
             .server_api_resources()
             .await?
             .into_iter()
@@ -268,8 +268,8 @@ impl Resource {
         api::ApiResource::erase::<K>(&<K as kube::Resource>::DynamicType::default())
     }
 
-    fn other(resource: &str, kubectl: &Kubectl) -> Option<Self> {
-        Self::cached_dynamic_api_resource(kubectl, resource)
+    fn other(resource: &str, kubeapi: &Kubeapi) -> Option<Self> {
+        Self::cached_dynamic_api_resource(kubeapi, resource)
             .map(|(scope, resource)| Self::Other { scope, resource })
     }
 }
@@ -299,8 +299,8 @@ mod tests {
 
     fn args(s: &[&str]) -> Result<Vec<ResourceArg>, InvalidResourceSpec> {
         let resources = s.iter().map(ToString::to_string).collect::<Vec<_>>();
-        let kubectl = Kubectl::local();
-        ResourceArg::from_strings(&resources, &kubectl)
+        let kubeapi = Kubeapi::local();
+        ResourceArg::from_strings(&resources, &kubeapi)
     }
 
     #[test]

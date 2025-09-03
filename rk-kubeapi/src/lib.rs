@@ -53,7 +53,7 @@ mod resource;
 mod version;
 
 #[derive(Debug)]
-pub struct Kubectl {
+pub struct Kubeapi {
     config: kube::Config,
     kubeconfig: kube::config::Kubeconfig,
     cache: Cache,
@@ -62,7 +62,7 @@ pub struct Kubectl {
     options: GlobalKubeapiOptions,
 }
 
-impl Kubectl {
+impl Kubeapi {
     pub async fn new(
         config_options: kube::config::KubeConfigOptions,
         debug: bool,
@@ -384,7 +384,7 @@ impl Kubectl {
 }
 
 #[cfg(test)]
-impl Kubectl {
+impl Kubeapi {
     pub fn local() -> Self {
         let config = kube::Config::new("http://localhost:6443".parse().unwrap());
         Self {

@@ -17,15 +17,15 @@ pub struct CreateNamespace {
 impl CreateNamespace {
     pub async fn exec(
         &self,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
         let data = corev1::Namespace::new(&self.name);
-        let k = kubectl
+        let k = kubeapi
             .namespaces()?
             .create(pp, &data)
             .await
-            .inspect(|ns| kubectl.inspect(ns))?;
+            .inspect(|ns| kubeapi.inspect(ns))?;
         let created = Created { k };
         Ok(Box::new(created))
     }

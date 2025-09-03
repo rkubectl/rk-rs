@@ -2,17 +2,17 @@ use super::*;
 
 #[derive(Debug)]
 pub struct Context {
-    kubectl: Kubectl,
+    kubeapi: Kubeapi,
     ui: Ui,
 }
 
 impl Context {
-    pub fn new(kubectl: Kubectl, ui: Ui) -> Self {
-        Self { kubectl, ui }
+    pub fn new(kubeapi: Kubeapi, ui: Ui) -> Self {
+        Self { kubeapi, ui }
     }
 
-    pub fn kubectl(&self) -> &Kubectl {
-        &self.kubectl
+    pub fn kubeapi(&self) -> &Kubeapi {
+        &self.kubeapi
     }
 
     pub fn ui(&self) -> &Ui {

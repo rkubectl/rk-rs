@@ -24,10 +24,10 @@ enum Object {
 
 impl CanI {
     pub async fn ask(self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
-        let ssar = Object::from_text(self.object, kubectl)
+        let kubeapi = context.kubeapi();
+        let ssar = Object::from_text(self.object, kubeapi)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?
-            .ask(kubectl, &self.verb)
+            .ask(kubeapi, &self.verb)
             .await?;
 
         let show_params = default();
@@ -38,11 +38,11 @@ impl CanI {
 }
 
 impl Object {
-    fn from_text(text: String, kubectl: &Kubectl) -> Result<Self, InvalidResourceSpec> {
+    fn from_text(text: String, kubeapi: &Kubeapi) -> Result<Self, InvalidResourceSpec> {
         if text.starts_with("/") {
             Ok(Self::NonResourceUrl(text))
         } else {
-            ResourceArg::from_strings(&[text], kubectl)?
+            ResourceArg::from_strings(&[text], kubeapi)?
                 .pop()
                 .map(Self::Resource)
                 .ok_or(InvalidResourceSpec)
@@ -51,26 +51,26 @@ impl Object {
 
     async fn ask(
         &self,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         verb: &str,
     ) -> kube::Result<authorizationv1::SelfSubjectAccessReview> {
         let ssar = authorizationv1::SelfSubjectAccessReview {
-            spec: self.spec(kubectl, verb),
+            spec: self.spec(kubeapi, verb),
             ..default()
         };
-        let pp = kubectl.post_params();
-        kubectl
+        let pp = kubeapi.post_params();
+        kubeapi
             .selfsubjectaccessreviews()?
             .create(&pp, &ssar)
             .await
-            .inspect(|k| kubectl.inspect(k))
-            .inspect_err(|err| kubectl.inspect_err(err))
+            .inspect(|k| kubeapi.inspect(k))
+            .inspect_err(|err| kubeapi.inspect_err(err))
     }
 
-    fn spec(&self, kubectl: &Kubectl, verb: &str) -> authorizationv1::SelfSubjectAccessReviewSpec {
+    fn spec(&self, kubeapi: &Kubeapi, verb: &str) -> authorizationv1::SelfSubjectAccessReviewSpec {
         match self {
             Self::Resource(resource_arg) => authorizationv1::SelfSubjectAccessReviewSpec {
-                resource_attributes: Some(self.resource_attributes(kubectl, resource_arg, verb)),
+                resource_attributes: Some(self.resource_attributes(kubeapi, resource_arg, verb)),
                 ..default()
             },
             Self::NonResourceUrl(path) => authorizationv1::SelfSubjectAccessReviewSpec {
@@ -82,7 +82,7 @@ impl Object {
 
     fn resource_attributes(
         &self,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         resource_arg: &ResourceArg,
         verb: &str,
     ) -> authorizationv1::ResourceAttributes {
@@ -98,7 +98,7 @@ impl Object {
 
         let namespace = match scope {
             discovery::Scope::Cluster => None,
-            discovery::Scope::Namespaced => kubectl.namespace().namespace(),
+            discovery::Scope::Namespaced => kubeapi.namespace().namespace(),
         };
 
         authorizationv1::ResourceAttributes {

@@ -16,7 +16,7 @@ k8s_openapi::k8s_if_1_33! {
 //     const K8S_VERSION: &str = "1.34";
 // }
 
-impl Kubectl {
+impl Kubeapi {
     pub async fn version(&self) -> kube::Result<String> {
         let info = self.client()?.apiserver_version().await?;
         let text = [

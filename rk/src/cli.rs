@@ -53,21 +53,21 @@ impl Cli {
     }
 
     pub async fn exec(self) -> kube::Result<()> {
-        let kubectl = self.kubectl().await?;
+        let kubeapi = self.kubeapi().await?;
         let ui = self.ui();
-        let context = Context::new(kubectl, ui);
+        let context = Context::new(kubeapi, ui);
         self.command.exec(&context).await
     }
 
-    async fn kubectl(&self) -> kube::Result<Kubectl> {
+    async fn kubeapi(&self) -> kube::Result<Kubeapi> {
         let namespace = self.namespace.namespace();
         let config_options = self.config.kube_config_options();
-        let kubectl = Kubectl::new(config_options, self.debug, &self.options)
+        let kubeapi = Kubeapi::new(config_options, self.debug, &self.options)
             .await
-            .inspect(|kubectl| info!(?kubectl))?
+            .inspect(|kubeapi| info!(?kubeapi))?
             .with_namespace(namespace);
 
-        Ok(kubectl)
+        Ok(kubeapi)
     }
 
     fn ui(&self) -> Ui {

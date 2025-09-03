@@ -111,14 +111,14 @@ pub enum CreateResource {
 
 impl Create {
     pub async fn exec(self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
+        let kubeapi = context.kubeapi();
         let created = if let Some(filename) = &self.filename {
-            self.create_from_file(filename, kubectl).await
+            self.create_from_file(filename, kubeapi).await
         } else {
-            self.create_resource(kubectl).await
+            self.create_resource(kubeapi).await
         }?;
 
-        let namespace = kubectl.show_namespace();
+        let namespace = kubeapi.show_namespace();
         let params = self.params();
         let output = context.output_deprecated();
         println!("{}", created.output(namespace, &params, output));
@@ -128,17 +128,17 @@ impl Create {
     async fn create_from_file(
         &self,
         filename: &str,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
     ) -> kube::Result<Box<dyn Show>> {
-        let _pp = kubectl.post_params_with_manager(&self.field_manager);
-        println!("Creating from {filename}, ({kubectl:?})");
+        let _pp = kubeapi.post_params_with_manager(&self.field_manager);
+        println!("Creating from {filename}, ({kubeapi:?})");
         todo!()
     }
 
-    async fn create_resource(&self, kubectl: &Kubectl) -> kube::Result<Box<dyn Show>> {
+    async fn create_resource(&self, kubeapi: &Kubeapi) -> kube::Result<Box<dyn Show>> {
         if let Some(command) = &self.command {
-            let pp = kubectl.post_params_with_manager(&self.field_manager);
-            command.exec(kubectl, &pp).await
+            let pp = kubeapi.post_params_with_manager(&self.field_manager);
+            command.exec(kubeapi, &pp).await
         } else {
             unreachable!()
         }
@@ -155,24 +155,24 @@ impl Create {
 impl CreateResource {
     pub async fn exec(
         &self,
-        kubectl: &Kubectl,
+        kubeapi: &Kubeapi,
         pp: &api::PostParams,
     ) -> kube::Result<Box<dyn Show>> {
         match self {
-            Self::ClusterRole(cluster_role) => cluster_role.exec(kubectl, pp).await,
+            Self::ClusterRole(cluster_role) => cluster_role.exec(kubeapi, pp).await,
             Self::ClusterRoleBinding => todo!(),
             Self::ConfigMap => todo!(),
             Self::CronJob => todo!(),
             Self::Deployment => todo!(),
             Self::Ingress => todo!(),
             Self::Job => todo!(),
-            Self::Namespace(namespace) => namespace.exec(kubectl, pp).await,
+            Self::Namespace(namespace) => namespace.exec(kubeapi, pp).await,
             Self::PodDisruptionBudget => todo!(),
             Self::PriorityClass => todo!(),
             Self::Quota => todo!(),
             Self::Role => todo!(),
             Self::RoleBinding => todo!(),
-            Self::Secret(secret) => secret.exec(kubectl, pp).await,
+            Self::Secret(secret) => secret.exec(kubeapi, pp).await,
             Self::Service => todo!(),
             Self::ServiceAccount => todo!(),
             Self::Token => todo!(),

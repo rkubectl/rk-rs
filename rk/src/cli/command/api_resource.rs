@@ -14,7 +14,7 @@ pub struct ApiResources {
 impl ApiResources {
     pub async fn exec(self, context: &Context) -> kube::Result<()> {
         let ar = context
-            .kubectl()
+            .kubeapi()
             .server_preferred_resources()
             .await?
             .into_iter()

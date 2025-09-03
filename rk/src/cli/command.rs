@@ -74,8 +74,7 @@ pub enum Command {
 
 impl Command {
     pub async fn exec(self, context: &Context) -> kube::Result<()> {
-        context.kubectl().debug(&self);
-        // let kubectl = context.kubectl();
+        context.kubeapi().debug(&self);
         match self {
             Self::Basic(basic) => basic.exec(context).await,
             Self::Intermediate(intermediate) => intermediate.exec(context).await,
@@ -94,21 +93,21 @@ impl Command {
 
     async fn api_versions(&self, context: &Context) -> kube::Result<()> {
         let _output = context.output_deprecated();
-        context.kubectl().api_versions().await
+        context.kubeapi().api_versions().await
     }
 
     async fn features(&self, context: &Context) -> kube::Result<()> {
         let output = context.output_deprecated();
-        context.kubectl().features(output).await
+        context.kubeapi().features(output).await
     }
 
     async fn info(&self, context: &Context) -> kube::Result<()> {
         let _output = context.output_deprecated();
-        context.kubectl().info().await
+        context.kubeapi().info().await
     }
 
     async fn version(&self, context: &Context) -> kube::Result<()> {
-        let text = context.kubectl().version().await?;
+        let text = context.kubeapi().version().await?;
         context.ui().print(text);
         Ok(())
     }
@@ -134,7 +133,7 @@ pub enum Basic {
 
 impl Basic {
     async fn exec(self, context: &Context) -> kube::Result<()> {
-        let _client = context.kubectl().client()?;
+        let _client = context.kubeapi().client()?;
         println!("Basic::exec: {self:?}");
         match self {
             Self::Create(create) => create.exec(context).await,

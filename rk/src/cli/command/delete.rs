@@ -182,23 +182,23 @@ pub struct Delete {
 
 impl Delete {
     pub async fn exec(self, context: &Context) -> kube::Result<()> {
-        let kubectl = context.kubectl();
+        let kubeapi = context.kubeapi();
         if let Some(filename) = &self.filename {
             let dp = api::DeleteParams::default();
             todo!("Deleting from {filename} ({dp:?}");
         } else {
-            self.delete_resources(kubectl).await
+            self.delete_resources(kubeapi).await
         }
     }
 
-    async fn delete_resources(&self, kubectl: &Kubectl) -> kube::Result<()> {
-        let dp = kubectl.delete_params(self.cascade, self.dry_run);
-        for resource in self.resources(kubectl)? {
+    async fn delete_resources(&self, kubeapi: &Kubeapi) -> kube::Result<()> {
+        let dp = kubeapi.delete_params(self.cascade, self.dry_run);
+        for resource in self.resources(kubeapi)? {
             if self.dry_run == DryRun::Client {
                 println!("{resource} deleted (dry run)");
             } else {
                 resource
-                    .delete(kubectl, &dp, self.all)
+                    .delete(kubeapi, &dp, self.all)
                     .await
                     .or_else(|err| self.ignore_not_found(err))?;
             }
@@ -207,9 +207,9 @@ impl Delete {
         Ok(())
     }
 
-    fn resources(&self, kubectl: &Kubectl) -> kube::Result<Vec<ResourceArg>> {
+    fn resources(&self, kubeapi: &Kubeapi) -> kube::Result<Vec<ResourceArg>> {
         let resources = self.resources.as_deref().unwrap_or_default();
-        ResourceArg::from_strings(resources, kubectl)
+        ResourceArg::from_strings(resources, kubeapi)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)
     }
 

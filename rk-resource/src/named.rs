@@ -21,9 +21,9 @@ impl NamedResource {
     }
 
     pub async fn delete(&self, kubeapi: &Kubeapi, dp: &api::DeleteParams) -> kube::Result<()> {
-        // let resource = self.resource.api_resource();
+        let (scope, ref dyntype) = self.resource.api_resource();
         kubeapi
-            .dynamic_object_api(&self.resource)?
+            .dynamic_object_api(scope, dyntype)?
             .delete(&self.name, dp)
             .await
             .inspect_err(|err| eprintln!("{err:?}"))?

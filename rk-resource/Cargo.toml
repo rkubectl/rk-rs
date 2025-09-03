@@ -1,5 +1,5 @@
 [package]
-name = "rk-kubeapi"
+name = "rk-resource"
 
 version.workspace = true
 edition.workspace = true
@@ -11,22 +11,14 @@ readme.workspace = true
 
 
 [dependencies]
-clap.workspace = true
-etcetera.workspace = true
-futures-util.workspace = true
-indexmap.workspace = true
 k8s-openapi.workspace = true
 k8s-openapi-ext.workspace = true
 kube.workspace = true
 kube-client-ext.workspace = true
-prometheus-parse.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-serde_yaml.workspace = true
-tracing.workspace = true
+thiserror.workspace = true
 
 rk-ext.workspace = true
-rk-features.workspace = true
+rk-kubeapi.workspace = true
 rk-ui.workspace = true
 
 

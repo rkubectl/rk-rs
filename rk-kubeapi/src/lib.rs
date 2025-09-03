@@ -24,8 +24,6 @@ use k8s::corev1;
 use k8s::metav1;
 use k8s::rbacv1;
 
-// use rk_ext::APIResourceExt;
-use rk_ext::APIResourceListExt;
 use rk_features::Feature;
 use rk_ui::OutputFormat;
 use rk_ui::Show;
@@ -36,10 +34,10 @@ pub use dryrun::DryRun;
 pub use namespace::Namespace;
 pub use options::ConfigOptions;
 pub use options::GlobalKubeapiOptions;
-pub use resource::InvalidResourceSpec;
-pub use resource::NamedResource;
-pub use resource::Resource;
-pub use resource::ResourceArg;
+// pub use resource::InvalidResourceSpec;
+// pub use resource::NamedResource;
+// pub use resource::Resource;
+// pub use resource::ResourceArg;
 
 mod cache;
 mod cascade;
@@ -49,7 +47,6 @@ mod info;
 mod kubeconfig;
 mod namespace;
 mod options;
-mod resource;
 mod version;
 
 #[derive(Debug)]
@@ -224,13 +221,11 @@ impl Kubeapi {
 
     pub fn dynamic_object_api(
         &self,
-        resource: &Resource,
+        scope: discovery::Scope,
+        dyntype: &discovery::ApiResource,
     ) -> kube::Result<api::Api<api::DynamicObject>> {
+        trace!(?scope, ?dyntype, "dynamic_object_api");
         let client = self.client()?;
-        let (scope, ref dyntype) = resource.api_resource();
-
-        trace!(?dyntype, "dynamic_object_api");
-
         let dynamic_api = match scope {
             discovery::Scope::Cluster => api::Api::all_with(client, dyntype),
             discovery::Scope::Namespaced => match &self.namespace {
@@ -243,6 +238,27 @@ impl Kubeapi {
         Ok(dynamic_api)
     }
 
+    // pub fn dynamic_object_api0(
+    //     &self,
+    //     resource: &Resource,
+    // ) -> kube::Result<api::Api<api::DynamicObject>> {
+    //     let client = self.client()?;
+    //     let (scope, ref dyntype) = resource.api_resource();
+
+    //     trace!(?dyntype, "dynamic_object_api");
+
+    //     let dynamic_api = match scope {
+    //         discovery::Scope::Cluster => api::Api::all_with(client, dyntype),
+    //         discovery::Scope::Namespaced => match &self.namespace {
+    //             Namespace::All => api::Api::all_with(client, dyntype),
+    //             Namespace::Default => api::Api::default_namespaced_with(client, dyntype),
+    //             Namespace::Namespace(ns) => api::Api::namespaced_with(client, ns, dyntype),
+    //         },
+    //     };
+
+    //     Ok(dynamic_api)
+    // }
+
     pub async fn raw(&self, name: &str) -> kube::Result<String> {
         let gp = self.get_params();
         let request = api::Request::new("")
@@ -251,10 +267,10 @@ impl Kubeapi {
         self.client()?.request_text(request).await
     }
 
-    pub async fn get(&self, resource: Vec<Resource>, output: OutputFormat) -> kube::Result<()> {
-        println!("Getting {resource:?} [{output:?}]");
-        Ok(())
-    }
+    // pub async fn get(&self, resource: Vec<Resource>, output: OutputFormat) -> kube::Result<()> {
+    //     println!("Getting {resource:?} [{output:?}]");
+    //     Ok(())
+    // }
 
     pub fn get_params(&self) -> api::GetParams {
         api::GetParams::default()
@@ -383,7 +399,6 @@ impl Kubeapi {
     }
 }
 
-#[cfg(test)]
 impl Kubeapi {
     pub fn local() -> Self {
         let config = kube::Config::new("http://localhost:6443".parse().unwrap());

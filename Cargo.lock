@@ -1380,6 +1380,7 @@ dependencies = [
  "kube",
  "rk-args",
  "rk-kubeapi",
+ "rk-resource",
  "rk-ui",
  "serde",
  "size",
@@ -1433,8 +1434,21 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
- "thiserror",
  "tracing",
+]
+
+[[package]]
+name = "rk-resource"
+version = "0.0.0"
+dependencies = [
+ "k8s-openapi",
+ "k8s-openapi-ext",
+ "kube",
+ "kube-client-ext",
+ "rk-ext",
+ "rk-kubeapi",
+ "rk-ui",
+ "thiserror",
 ]
 
 [[package]]

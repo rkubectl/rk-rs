@@ -23,6 +23,7 @@ tracing.workspace = true
 
 rk-args.workspace = true
 rk-kubeapi.workspace = true
+rk-resource.workspace = true
 rk-ui.workspace = true
 
 

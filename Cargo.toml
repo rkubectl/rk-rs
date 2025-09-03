@@ -5,6 +5,7 @@ members = [
     "rk-ext",
     "rk-features",
     "rk-kubeapi",
+    "rk-resource",
     "rk-ui",
     "rkubectl",
 ]
@@ -53,6 +54,7 @@ rk-args = { path = "./rk-args" }
 rk-ext = { path = "./rk-ext" }
 rk-features = { path = "./rk-features" }
 rk-kubeapi = { path = "./rk-kubeapi" }
+rk-resource = { path = "./rk-resource" }
 rk-ui = { path = "./rk-ui" }
 
 

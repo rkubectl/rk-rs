@@ -1,4 +1,19 @@
-use super::*;
+use std::fmt;
+
+use k8s_openapi_ext as k8s;
+use kube::api;
+use kube::discovery;
+
+// use k8s::authenticationv1;
+// use k8s::authorizationv1;
+use k8s::corev1;
+// use k8s::metav1;
+// use k8s::rbacv1;
+
+// use rk_ext::APIResourceExt;
+use rk_ext::APIResourceListExt;
+use rk_kubeapi::Kubeapi;
+use rk_ui::Show;
 
 pub use named::NamedResource;
 

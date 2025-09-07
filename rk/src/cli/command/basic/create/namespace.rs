@@ -15,11 +15,7 @@ pub struct CreateNamespace {
 }
 
 impl CreateNamespace {
-    pub async fn exec(
-        &self,
-        kubeapi: &Kubeapi,
-        pp: &api::PostParams,
-    ) -> kube::Result<Box<dyn Show>> {
+    pub async fn exec(&self, kubeapi: &Kubeapi, pp: &api::PostParams) -> RkResult<Box<dyn Show>> {
         let data = corev1::Namespace::new(&self.name);
         let k = kubeapi
             .namespaces()?

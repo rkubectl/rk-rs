@@ -110,7 +110,7 @@ pub enum CreateResource {
 }
 
 impl Create {
-    pub async fn exec(self, context: &Context) -> kube::Result<()> {
+    pub async fn exec(self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         let created = if let Some(filename) = &self.filename {
             self.create_from_file(filename, kubeapi).await
@@ -125,17 +125,13 @@ impl Create {
         Ok(())
     }
 
-    async fn create_from_file(
-        &self,
-        filename: &str,
-        kubeapi: &Kubeapi,
-    ) -> kube::Result<Box<dyn Show>> {
-        let _pp = kubeapi.post_params_with_manager(&self.field_manager);
-        println!("Creating from {filename}, ({kubeapi:?})");
-        todo!()
+    async fn create_from_file(&self, filename: &str, kubeapi: &Kubeapi) -> RkResult<Box<dyn Show>> {
+        let pp = kubeapi.post_params_with_manager(&self.field_manager);
+        println!("Creating from {filename} [{pp:?}]");
+        Err(RkError::todo())
     }
 
-    async fn create_resource(&self, kubeapi: &Kubeapi) -> kube::Result<Box<dyn Show>> {
+    async fn create_resource(&self, kubeapi: &Kubeapi) -> RkResult<Box<dyn Show>> {
         if let Some(command) = &self.command {
             let pp = kubeapi.post_params_with_manager(&self.field_manager);
             command.exec(kubeapi, &pp).await
@@ -153,29 +149,25 @@ impl Create {
 }
 
 impl CreateResource {
-    pub async fn exec(
-        &self,
-        kubeapi: &Kubeapi,
-        pp: &api::PostParams,
-    ) -> kube::Result<Box<dyn Show>> {
+    pub async fn exec(&self, kubeapi: &Kubeapi, pp: &api::PostParams) -> RkResult<Box<dyn Show>> {
         match self {
             Self::ClusterRole(cluster_role) => cluster_role.exec(kubeapi, pp).await,
-            Self::ClusterRoleBinding => todo!(),
-            Self::ConfigMap => todo!(),
-            Self::CronJob => todo!(),
-            Self::Deployment => todo!(),
-            Self::Ingress => todo!(),
-            Self::Job => todo!(),
+            Self::ClusterRoleBinding => Err(RkError::todo()),
+            Self::ConfigMap => Err(RkError::todo()),
+            Self::CronJob => Err(RkError::todo()),
+            Self::Deployment => Err(RkError::todo()),
+            Self::Ingress => Err(RkError::todo()),
+            Self::Job => Err(RkError::todo()),
             Self::Namespace(namespace) => namespace.exec(kubeapi, pp).await,
-            Self::PodDisruptionBudget => todo!(),
-            Self::PriorityClass => todo!(),
-            Self::Quota => todo!(),
-            Self::Role => todo!(),
-            Self::RoleBinding => todo!(),
+            Self::PodDisruptionBudget => Err(RkError::todo()),
+            Self::PriorityClass => Err(RkError::todo()),
+            Self::Quota => Err(RkError::todo()),
+            Self::Role => Err(RkError::todo()),
+            Self::RoleBinding => Err(RkError::todo()),
             Self::Secret(secret) => secret.exec(kubeapi, pp).await,
-            Self::Service => todo!(),
-            Self::ServiceAccount => todo!(),
-            Self::Token => todo!(),
+            Self::Service => Err(RkError::todo()),
+            Self::ServiceAccount => Err(RkError::todo()),
+            Self::Token => Err(RkError::todo()),
         }
     }
 }

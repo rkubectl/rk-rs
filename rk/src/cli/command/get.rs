@@ -31,7 +31,7 @@ pub struct Get {
 }
 
 impl Get {
-    pub async fn exec(&self, context: &Context) -> kube::Result<()> {
+    pub async fn exec(&self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         if let Some(raw) = self.raw.as_deref() {
             let name = raw.strip_prefix("/").unwrap_or(raw);

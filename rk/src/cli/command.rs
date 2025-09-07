@@ -73,7 +73,7 @@ pub enum Command {
 }
 
 impl Command {
-    pub async fn exec(self, context: &Context) -> kube::Result<()> {
+    pub async fn exec(self, context: &Context) -> RkResult<()> {
         context.kubeapi().debug(&self);
         match self {
             Self::Basic(basic) => basic.exec(context).await,
@@ -91,22 +91,25 @@ impl Command {
         }
     }
 
-    async fn api_versions(&self, context: &Context) -> kube::Result<()> {
+    async fn api_versions(&self, context: &Context) -> RkResult<()> {
         let _output = context.output_deprecated();
-        context.kubeapi().api_versions().await
+        context.kubeapi().api_versions().await?;
+        Ok(())
     }
 
-    async fn features(&self, context: &Context) -> kube::Result<()> {
+    async fn features(&self, context: &Context) -> RkResult<()> {
         let output = context.output_deprecated();
-        context.kubeapi().features(output).await
+        context.kubeapi().features(output).await?;
+        Ok(())
     }
 
-    async fn info(&self, context: &Context) -> kube::Result<()> {
+    async fn info(&self, context: &Context) -> RkResult<()> {
         let _output = context.output_deprecated();
-        context.kubeapi().info().await
+        context.kubeapi().info().await?;
+        Ok(())
     }
 
-    async fn version(&self, context: &Context) -> kube::Result<()> {
+    async fn version(&self, context: &Context) -> RkResult<()> {
         let text = context.kubeapi().version().await?;
         context.ui().print(text);
         Ok(())
@@ -132,14 +135,12 @@ pub enum Basic {
 }
 
 impl Basic {
-    async fn exec(self, context: &Context) -> kube::Result<()> {
-        let _client = context.kubeapi().client()?;
-        println!("Basic::exec: {self:?}");
+    async fn exec(self, context: &Context) -> RkResult<()> {
         match self {
             Self::Create(create) => create.exec(context).await,
-            Self::Expose => Ok(()),
-            Self::Run => Ok(()),
-            Self::Set => Ok(()),
+            Self::Expose => Err(RkError::todo()),
+            Self::Run => Err(RkError::todo()),
+            Self::Set => Err(RkError::todo()),
         }
     }
 }
@@ -158,11 +159,11 @@ pub enum Intermediate {
 }
 
 impl Intermediate {
-    async fn exec(self, context: &Context) -> kube::Result<()> {
+    async fn exec(self, context: &Context) -> RkResult<()> {
         match self {
-            Self::Explain => Ok(()),
+            Self::Explain => Err(RkError::todo()),
             Self::Get(get) => get.exec(context).await,
-            Self::Edit => Ok(()),
+            Self::Edit => Err(RkError::todo()),
             Self::Delete(delete) => delete.exec(context).await,
         }
     }
@@ -183,12 +184,12 @@ pub enum Deploy {
 }
 
 impl Deploy {
-    async fn exec(self, context: &Context) -> kube::Result<()> {
+    async fn exec(self, context: &Context) -> RkResult<()> {
         context.ui().not_implemented(&self);
         match self {
-            Self::Rollout => Ok(()),
-            Self::Scale => Ok(()),
-            Self::Autoscale => Ok(()),
+            Self::Rollout => Err(RkError::todo()),
+            Self::Scale => Err(RkError::todo()),
+            Self::Autoscale => Err(RkError::todo()),
         }
     }
 }
@@ -219,16 +220,16 @@ pub enum ClusterManagement {
 }
 
 impl ClusterManagement {
-    async fn exec(self, context: &Context) -> kube::Result<()> {
+    async fn exec(self, context: &Context) -> RkResult<()> {
         context.ui().not_implemented(&self);
         match self {
-            Self::Certificate => Ok(()),
-            Self::ClusterInfo => Ok(()),
-            Self::Top => Ok(()),
-            Self::Cordon => Ok(()),
-            Self::Uncordon => Ok(()),
-            Self::Drain => Ok(()),
-            Self::Taint => Ok(()),
+            Self::Certificate => Err(RkError::todo()),
+            Self::ClusterInfo => Err(RkError::todo()),
+            Self::Top => Err(RkError::todo()),
+            Self::Cordon => Err(RkError::todo()),
+            Self::Uncordon => Err(RkError::todo()),
+            Self::Drain => Err(RkError::todo()),
+            Self::Taint => Err(RkError::todo()),
         }
     }
 }

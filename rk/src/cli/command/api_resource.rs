@@ -12,7 +12,7 @@ pub struct ApiResources {
 }
 
 impl ApiResources {
-    pub async fn exec(self, context: &Context) -> kube::Result<()> {
+    pub async fn exec(self, context: &Context) -> RkResult<()> {
         let ar = context
             .kubeapi()
             .server_preferred_resources()

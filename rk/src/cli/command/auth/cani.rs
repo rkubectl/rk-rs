@@ -23,7 +23,7 @@ enum Object {
 }
 
 impl CanI {
-    pub async fn ask(self, context: &Context) -> kube::Result<()> {
+    pub async fn ask(self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         let ssar = Object::from_text(self.object, kubeapi)
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?

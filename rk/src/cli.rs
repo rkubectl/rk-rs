@@ -52,7 +52,7 @@ impl Cli {
         self
     }
 
-    pub async fn exec(self) -> kube::Result<()> {
+    pub async fn exec(self) -> RkResult<()> {
         let kubeapi = self.kubeapi().await?;
         let ui = self.ui();
         let context = Context::new(kubeapi, ui);

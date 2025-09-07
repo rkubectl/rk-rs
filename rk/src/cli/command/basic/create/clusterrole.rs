@@ -57,11 +57,7 @@ struct PolicyRulesArgs {
 }
 
 impl CreateClusterRole {
-    pub async fn exec(
-        &self,
-        kubeapi: &Kubeapi,
-        pp: &api::PostParams,
-    ) -> kube::Result<Box<dyn Show>> {
+    pub async fn exec(&self, kubeapi: &Kubeapi, pp: &api::PostParams) -> RkResult<Box<dyn Show>> {
         let data = self.cluster_role();
 
         let k = kubeapi

@@ -5,7 +5,7 @@ use super::*;
 pub struct WhoAmI;
 
 impl WhoAmI {
-    pub async fn ask(&self, context: &Context) -> kube::Result<()> {
+    pub async fn ask(&self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         let ssr = authenticationv1::SelfSubjectReview::default();
         let pp = kubeapi.post_params();

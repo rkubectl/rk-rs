@@ -46,24 +46,25 @@ pub enum Config {
 }
 
 impl Config {
-    pub fn exec(self, context: &Context) -> kube::Result<()> {
+    pub fn exec(self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         match self {
-            Self::CurrentContext => kubeapi.current_context(),
-            Self::DeleteCluster => todo!(),
-            Self::DeleteContext => todo!(),
-            Self::DeleteUser => todo!(),
-            Self::GetClusters => kubeapi.get_clusters(),
-            Self::GetContexts => kubeapi.get_contexts(),
-            Self::GetUsers => kubeapi.get_users(),
-            Self::RenameContext => todo!(),
-            Self::Set => todo!(),
-            Self::SetCluster => todo!(),
-            Self::SetContext => todo!(),
-            Self::SetCredentials => todo!(),
-            Self::Unset => todo!(),
-            Self::UseContext => todo!(),
-            Self::View => kubeapi.view(),
+            Self::CurrentContext => kubeapi.current_context()?,
+            Self::DeleteCluster => Err(RkError::todo())?,
+            Self::DeleteContext => Err(RkError::todo())?,
+            Self::DeleteUser => Err(RkError::todo())?,
+            Self::GetClusters => kubeapi.get_clusters()?,
+            Self::GetContexts => kubeapi.get_contexts()?,
+            Self::GetUsers => kubeapi.get_users()?,
+            Self::RenameContext => Err(RkError::todo())?,
+            Self::Set => Err(RkError::todo())?,
+            Self::SetCluster => Err(RkError::todo())?,
+            Self::SetContext => Err(RkError::todo())?,
+            Self::SetCredentials => Err(RkError::todo())?,
+            Self::Unset => Err(RkError::todo())?,
+            Self::UseContext => Err(RkError::todo())?,
+            Self::View => kubeapi.view()?,
         }
+        Ok(())
     }
 }

@@ -31,8 +31,13 @@ use rk_ui::ShowParams;
 use rk_ui::Ui;
 
 pub use cli::*;
+pub use error::RkError;
+
+pub type Result<T, E = RkError> = ::std::result::Result<T, E>;
+pub type RkResult<T> = self::Result<T>;
 
 mod cli;
+mod error;
 
 fn default<T: Default>() -> T {
     T::default()

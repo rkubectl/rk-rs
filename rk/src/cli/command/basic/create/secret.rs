@@ -23,11 +23,7 @@ pub enum CreateSecret {
 }
 
 impl CreateSecret {
-    pub async fn exec(
-        &self,
-        kubeapi: &Kubeapi,
-        pp: &api::PostParams,
-    ) -> kube::Result<Box<dyn Show>> {
+    pub async fn exec(&self, kubeapi: &Kubeapi, pp: &api::PostParams) -> RkResult<Box<dyn Show>> {
         trace!(?kubeapi, ?pp);
         let data = match self {
             Self::DockerRegistry(docker_registry) => docker_registry.secret().await,

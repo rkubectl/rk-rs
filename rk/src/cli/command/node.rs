@@ -14,14 +14,14 @@ pub enum Node {
 }
 
 impl Node {
-    pub async fn exec(&self, context: &Context) -> kube::Result<()> {
+    pub async fn exec(&self, context: &Context) -> RkResult<()> {
         match self {
             Self::Info => self.info(context).await,
             Self::ListImages => self.list_images(context).await,
         }
     }
 
-    pub async fn info(&self, context: &Context) -> kube::Result<()> {
+    pub async fn info(&self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         for node in self.nodes(kubeapi).await? {
             let name = node.name_any();
@@ -51,7 +51,7 @@ impl Node {
         Ok(())
     }
 
-    pub async fn list_images(&self, context: &Context) -> kube::Result<()> {
+    pub async fn list_images(&self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         for node in self.nodes(kubeapi).await? {
             println!("\n{}\n", node.name_any());

@@ -181,14 +181,15 @@ pub struct Delete {
 }
 
 impl Delete {
-    pub async fn exec(self, context: &Context) -> kube::Result<()> {
+    pub async fn exec(self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
         if let Some(filename) = &self.filename {
             let dp = api::DeleteParams::default();
             todo!("Deleting from {filename} ({dp:?}");
         } else {
-            self.delete_resources(kubeapi).await
+            self.delete_resources(kubeapi).await?;
         }
+        Ok(())
     }
 
     async fn delete_resources(&self, kubeapi: &Kubeapi) -> kube::Result<()> {

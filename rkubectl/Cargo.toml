@@ -12,6 +12,7 @@ readme.workspace = true
 
 [dependencies]
 kube.workspace = true
+miette.workspace = true
 tokio.workspace = true
 tracing-subscriber.workspace = true
 

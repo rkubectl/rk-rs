@@ -11,6 +11,7 @@ readme.workspace = true
 
 
 [dependencies]
+base64.workspace = true
 k8s-openapi-ext.workspace = true
 kube.workspace = true
 

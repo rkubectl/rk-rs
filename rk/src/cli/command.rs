@@ -19,6 +19,7 @@ pub use config::Config;
 pub use delete::Delete;
 pub use get::Get;
 pub use node::Node;
+pub use secret::Secret;
 
 mod api_resource;
 mod auth;
@@ -27,6 +28,7 @@ mod config;
 mod delete;
 mod get;
 mod node;
+mod secret;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Command {
@@ -68,6 +70,10 @@ pub enum Command {
     #[command(subcommand, visible_aliases = ["no", "nodes"])]
     Node(Node),
 
+    /// Print Secret related info
+    #[command(subcommand, visible_aliases = ["se", "sec", "secrets"])]
+    Secret(Secret),
+
     /// Print client and server version
     Version,
 }
@@ -87,6 +93,7 @@ impl Command {
             Self::Features => self.features(context).await,
             Self::Info => self.info(context).await,
             Self::Node(node) => node.exec(context).await,
+            Self::Secret(secret) => secret.exec(context).await,
             Self::Version => self.version(context).await,
         }
     }

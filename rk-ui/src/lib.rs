@@ -37,7 +37,10 @@ impl Ui {
         }
     }
 
-    pub fn show(&self, item: Box<dyn Show>, params: &ShowParams) {
+    pub fn show<T>(&self, item: T, params: &ShowParams)
+    where
+        T: Show,
+    {
         item.output(self.namespace, params, &self.output);
     }
 

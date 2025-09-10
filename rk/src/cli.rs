@@ -13,6 +13,7 @@ pub use command::CreateResource;
 pub use command::Delete;
 pub use command::Get;
 pub use command::Node;
+pub use command::Secret;
 
 use context::Context;
 

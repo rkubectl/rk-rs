@@ -13,9 +13,12 @@ use k8s::metav1;
 
 pub use apiresource::APIResourceExt;
 pub use apiresource::APIResourceListExt;
+pub use b64::Base64Decode;
+pub use b64::Base64Encode;
 pub use namespace::NamespaceGetExt2;
 pub use pod::PodGetExt2;
 
 mod apiresource;
+mod b64;
 mod namespace;
 mod pod;

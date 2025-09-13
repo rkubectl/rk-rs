@@ -72,7 +72,7 @@ impl CreateGenericSecret {
             .collect::<io::Result<Vec<_>>>()?
             .into_iter()
             .flatten()
-            .map(|kv| kv.base64_encoded());
+            .map(|kv| kv.byte_string());
         Ok(items)
     }
 
@@ -84,13 +84,14 @@ impl CreateGenericSecret {
             .collect::<io::Result<Vec<_>>>()?
             .into_iter()
             .flatten()
-            .map(|kv| kv.base64_encoded());
+            .map(|kv| kv.byte_string());
         Ok(items)
     }
 
     fn literal(&self) -> impl Iterator<Item = KeyValue<k8s::ByteString>> {
         self.from_literal
             .iter()
-            .map(KeyValue::<String>::base64_encoded)
+            .cloned()
+            .map(KeyValue::<String>::byte_string)
     }
 }

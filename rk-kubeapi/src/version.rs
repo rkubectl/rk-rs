@@ -12,8 +12,11 @@ k8s_openapi::k8s_if_1_32! {
 k8s_openapi::k8s_if_1_33! {
     const K8S_VERSION: &str = "1.33";
 }
-// k8s_openapi::k8s_if_1_34! {
-//     const K8S_VERSION: &str = "1.34";
+k8s_openapi::k8s_if_1_34! {
+    const K8S_VERSION: &str = "1.34";
+}
+// k8s_openapi::k8s_if_1_35! {
+//     const K8S_VERSION: &str = "1.35";
 // }
 
 impl Kubeapi {

@@ -4,7 +4,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::str;
 
-use base64::prelude::*;
 use clap::builder::PathBufValueParser;
 use clap::builder::StringValueParser;
 use clap::builder::TypedValueParser;

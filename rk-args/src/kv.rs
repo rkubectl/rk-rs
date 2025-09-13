@@ -33,11 +33,9 @@ impl KeyValue<String> {
         StringValueParser::new().try_map(Self::from_text)
     }
 
-    pub fn base64_encoded(&self) -> KeyValue<k8s::ByteString> {
+    pub fn byte_string(self) -> KeyValue<k8s::ByteString> {
         let Self { key, value } = self;
-        let key = key.clone();
-        let value = BASE64_STANDARD.encode(value).into_bytes();
-        let value = k8s::ByteString(value);
+        let value = k8s::ByteString(value.into_bytes());
         KeyValue { key, value }
     }
 
@@ -67,9 +65,8 @@ impl KeyValue<String> {
 }
 
 impl KeyValue<Vec<u8>> {
-    pub fn base64_encoded(self) -> KeyValue<k8s::ByteString> {
+    pub fn byte_string(self) -> KeyValue<k8s::ByteString> {
         let Self { key, value } = self;
-        let value = BASE64_STANDARD.encode(&value).into_bytes();
         let value = k8s::ByteString(value);
         KeyValue { key, value }
     }

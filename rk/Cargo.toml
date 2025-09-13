@@ -10,7 +10,6 @@ readme.workspace = true
 
 
 [dependencies]
-base64.workspace = true
 clap.workspace = true
 indexmap.workspace = true
 k8s-openapi.workspace = true

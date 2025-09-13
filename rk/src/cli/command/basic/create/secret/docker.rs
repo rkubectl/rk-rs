@@ -117,7 +117,7 @@ impl FromFileDockerRegistry {
     fn load(&self, name: &str) -> kube::Result<corev1::Secret> {
         let (key, config) = self.load_data()?.into_pair();
         debug_assert_eq!(key, corev1::Secret::SECRET_TYPE_DOCKER_CONFIG_JSON);
-        let secret = corev1::Secret::docker_config_json_base64_encoded(name, config);
+        let secret = corev1::Secret::docker_config_json_binary(name, config);
         Ok(secret)
     }
 
@@ -130,6 +130,6 @@ impl FromFileDockerRegistry {
         let Result::<[_; 1], _>::Ok([item]) = items.try_into() else {
             return Err(kube::Error::LinesCodecMaxLineLengthExceeded);
         };
-        Ok(item.base64_encoded())
+        Ok(item.byte_string())
     }
 }

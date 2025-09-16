@@ -2,22 +2,9 @@ use prometheus_parse::Scrape;
 
 use super::*;
 
-trait FeaturesExt {
-    fn features(self) -> Vec<Feature>;
-}
-
-impl FeaturesExt for Scrape {
-    fn features(self) -> Vec<Feature> {
-        Feature::from_scrape(self)
-    }
-}
-
 impl Kubeapi {
-    pub async fn features(&self, output: &OutputFormat) -> kube::Result<()> {
-        let features = self.metrics().await?.features();
-        let show_params = default();
-        println!("{}", features.output(false, &show_params, output));
-        Ok(())
+    pub async fn features(&self) -> kube::Result<Vec<Feature>> {
+        self.metrics().await.map(Feature::from_scrape)
     }
 
     pub async fn metrics(&self) -> kube::Result<Scrape> {

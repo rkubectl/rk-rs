@@ -1,6 +1,7 @@
 use std::fs;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::str;
 
 use k8s_openapi_ext as k8s;

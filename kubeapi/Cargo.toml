@@ -28,7 +28,6 @@ tracing.workspace = true
 
 rkubectl-ext.workspace = true
 rkubectl-features.workspace = true
-rkubectl-ui.workspace = true
 
 
 [lints]

@@ -35,7 +35,7 @@ impl Get {
         let kubeapi = context.kubeapi();
         if let Some(raw) = self.raw.as_deref() {
             let name = raw.strip_prefix("/").unwrap_or(raw);
-            let text = kubeapi.raw(name).await?;
+            let text = kubeapi.raw_get(name).await?;
             println!("{text}");
         } else {
             let resources = self.resources(kubeapi)?;

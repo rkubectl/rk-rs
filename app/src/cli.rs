@@ -28,13 +28,13 @@ pub struct Cli {
     pub debug: bool,
 
     #[command(flatten, next_display_order = 1000)]
-    pub options: GlobalKubeapiOptions,
+    pub options: KubeapiOptions,
 
     #[command(flatten, next_display_order = 2000)]
     pub namespace: NamespaceOptions,
 
     #[command(flatten, next_display_order = 3000)]
-    pub config: ConfigOptions,
+    pub config: KubeConfigOptions,
 
     #[arg(short, long, value_enum, global = true, display_order = 10000)]
     pub output: Option<OutputFormat>,
@@ -62,11 +62,14 @@ impl Cli {
 
     async fn kubeapi(&self) -> kube::Result<Kubeapi> {
         let namespace = self.namespace.namespace();
-        let config_options = self.config.kube_config_options();
-        let kubeapi = Kubeapi::new(config_options, self.debug, &self.options)
-            .await
-            .inspect(|kubeapi| info!(?kubeapi))?
+        let kubeapi = Kubeapi::new(&self.config, &self.options, self.debug)
+            .await?
             .with_namespace(namespace);
+        info!(
+            ctx = kubeapi.cluster_url(),
+            namespace = ?kubeapi.namespace(),
+            "Accessing Kubernetes API server"
+        );
 
         Ok(kubeapi)
     }

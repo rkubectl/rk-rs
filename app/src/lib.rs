@@ -19,10 +19,10 @@ use k8s::metav1;
 use k8s::rbacv1;
 
 use rkubectl_kubeapi::Cascade;
-use rkubectl_kubeapi::ConfigOptions;
 use rkubectl_kubeapi::DryRun;
-use rkubectl_kubeapi::GlobalKubeapiOptions;
+use rkubectl_kubeapi::KubeConfigOptions;
 use rkubectl_kubeapi::Kubeapi;
+use rkubectl_kubeapi::KubeapiOptions;
 use rkubectl_kubeapi::Namespace;
 use rkubectl_resource::InvalidResourceSpec;
 use rkubectl_resource::ResourceArg;

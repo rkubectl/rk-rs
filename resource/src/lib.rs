@@ -263,18 +263,6 @@ impl Resource {
             .find_map(|arl| arl.kube_api_resource(name))
     }
 
-    async fn _dynamic_api_resource(
-        kubeapi: &Kubeapi,
-        name: &str,
-    ) -> kube::Result<Option<(discovery::Scope, api::ApiResource)>> {
-        let ar = kubeapi
-            .server_api_resources()
-            .await?
-            .into_iter()
-            .find_map(|arl| arl.kube_api_resource(name));
-        Ok(ar)
-    }
-
     fn erase<K>() -> api::ApiResource
     where
         K: kube::Resource,

@@ -3,7 +3,7 @@ use clap::Args;
 use super::*;
 
 #[derive(Clone, Debug, Default, Args)]
-pub struct GlobalKubeapiOptions {
+pub struct KubeapiOptions {
     /// Default cache directory
     #[arg(long, global = true)]
     pub cache_dir: Option<PathBuf>,
@@ -21,7 +21,7 @@ pub struct GlobalKubeapiOptions {
     pub as_uid: Option<String>,
 }
 
-impl GlobalKubeapiOptions {
+impl KubeapiOptions {
     pub fn cache_dir(&self) -> PathBuf {
         self.cache_dir
             .clone()
@@ -43,8 +43,11 @@ impl GlobalKubeapiOptions {
     }
 }
 
+/// This struct mirrors `KubeConfigOptions` from `kube::config` crate.
+/// It exists here to allow using the same struct in the CLI since
+/// `kube::config::KubeConfigOptions` does not derive `clap::Args`.
 #[derive(Clone, Debug, Default, Args)]
-pub struct ConfigOptions {
+pub struct KubeConfigOptions {
     /// The name of the kubeconfig cluster to use
     #[arg(long, global = true)]
     pub cluster: Option<String>,
@@ -58,7 +61,7 @@ pub struct ConfigOptions {
     pub user: Option<String>,
 }
 
-impl ConfigOptions {
+impl KubeConfigOptions {
     pub fn kube_config_options(&self) -> kube::config::KubeConfigOptions {
         kube::config::KubeConfigOptions {
             context: self.context.clone(),

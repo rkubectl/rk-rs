@@ -76,3 +76,7 @@ warnings = "deny"
 use_self = "warn"
 map_unwrap_or = "warn"
 map_flatten = "warn"
+
+
+[workspace.package.metadata.docs.rs]
+features = ["k8s-openapi/latest"]

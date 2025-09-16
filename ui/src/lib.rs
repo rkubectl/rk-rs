@@ -7,8 +7,8 @@ use kube::api;
 use serde_json as json;
 use serde_yaml as yaml;
 
-use rk_ext::NamespaceGetExt2;
-use rk_ext::PodGetExt2;
+use rkubectl_ext::NamespaceGetExt2;
+use rkubectl_ext::PodGetExt2;
 
 use k8s::ComponentConditionGetExt;
 use k8s::ComponentStatusGetExt;

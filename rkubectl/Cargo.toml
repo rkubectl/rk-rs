@@ -16,7 +16,7 @@ miette.workspace = true
 tokio.workspace = true
 tracing-subscriber.workspace = true
 
-rk.workspace = true
+rkubectl-app.workspace = true
 
 
 [lints]

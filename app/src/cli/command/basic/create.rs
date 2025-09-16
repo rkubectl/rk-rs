@@ -1,6 +1,6 @@
 use super::*;
 
-use rk_ui::Created;
+use rkubectl_ui::Created;
 
 use clusterrole::CreateClusterRole;
 use namespace::CreateNamespace;

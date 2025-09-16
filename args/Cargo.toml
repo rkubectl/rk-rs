@@ -1,6 +1,5 @@
 [package]
-name = "rk-ext"
-
+name = "rkubectl-args"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,9 +10,8 @@ readme.workspace = true
 
 
 [dependencies]
-base64.workspace = true
+clap.workspace = true
 k8s-openapi-ext.workspace = true
-kube.workspace = true
 
 
 [lints]

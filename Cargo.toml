@@ -1,12 +1,12 @@
 [workspace]
 members = [
-    "rk",
-    "rk-args",
-    "rk-ext",
-    "rk-features",
-    "rk-kubeapi",
-    "rk-resource",
-    "rk-ui",
+    "app",
+    "args",
+    "ext",
+    "features",
+    "kubeapi",
+    "resource",
+    "ui",
     "rkubectl",
 ]
 resolver = "3"
@@ -17,7 +17,7 @@ version = "0.0.0"
 edition = "2024"
 rust-version = "1.89"
 license = "Apache-2.0"
-keywords = ["k8s", "kubernetes"]
+keywords = ["k8s", "kubernetes", "kubectl", "cli", "tool"]
 repository = "https://github.com/rkubectl"
 readme = "README.md"
 
@@ -30,7 +30,11 @@ futures-util = "0.3"
 indexmap = "2.9"
 k8s-openapi = { version = "0.26", features = ["latest", "schemars"] }
 k8s-openapi-ext = "0.26.0"
-kube = { version = "2.0", default-features = false, features = ["client", "rustls-tls", "aws-lc-rs"] }
+kube = { version = "2.0", default-features = false, features = [
+    "client",
+    "rustls-tls",
+    "aws-lc-rs",
+] }
 kube-client-ext = "2.0.0"
 miette = { version = "7.6", features = ["fancy", "serde"] }
 prometheus-parse = "0.2"
@@ -44,13 +48,13 @@ tokio = { version = "1.47", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-rk = { path = "./rk" }
-rk-args = { path = "./rk-args" }
-rk-ext = { path = "./rk-ext" }
-rk-features = { path = "./rk-features" }
-rk-kubeapi = { path = "./rk-kubeapi" }
-rk-resource = { path = "./rk-resource" }
-rk-ui = { path = "./rk-ui" }
+rkubectl-app = { path = "./app" }
+rkubectl-args = { path = "./args" }
+rkubectl-ext = { path = "./ext" }
+rkubectl-features = { path = "./features" }
+rkubectl-kubeapi = { path = "./kubeapi" }
+rkubectl-resource = { path = "./resource" }
+rkubectl-ui = { path = "./ui" }
 
 
 [workspace.lints.rust]

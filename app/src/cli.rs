@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use rk_args::{EnvFile, File, KeyValue};
+use rkubectl_args::{EnvFile, File, KeyValue};
 
 use super::*;
 

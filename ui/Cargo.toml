@@ -1,5 +1,5 @@
 [package]
-name = "rk-features"
+name = "rkubectl-ui"
 
 version.workspace = true
 edition.workspace = true
@@ -11,10 +11,16 @@ readme.workspace = true
 
 
 [dependencies]
-prometheus-parse.workspace = true
+clap.workspace = true
+k8s-openapi-ext.workspace = true
+kube.workspace = true
 serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
 tabled.workspace = true
 
+rkubectl-ext.workspace = true
+rkubectl-features.workspace = true
 
 [lints]
 workspace = true

@@ -24,9 +24,9 @@ use k8s::corev1;
 use k8s::metav1;
 use k8s::rbacv1;
 
-use rk_features::Feature;
-use rk_ui::OutputFormat;
-use rk_ui::Show;
+use rkubectl_features::Feature;
+use rkubectl_ui::OutputFormat;
+use rkubectl_ui::Show;
 
 pub use cache::Cache;
 pub use cascade::Cascade;

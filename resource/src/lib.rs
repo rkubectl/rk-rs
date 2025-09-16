@@ -10,10 +10,10 @@ use k8s::corev1;
 // use k8s::metav1;
 // use k8s::rbacv1;
 
-// use rk_ext::APIResourceExt;
-use rk_ext::APIResourceListExt;
-use rk_kubeapi::Kubeapi;
-use rk_ui::Show;
+// use rkubectl_ext::APIResourceExt;
+use rkubectl_ext::APIResourceListExt;
+use rkubectl_kubeapi::Kubeapi;
+use rkubectl_ui::Show;
 
 pub use named::NamedResource;
 

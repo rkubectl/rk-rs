@@ -1,6 +1,6 @@
 use super::*;
 
-impl Show for rk_features::Feature {
+impl Show for rkubectl_features::Feature {
     fn header(&self, _output: &OutputFormat) -> Vec<String> {
         Self::headers().into_iter().map(Into::into).collect()
     }

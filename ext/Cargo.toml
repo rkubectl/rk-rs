@@ -1,5 +1,5 @@
 [package]
-name = "rk-resource"
+name = "rkubectl-ext"
 
 version.workspace = true
 edition.workspace = true
@@ -11,15 +11,9 @@ readme.workspace = true
 
 
 [dependencies]
-k8s-openapi.workspace = true
+base64.workspace = true
 k8s-openapi-ext.workspace = true
 kube.workspace = true
-kube-client-ext.workspace = true
-thiserror.workspace = true
-
-rk-ext.workspace = true
-rk-kubeapi.workspace = true
-rk-ui.workspace = true
 
 
 [lints]

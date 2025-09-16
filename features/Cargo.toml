@@ -1,5 +1,6 @@
 [package]
-name = "rk-args"
+name = "rkubectl-features"
+
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,8 +11,9 @@ readme.workspace = true
 
 
 [dependencies]
-clap.workspace = true
-k8s-openapi-ext.workspace = true
+prometheus-parse.workspace = true
+serde.workspace = true
+tabled.workspace = true
 
 
 [lints]

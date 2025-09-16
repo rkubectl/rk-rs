@@ -1,6 +1,8 @@
 use miette::IntoDiagnostic;
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
+use rkubectl_app as app;
+
 #[tokio::main]
 async fn main() -> miette::Result<()> {
     tracing_subscriber::registry()
@@ -8,7 +10,7 @@ async fn main() -> miette::Result<()> {
         .with(EnvFilter::from_default_env())
         .init();
 
-    rk::Cli::new().exec().await.into_diagnostic()?;
+    app::Cli::new().exec().await.into_diagnostic()?;
 
     Ok(())
 }

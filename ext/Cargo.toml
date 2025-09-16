@@ -1,6 +1,6 @@
 [package]
 name = "rkubectl-ext"
-
+description = "Extension traits for rkubectl, a Kubernetes CLI tool"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

@@ -48,13 +48,13 @@ tokio = { version = "1.47", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-rkubectl-app = { path = "./app" }
-rkubectl-args = { path = "./args" }
-rkubectl-ext = { path = "./ext" }
-rkubectl-features = { path = "./features" }
-rkubectl-kubeapi = { path = "./kubeapi" }
-rkubectl-resource = { path = "./resource" }
-rkubectl-ui = { path = "./ui" }
+rkubectl-app = { version = "0.0.0", path = "./app" }
+rkubectl-args = { version = "0.0.0", path = "./args" }
+rkubectl-ext = { version = "0.0.0", path = "./ext" }
+rkubectl-features = { version = "0.0.0", path = "./features" }
+rkubectl-kubeapi = { version = "0.0.0", path = "./kubeapi" }
+rkubectl-resource = { version = "0.0.0", path = "./resource" }
+rkubectl-ui = { version = "0.0.0", path = "./ui" }
 
 
 [workspace.lints.rust]

@@ -1,6 +1,7 @@
 [package]
 name = "rkubectl"
 description = "A Kubernetes CLI tool written in Rust"
+
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -8,6 +9,8 @@ license.workspace = true
 keywords.workspace = true
 repository.workspace = true
 readme.workspace = true
+
+metadata.docs.rs.workspace = true
 
 
 [dependencies]

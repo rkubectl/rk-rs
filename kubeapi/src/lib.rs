@@ -1,3 +1,7 @@
+//! This crate provides a higher-level API for interacting with Kubernetes clusters.
+//! It builds on top of the `kube` crate and adds features like caching, namespace
+//! management, and easier access to common Kubernetes resources.
+
 use std::collections::BTreeSet;
 use std::fmt;
 use std::fs;
@@ -6,7 +10,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time;
 
-use futures_util::stream::{self, StreamExt, TryStreamExt};
 use k8s_openapi_ext as k8s;
 use kube::api;
 use kube::discovery;
@@ -29,8 +32,8 @@ pub use cache::Cache;
 pub use cascade::Cascade;
 pub use dryrun::DryRun;
 pub use namespace::Namespace;
-pub use options::ConfigOptions;
-pub use options::GlobalKubeapiOptions;
+pub use options::KubeConfigOptions;
+pub use options::KubeapiOptions;
 
 mod cache;
 mod cascade;
@@ -40,8 +43,12 @@ mod info;
 mod kubeconfig;
 mod namespace;
 mod options;
+mod raw;
+mod server;
 mod version;
 
+/// Kubeapi is a higher-level Kubernetes API client that provides additional features
+/// such as caching, namespace management, and easier access to common Kubernetes resources.
 #[derive(Debug)]
 pub struct Kubeapi {
     config: kube::Config,
@@ -49,15 +56,16 @@ pub struct Kubeapi {
     cache: Cache,
     namespace: Namespace,
     debug: bool,
-    options: GlobalKubeapiOptions,
+    options: KubeapiOptions,
 }
 
 impl Kubeapi {
     pub async fn new(
-        config_options: kube::config::KubeConfigOptions,
+        config: &KubeConfigOptions,
+        options: &KubeapiOptions,
         debug: bool,
-        options: &GlobalKubeapiOptions,
     ) -> kube::Result<Self> {
+        let config_options = config.kube_config_options();
         let options = options.clone();
         let namespace = default();
         let cache = cache::Cache::default();
@@ -76,16 +84,22 @@ impl Kubeapi {
             .map_err(|_| kube::Error::LinesCodecMaxLineLengthExceeded)
     }
 
+    pub fn cluster_url(&self) -> String {
+        self.config.cluster_url.to_string()
+    }
+
     pub fn debug(&self, item: impl fmt::Debug) {
         if self.debug {
             println!("{item:?}")
         }
     }
 
+    /// Create a kube::Client from the current configuration.
     pub fn client(&self) -> kube::Result<kube::Client> {
         kube::Client::try_from(self.config.clone())
     }
 
+    /// Returns the path to the cache file based on the current kubeconfig context.
     fn cache_path(&self) -> Result<PathBuf, kube::config::KubeconfigError> {
         self.options.discovery_cache_for_config(&self.config)
     }
@@ -99,10 +113,13 @@ impl Kubeapi {
         Ok(Self { cache, ..self })
     }
 
+    /// Set the namespace for the Kubeapi instance.
+    /// This method returns a new instance with the updated namespace.
     pub fn with_namespace(self, namespace: Namespace) -> Self {
         Self { namespace, ..self }
     }
 
+    /// Get the current namespace of the Kubeapi instance.
     pub fn namespace(&self) -> &Namespace {
         &self.namespace
     }
@@ -113,23 +130,6 @@ impl Kubeapi {
 
     pub fn cached_server_api_resources(&self) -> Vec<metav1::APIResourceList> {
         self.cache.api_resources().unwrap_or_default()
-    }
-
-    pub async fn server_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
-        if let Some(resources) = self.cache.api_resources() {
-            // resources.sort_by_key(|arl| arl.resources[0].group.as_deref());
-            Ok(resources)
-        } else {
-            self.get_server_api_resources().await
-        }
-    }
-
-    pub async fn server_api_groups(&self) -> kube::Result<metav1::APIGroupList> {
-        if let Some(groups) = self.cache.api_groups() {
-            Ok(groups)
-        } else {
-            self.get_server_api_groups().await
-        }
     }
 
     pub async fn server_preferred_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
@@ -151,55 +151,6 @@ impl Kubeapi {
             .filter(|arl| preferred_versions.contains(&arl.group_version))
             .collect();
         Ok(resources)
-    }
-
-    async fn get_server_api_groups(&self) -> kube::Result<metav1::APIGroupList> {
-        let client = self.client()?;
-        let core = client.list_core_api_versions().await?;
-        let name = kube::discovery::ApiGroup::CORE_GROUP.to_string();
-
-        let versions = core
-            .versions
-            .into_iter()
-            .map(|version| metav1::GroupVersionForDiscovery {
-                group_version: format!("{name}{version}"),
-                version,
-            })
-            .collect::<Vec<_>>();
-
-        let core = metav1::APIGroup {
-            name,
-            preferred_version: Some(versions[0].clone()),
-            server_address_by_client_cidrs: Some(core.server_address_by_client_cidrs),
-            versions,
-        };
-
-        let mut groups = client.list_api_groups().await?;
-        groups.groups.insert(0, core);
-        Ok(groups)
-    }
-
-    async fn get_server_api_resources(&self) -> kube::Result<Vec<metav1::APIResourceList>> {
-        let client = self.client()?;
-        let core = client.list_core_api_versions().await?;
-        let core = stream::iter(&core.versions)
-            .then(|version| client.list_core_api_resources(version))
-            .try_collect::<Vec<_>>()
-            .await?;
-
-        let groups = client.list_api_groups().await?.groups;
-        let apiversions = groups.iter().filter_map(|group| {
-            group
-                .preferred_version
-                .as_ref()
-                .or_else(|| group.versions.first())
-        });
-        let groups = stream::iter(apiversions)
-            .then(|apiversion| client.list_api_group_resources(&apiversion.group_version))
-            .try_collect::<Vec<_>>()
-            .await?;
-
-        Ok(core.into_iter().chain(groups).collect())
     }
 
     pub async fn api_versions(&self) -> kube::Result<()> {
@@ -251,14 +202,6 @@ impl Kubeapi {
 
     //     Ok(dynamic_api)
     // }
-
-    pub async fn raw(&self, name: &str) -> kube::Result<String> {
-        let gp = self.get_params();
-        let request = api::Request::new("")
-            .get(name, &gp)
-            .map_err(kube::Error::BuildRequest)?;
-        self.client()?.request_text(request).await
-    }
 
     // pub async fn get(&self, resource: Vec<Resource>, output: OutputFormat) -> kube::Result<()> {
     //     println!("Getting {resource:?} [{output:?}]");

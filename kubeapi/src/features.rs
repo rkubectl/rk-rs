@@ -8,7 +8,7 @@ impl Kubeapi {
     }
 
     pub async fn metrics(&self) -> kube::Result<Scrape> {
-        let text = self.raw("metrics").await?;
+        let text = self.raw_get("metrics").await?;
         let lines = text.lines().map(String::from).map(Ok);
         Scrape::parse(lines).map_err(kube::Error::ReadEvents)
     }

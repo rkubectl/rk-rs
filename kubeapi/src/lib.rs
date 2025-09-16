@@ -15,7 +15,6 @@ use serde_json as json;
 use serde_yaml as yaml;
 use tracing::debug;
 use tracing::error;
-// use tracing::info;
 use tracing::trace;
 
 use k8s::authenticationv1;
@@ -25,8 +24,6 @@ use k8s::metav1;
 use k8s::rbacv1;
 
 use rkubectl_features::Feature;
-use rkubectl_ui::OutputFormat;
-use rkubectl_ui::Show;
 
 pub use cache::Cache;
 pub use cascade::Cascade;
@@ -34,10 +31,6 @@ pub use dryrun::DryRun;
 pub use namespace::Namespace;
 pub use options::ConfigOptions;
 pub use options::GlobalKubeapiOptions;
-// pub use resource::InvalidResourceSpec;
-// pub use resource::NamedResource;
-// pub use resource::Resource;
-// pub use resource::ResourceArg;
 
 mod cache;
 mod cascade;

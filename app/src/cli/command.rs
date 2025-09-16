@@ -106,7 +106,9 @@ impl Command {
 
     async fn features(&self, context: &Context) -> RkResult<()> {
         let output = context.output_deprecated();
-        context.kubeapi().features(output).await?;
+        let features = context.kubeapi().features().await?;
+        let show_params = default();
+        println!("{}", features.output(false, &show_params, output));
         Ok(())
     }
 

@@ -1442,7 +1442,6 @@ dependencies = [
  "prometheus-parse",
  "rkubectl-ext",
  "rkubectl-features",
- "rkubectl-ui",
  "serde",
  "serde_json",
  "serde_yaml",

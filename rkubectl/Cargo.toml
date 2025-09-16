@@ -10,8 +10,6 @@ keywords.workspace = true
 repository.workspace = true
 readme.workspace = true
 
-metadata.docs.rs.workspace = true
-
 
 [dependencies]
 kube.workspace = true
@@ -24,3 +22,7 @@ rkubectl-app.workspace = true
 
 [lints]
 workspace = true
+
+
+[package.metadata.docs.rs]
+features = ["k8s-openapi/latest"]

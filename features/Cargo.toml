@@ -1,6 +1,6 @@
 [package]
 name = "rkubectl-features"
-
+description = "Kubernetes features support for rkubectl, a Kubernetes CLI tool"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

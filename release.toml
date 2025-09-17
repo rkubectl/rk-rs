@@ -1,4 +1,4 @@
-allow-branch = ["main", "release"]
+allow-branch = ["main", "release", "HEAD"]
 push = true
 tag = true
 publish = true

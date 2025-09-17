@@ -35,6 +35,7 @@ pub use namespace::Namespace;
 pub use options::KubeConfigOptions;
 pub use options::KubeapiOptions;
 
+mod apis;
 mod cache;
 mod cascade;
 mod dryrun;
@@ -43,6 +44,7 @@ mod info;
 mod kubeconfig;
 mod namespace;
 mod options;
+mod params;
 mod raw;
 mod server;
 mod version;
@@ -182,110 +184,6 @@ impl Kubeapi {
         Ok(dynamic_api)
     }
 
-    // pub fn dynamic_object_api0(
-    //     &self,
-    //     resource: &Resource,
-    // ) -> kube::Result<api::Api<api::DynamicObject>> {
-    //     let client = self.client()?;
-    //     let (scope, ref dyntype) = resource.api_resource();
-
-    //     trace!(?dyntype, "dynamic_object_api");
-
-    //     let dynamic_api = match scope {
-    //         discovery::Scope::Cluster => api::Api::all_with(client, dyntype),
-    //         discovery::Scope::Namespaced => match &self.namespace {
-    //             Namespace::All => api::Api::all_with(client, dyntype),
-    //             Namespace::Default => api::Api::default_namespaced_with(client, dyntype),
-    //             Namespace::Namespace(ns) => api::Api::namespaced_with(client, ns, dyntype),
-    //         },
-    //     };
-
-    //     Ok(dynamic_api)
-    // }
-
-    // pub async fn get(&self, resource: Vec<Resource>, output: OutputFormat) -> kube::Result<()> {
-    //     println!("Getting {resource:?} [{output:?}]");
-    //     Ok(())
-    // }
-
-    pub fn get_params(&self) -> api::GetParams {
-        api::GetParams::default()
-    }
-
-    pub fn list_params(&self) -> api::ListParams {
-        api::ListParams::default()
-    }
-
-    pub fn post_params(&self) -> api::PostParams {
-        api::PostParams::default()
-    }
-
-    pub fn delete_params(&self, cascade: Cascade, dry_run: DryRun) -> api::DeleteParams {
-        let dp = match cascade {
-            Cascade::Background => api::DeleteParams::background(),
-            Cascade::Foreground => api::DeleteParams::foreground(),
-            Cascade::Orphan => api::DeleteParams::orphan(),
-        };
-
-        match dry_run {
-            DryRun::Server => dp.dry_run(),
-            DryRun::None | DryRun::Client => dp,
-        }
-    }
-
-    pub fn post_params_with_manager(&self, manager: &str) -> api::PostParams {
-        api::PostParams {
-            field_manager: Some(manager.to_string()),
-            ..default()
-        }
-    }
-
-    pub fn clusterroles(&self) -> kube::Result<api::Api<rbacv1::ClusterRole>> {
-        self.cluster_api()
-    }
-
-    pub fn namespaces(&self) -> kube::Result<api::Api<corev1::Namespace>> {
-        self.cluster_api()
-    }
-
-    pub fn pods(&self) -> kube::Result<api::Api<corev1::Pod>> {
-        self.namespaced_api()
-    }
-
-    pub fn configmaps(&self) -> kube::Result<api::Api<corev1::ConfigMap>> {
-        self.namespaced_api()
-    }
-
-    pub fn secrets(&self) -> kube::Result<api::Api<corev1::Secret>> {
-        self.namespaced_api()
-    }
-
-    pub fn componentstatuses(&self) -> kube::Result<api::Api<corev1::ComponentStatus>> {
-        self.cluster_api()
-    }
-
-    pub fn nodes(&self) -> kube::Result<api::Api<corev1::Node>> {
-        self.cluster_api()
-    }
-
-    pub fn selfsubjectaccessreviews(
-        &self,
-    ) -> kube::Result<api::Api<authorizationv1::SelfSubjectAccessReview>> {
-        self.cluster_api()
-    }
-
-    pub fn selfsubjectrulesreviews(
-        &self,
-    ) -> kube::Result<api::Api<authorizationv1::SelfSubjectRulesReview>> {
-        self.cluster_api()
-    }
-
-    pub fn selfsubjectreviews(
-        &self,
-    ) -> kube::Result<api::Api<authenticationv1::SelfSubjectReview>> {
-        self.cluster_api()
-    }
-
     pub fn inspect<K>(&self, k: &K)
     where
         K: serde::Serialize,
@@ -302,28 +200,6 @@ impl Kubeapi {
         }
     }
 
-    fn cluster_api<K>(&self) -> kube::Result<api::Api<K>>
-    where
-        K: kube::Resource<Scope = k8s::openapi::ClusterResourceScope>,
-        <K as kube::Resource>::DynamicType: Default,
-    {
-        self.client().map(|client| client.api())
-    }
-
-    fn namespaced_api<K>(&self) -> kube::Result<api::Api<K>>
-    where
-        K: kube::Resource<Scope = k8s::openapi::NamespaceResourceScope>,
-        <K as kube::Resource>::DynamicType: Default,
-    {
-        let client = self.client()?;
-        let api = match &self.namespace {
-            Namespace::All => client.api(),
-            Namespace::Default => client.default_namespaced_api(),
-            Namespace::Namespace(namespace) => client.namespaced_api(namespace),
-        };
-        Ok(api)
-    }
-
     pub fn full_name<K>(&self, k: &K) -> String
     where
         K: kube::Resource + kube::ResourceExt,
@@ -336,6 +212,10 @@ impl Kubeapi {
 }
 
 impl Kubeapi {
+    /// Create a `Kubeapi` instance configured to connect to a local Kubernetes cluster.
+    /// This is useful for development and testing purposes.
+    /// It assumes the cluster is accessible at `http://localhost:6443`.
+    /// Note: This instance does not load any kubeconfig file and uses default settings.
     pub fn local() -> Self {
         let config = kube::Config::new("http://localhost:6443".parse().unwrap());
         Self {

@@ -10,3 +10,9 @@ impl Base64Decode for ByteString {
         Ok(String::from_utf8_lossy(&decoded).to_string())
     }
 }
+
+impl Base64Decode<Vec<u8>> for ByteString {
+    fn decode(self) -> Result<Vec<u8>, base64::DecodeError> {
+        BASE64_STANDARD.decode(&self.0)
+    }
+}

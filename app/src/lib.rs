@@ -8,6 +8,7 @@ use k8s_openapi_ext as k8s;
 use kube::ResourceExt;
 use kube::api;
 use kube::discovery;
+use serde_json as json;
 use tracing::debug;
 use tracing::info;
 use tracing::trace;
@@ -18,6 +19,7 @@ use k8s::corev1;
 use k8s::metav1;
 use k8s::rbacv1;
 
+use rkubectl_ext as ext;
 use rkubectl_kubeapi::Cascade;
 use rkubectl_kubeapi::DryRun;
 use rkubectl_kubeapi::KubeConfigOptions;

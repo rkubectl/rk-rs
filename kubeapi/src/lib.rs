@@ -18,6 +18,7 @@ use serde_json as json;
 use serde_yaml as yaml;
 use tracing::debug;
 use tracing::error;
+use tracing::info;
 use tracing::trace;
 
 use k8s::authenticationv1;
@@ -92,7 +93,7 @@ impl Kubeapi {
 
     pub fn debug(&self, item: impl fmt::Debug) {
         if self.debug {
-            println!("{item:?}")
+            info!("{item:?}")
         }
     }
 
@@ -110,7 +111,7 @@ impl Kubeapi {
         let path = self.cache_path()?;
         let cache = self.cache.try_load(path);
         if self.debug {
-            println!("Loading cache took {:?}", cache.took());
+            info!("Loading cache took {:?}", cache.took());
         }
         Ok(Self { cache, ..self })
     }
@@ -155,14 +156,17 @@ impl Kubeapi {
         Ok(resources)
     }
 
-    pub async fn api_versions(&self) -> kube::Result<()> {
-        self.server_api_groups()
+    pub async fn api_versions(
+        &self,
+    ) -> kube::Result<impl Iterator<Item = metav1::GroupVersionForDiscovery>> {
+        let items = self
+            .server_api_groups()
             .await?
             .groups
-            .iter()
-            .flat_map(|group| group.versions.iter())
-            .for_each(|version| println!("{}", version.group_version));
-        Ok(())
+            .into_iter()
+            .flat_map(|group| group.versions.into_iter());
+
+        Ok(items)
     }
 
     pub fn dynamic_object_api(
@@ -190,13 +194,13 @@ impl Kubeapi {
     {
         if self.debug {
             let k = yaml::to_string(k).unwrap_or_default();
-            println!("{k}");
+            info!("{k}");
         }
     }
 
     pub fn inspect_err(&self, err: &kube::Error) {
         if self.debug {
-            println!("{err:?}");
+            info!("{err:?}");
         }
     }
 

@@ -99,22 +99,40 @@ impl Command {
     }
 
     async fn api_versions(&self, context: &Context) -> RkResult<()> {
-        let _output = context.output_deprecated();
-        context.kubeapi().api_versions().await?;
+        let ui = context.ui();
+        context
+            .kubeapi()
+            .api_versions()
+            .await?
+            .for_each(|version| ui.print(version.group_version));
         Ok(())
     }
 
     async fn features(&self, context: &Context) -> RkResult<()> {
         let output = context.output_deprecated();
         let features = context.kubeapi().features().await?;
-        let show_params = default();
-        println!("{}", features.output(false, &show_params, output));
+        let show_params: ShowParams = default();
+        context
+            .ui()
+            .print(features.output(false, &show_params, output));
         Ok(())
     }
 
     async fn info(&self, context: &Context) -> RkResult<()> {
-        let _output = context.output_deprecated();
-        context.kubeapi().info().await?;
+        let info = context.kubeapi().info().await?;
+        let ui = context.ui();
+
+        ui.print(format!("build date:     {}", info.build_date));
+        ui.print(format!("compiler:       {}", info.compiler));
+        ui.print(format!("compiler:       {}", info.compiler));
+        ui.print(format!("git_commit:     {}", info.git_commit));
+        ui.print(format!("git_tree_state: {}", info.git_tree_state));
+        ui.print(format!("git_version:    {}", info.git_version));
+        ui.print(format!("go_version:     {}", info.go_version));
+        ui.print(format!("major:          {}", info.major));
+        ui.print(format!("minor:          {}", info.minor));
+        ui.print(format!("platform:       {}", info.platform));
+
         Ok(())
     }
 

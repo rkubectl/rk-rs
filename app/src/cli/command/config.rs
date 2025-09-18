@@ -48,14 +48,34 @@ pub enum Config {
 impl Config {
     pub fn exec(self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
+        let ui = context.ui();
         match self {
-            Self::CurrentContext => kubeapi.current_context()?,
+            Self::CurrentContext => {
+                if let Some(ctx) = kubeapi.current_context() {
+                    ui.print(ctx);
+                }
+            }
             Self::DeleteCluster => Err(RkError::todo())?,
             Self::DeleteContext => Err(RkError::todo())?,
             Self::DeleteUser => Err(RkError::todo())?,
-            Self::GetClusters => kubeapi.get_clusters()?,
-            Self::GetContexts => kubeapi.get_contexts()?,
-            Self::GetUsers => kubeapi.get_users()?,
+            Self::GetClusters => {
+                kubeapi
+                    .get_clusters()
+                    .iter()
+                    .for_each(|cluster| ui.print(&cluster.name));
+            }
+            Self::GetContexts => {
+                kubeapi
+                    .get_contexts()
+                    .iter()
+                    .for_each(|ctx| ui.print(&ctx.name));
+            }
+            Self::GetUsers => {
+                kubeapi
+                    .get_users()
+                    .iter()
+                    .for_each(|auth| ui.print(&auth.name));
+            }
             Self::RenameContext => Err(RkError::todo())?,
             Self::Set => Err(RkError::todo())?,
             Self::SetCluster => Err(RkError::todo())?,
@@ -63,7 +83,11 @@ impl Config {
             Self::SetCredentials => Err(RkError::todo())?,
             Self::Unset => Err(RkError::todo())?,
             Self::UseContext => Err(RkError::todo())?,
-            Self::View => kubeapi.view()?,
+            Self::View => {
+                if let Ok(text) = kubeapi.view() {
+                    ui.print(text);
+                }
+            }
         }
         Ok(())
     }

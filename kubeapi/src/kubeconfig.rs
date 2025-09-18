@@ -31,42 +31,24 @@ impl Kubeapi {
             .map(|config| (config, kubeconfig))
     }
 
-    pub fn current_context(&self) -> kube::Result<()> {
-        println!(
-            "{}",
-            self.kubeconfig
-                .current_context
-                .as_deref()
-                .unwrap_or_default()
-        );
-        Ok(())
+    pub fn current_context(&self) -> Option<&str> {
+        self.kubeconfig.current_context.as_deref()
     }
 
-    pub fn get_clusters(&self) -> kube::Result<()> {
+    pub fn get_clusters(&self) -> &[kube::config::NamedCluster] {
         self.clusters()
-            .iter()
-            .for_each(|cluster| println!("{}", cluster.name));
-        Ok(())
     }
 
-    pub fn get_contexts(&self) -> kube::Result<()> {
+    pub fn get_contexts(&self) -> &[kube::config::NamedContext] {
         self.contexts()
-            .iter()
-            .for_each(|ctx| println!("{}", ctx.name));
-        Ok(())
     }
 
-    pub fn get_users(&self) -> kube::Result<()> {
+    pub fn get_users(&self) -> &[kube::config::NamedAuthInfo] {
         self.authinfo()
-            .iter()
-            .for_each(|ai| println!("{}", ai.name));
-        Ok(())
     }
 
-    pub fn view(&self) -> kube::Result<()> {
+    pub fn view(&self) -> yaml::Result<String> {
         yaml::to_string(&self.kubeconfig)
-            .map(|config| println!("{config}"))
-            .map_err(|_| kube::Error::LinesCodecMaxLineLengthExceeded)
     }
 
     fn clusters(&self) -> &[NamedCluster] {

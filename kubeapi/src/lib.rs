@@ -52,7 +52,7 @@ mod version;
 
 /// Kubeapi is a higher-level Kubernetes API client that provides additional features
 /// such as caching, namespace management, and easier access to common Kubernetes resources.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Kubeapi {
     config: kube::Config,
     kubeconfig: kube::config::Kubeconfig,

@@ -41,7 +41,7 @@ impl Ui {
     where
         T: Show,
     {
-        item.output(self.namespace, params, &self.output);
+        self.print(item.output(self.namespace, params, &self.output));
     }
 
     pub fn print(&self, text: impl fmt::Display) {

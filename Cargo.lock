@@ -863,9 +863,9 @@ dependencies = [
 
 [[package]]
 name = "k8s-openapi-ext"
-version = "0.26.0"
+version = "0.26.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dce11891420d8e7ef49b6d87a0d2c4d305ea27d0b3e603c59c9a96bf13f82812"
+checksum = "a2c0bf0f5ec491d14a79815cb99574a1d21d768449a4103e2a518a483f37255f"
 dependencies = [
  "base64",
  "chrono",
@@ -1525,9 +1525,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.31"
+version = "0.23.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0ebcbd2f03de0fc1122ad9bb24b127a5a6cd51d72604a3f3c50ac459762b6cc"
+checksum = "cd3c25631629d034ce7cd9940adc9d45762d46de2b0f57193c4443b92c6d4d40"
 dependencies = [
  "aws-lc-rs",
  "log",

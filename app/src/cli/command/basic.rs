@@ -24,7 +24,7 @@ pub enum Basic {
 }
 
 impl Basic {
-    async fn exec(self, context: &Context) -> RkResult<()> {
+    pub async fn exec(self, context: &Context) -> RkResult<()> {
         match self {
             Self::Create(create) => create.exec(context).await,
             Self::Expose => Err(RkError::todo()),

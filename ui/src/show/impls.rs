@@ -11,6 +11,7 @@ mod namespace;
 mod node;
 mod objectlist;
 mod pod;
+mod service;
 mod subjectreview;
 
 trait StripManagedFields<'a>: Clone + 'a {

@@ -17,8 +17,10 @@ pub use b64::Base64Decode;
 pub use b64::Base64Encode;
 pub use namespace::NamespaceGetExt2;
 pub use pod::PodGetExt2;
+pub use service::ServiceGetExt2;
 
 mod apiresource;
 mod b64;
 mod namespace;
 mod pod;
+mod service;

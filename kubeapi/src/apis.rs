@@ -22,6 +22,11 @@ impl Kubeapi {
         self.namespaced_api()
     }
 
+    /// `corev1::Service`
+    pub fn services(&self) -> kube::Result<api::Api<corev1::Service>> {
+        self.namespaced_api()
+    }
+
     /// `corev1::ComponentStatus`
     pub fn componentstatuses(&self) -> kube::Result<api::Api<corev1::ComponentStatus>> {
         self.cluster_api()

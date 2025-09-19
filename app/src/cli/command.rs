@@ -13,8 +13,12 @@ use super::*;
 pub use api_resource::ApiResource;
 pub use api_resource::ApiResources;
 pub use auth::Auth;
+pub use basic::Basic;
 pub use basic::Create;
 pub use basic::CreateResource;
+pub use cluster::ClusterInfo;
+pub use cluster::ClusterManagement;
+pub use cluster::Dump;
 pub use config::Config;
 pub use delete::Delete;
 pub use get::Get;
@@ -24,6 +28,7 @@ pub use secret::Secret;
 mod api_resource;
 mod auth;
 mod basic;
+mod cluster;
 mod config;
 mod delete;
 mod get;
@@ -188,46 +193,6 @@ impl Deploy {
             Self::Rollout => Err(RkError::todo()),
             Self::Scale => Err(RkError::todo()),
             Self::Autoscale => Err(RkError::todo()),
-        }
-    }
-}
-
-/// Cluster Management Commands
-#[derive(Clone, Debug, Subcommand)]
-pub enum ClusterManagement {
-    /// Modify certificate resources
-    Certificate,
-
-    /// Display cluster information
-    ClusterInfo,
-
-    /// Display resource (CPU/memory) usage
-    Top,
-
-    /// Mark node as unschedulable
-    Cordon,
-
-    /// Mark node as schedulable
-    Uncordon,
-
-    /// Drain node in preparation for maintenance
-    Drain,
-
-    /// Update the taints on one or more nodes
-    Taint,
-}
-
-impl ClusterManagement {
-    async fn exec(self, context: &Context) -> RkResult<()> {
-        context.ui().not_implemented(&self);
-        match self {
-            Self::Certificate => Err(RkError::todo()),
-            Self::ClusterInfo => Err(RkError::todo()),
-            Self::Top => Err(RkError::todo()),
-            Self::Cordon => Err(RkError::todo()),
-            Self::Uncordon => Err(RkError::todo()),
-            Self::Drain => Err(RkError::todo()),
-            Self::Taint => Err(RkError::todo()),
         }
     }
 }

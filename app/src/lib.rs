@@ -1,5 +1,6 @@
 use std::fs;
 use std::io;
+use std::iter;
 use std::path::Path;
 use std::path::PathBuf;
 use std::str;

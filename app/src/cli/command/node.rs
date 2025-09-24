@@ -4,13 +4,20 @@ use std::collections::BTreeSet;
 use super::*;
 
 use image::ImageInfo;
+use resources::Resources;
 
 mod image;
+mod resources;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Node {
     Info,
     ListImages,
+    Resources {
+        /// Also show allocatable resources
+        #[arg(short, long)]
+        allocatable: bool,
+    },
 }
 
 impl Node {
@@ -18,12 +25,12 @@ impl Node {
         match self {
             Self::Info => self.info(context).await,
             Self::ListImages => self.list_images(context).await,
+            Self::Resources { allocatable } => self.resources(context, *allocatable).await,
         }
     }
 
     pub async fn info(&self, context: &Context) -> RkResult<()> {
-        let kubeapi = context.kubeapi();
-        for node in self.nodes(kubeapi).await? {
+        for node in self.nodes(context).await? {
             let name = node.name_any();
             if let Some(info) = node_info(node) {
                 let info = [
@@ -52,8 +59,7 @@ impl Node {
     }
 
     pub async fn list_images(&self, context: &Context) -> RkResult<()> {
-        let kubeapi = context.kubeapi();
-        for node in self.nodes(kubeapi).await? {
+        for node in self.nodes(context).await? {
             println!("\n{}\n", node.name_any());
             node.status
                 .unwrap_or_default()
@@ -67,7 +73,16 @@ impl Node {
         Ok(())
     }
 
-    async fn nodes(&self, kubeapi: &Kubeapi) -> kube::Result<Vec<corev1::Node>> {
+    async fn resources(&self, context: &Context, allocatable: bool) -> RkResult<()> {
+        let nodes = self.nodes(context).await?;
+        let resources = Resources::from_nodes(nodes, allocatable);
+        context.ui().show(resources, &default());
+
+        Ok(())
+    }
+
+    async fn nodes(&self, context: &Context) -> kube::Result<Vec<corev1::Node>> {
+        let kubeapi = context.kubeapi();
         let lp = kubeapi.list_params();
         kubeapi.nodes()?.list(&lp).await.map(|list| list.items)
     }

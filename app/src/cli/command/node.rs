@@ -11,12 +11,18 @@ mod resources;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Node {
+    /// Show node info.
     Info,
+    /// List node images.
+    #[command(visible_aliases = ["images", "img"])]
     ListImages,
+
+    /// Show node resources (allocatable by default or capacity).
+    #[command(visible_aliases = ["resource", "res"])]
     Resources {
-        /// Also show allocatable resources
+        /// Show node capacity
         #[arg(short, long)]
-        allocatable: bool,
+        capacity: bool,
     },
 }
 
@@ -25,7 +31,7 @@ impl Node {
         match self {
             Self::Info => self.info(context).await,
             Self::ListImages => self.list_images(context).await,
-            Self::Resources { allocatable } => self.resources(context, *allocatable).await,
+            Self::Resources { capacity } => self.resources(context, *capacity).await,
         }
     }
 
@@ -73,9 +79,9 @@ impl Node {
         Ok(())
     }
 
-    async fn resources(&self, context: &Context, allocatable: bool) -> RkResult<()> {
+    async fn resources(&self, context: &Context, capacity: bool) -> RkResult<()> {
         let nodes = self.nodes(context).await?;
-        let resources = Resources::from_nodes(nodes, allocatable);
+        let resources = Resources::from_nodes(nodes, capacity);
         context.ui().show(resources, &default());
 
         Ok(())

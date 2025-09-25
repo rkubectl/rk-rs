@@ -9,24 +9,24 @@ pub(super) struct Resources {
 }
 
 impl Resources {
-    pub(super) fn from_nodes(nodes: Vec<corev1::Node>, allocatable: bool) -> Vec<Self> {
+    pub(super) fn from_nodes(nodes: Vec<corev1::Node>, capacity: bool) -> Vec<Self> {
         let resources = nodes.iter().filter_map(|node| {
-            if allocatable {
-                Self::allocatable(node)
-            } else {
+            if capacity {
                 Self::capacity(node)
+            } else {
+                Self::allocatable(node)
             }
         });
         let resources = resource_names(resources);
         nodes
             .into_iter()
-            .map(|node| Self::from_node(node, allocatable, &resources))
+            .map(|node| Self::from_node(node, capacity, &resources))
             .collect()
     }
 
-    fn from_node(node: corev1::Node, allocatable: bool, resources: &[String]) -> Self {
+    fn from_node(node: corev1::Node, capacity: bool, resources: &[String]) -> Self {
         let name = node.name_any();
-        let values = Self::node_resources(node, allocatable, resources);
+        let values = Self::node_resources(node, capacity, resources);
         let resources = iter::once("NODE".to_string())
             .chain(resources.iter().cloned())
             .collect();
@@ -34,12 +34,12 @@ impl Resources {
         Self { resources, values }
     }
 
-    fn node_resources(node: corev1::Node, allocatable: bool, names: &[String]) -> Vec<String> {
+    fn node_resources(node: corev1::Node, capacity: bool, names: &[String]) -> Vec<String> {
         let status = node.status.unwrap_or_default();
-        let mut resources = if allocatable {
-            status.allocatable.unwrap_or_default()
-        } else {
+        let mut resources = if capacity {
             status.capacity.unwrap_or_default()
+        } else {
+            status.allocatable.unwrap_or_default()
         };
 
         names

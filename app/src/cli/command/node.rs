@@ -39,25 +39,8 @@ impl Node {
         for node in self.nodes(context).await? {
             let name = node.name_any();
             if let Some(info) = node_info(node) {
-                let info = [
-                    ("Architecture", info.architecture),
-                    ("Boot ID", info.boot_id),
-                    ("Container Runtime Version", info.container_runtime_version),
-                    ("Kernel Version", info.kernel_version),
-                    ("Kube Proxy Version", info.kube_proxy_version),
-                    ("Kubelet Version", info.kubelet_version),
-                    ("Machine ID", info.machine_id),
-                    ("Operating System", info.operating_system),
-                    ("OS Image", info.os_image),
-                    ("System UUID", info.system_uuid),
-                ]
-                .into_iter()
-                .collect::<BTreeMap<_, _>>();
-
-                let mut table = tabled::builder::Builder::from(info).build();
-                table.with(tabled::settings::Style::blank());
-                println!("\n{name}\n");
-                println!("{table}");
+                context.ui().print(format!("\n{name}"));
+                context.ui().show(info, &default());
             }
         }
 

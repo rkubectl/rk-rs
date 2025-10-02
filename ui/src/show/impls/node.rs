@@ -35,3 +35,29 @@ impl Show for corev1::Node {
         todo!()
     }
 }
+
+impl Show for corev1::NodeSystemInfo {
+    fn header(&self, _output: &OutputFormat) -> Vec<String> {
+        todo!()
+    }
+
+    fn data(&self, _params: &ShowParams, _output: &OutputFormat) -> Vec<String> {
+        todo!()
+    }
+
+    fn json(&self, _params: &ShowParams) -> String {
+        json::to_string(self).unwrap_or_default()
+    }
+
+    fn yaml(&self, _params: &ShowParams) -> String {
+        yaml::to_string(self).unwrap_or_default()
+    }
+
+    fn name(&self) -> String {
+        todo!()
+    }
+
+    fn normal(&self, _params: &ShowParams, _output: &OutputFormat) -> tabled::Table {
+        convert::serialize_to_title_case_table(self).unwrap_or_default()
+    }
+}

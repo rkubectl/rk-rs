@@ -105,6 +105,7 @@ pub trait Show {
     fn table_settings(&self) -> TableSettings {
         Settings::empty()
             .with(Style::blank())
+            // .with(Padding::zero())
             .with(Padding::new(0, 2, 0, 0))
     }
 }

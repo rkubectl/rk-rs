@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fmt;
 
 use k8s_openapi_ext as k8s;
@@ -21,6 +22,7 @@ use k8s::metav1;
 pub use show::Show;
 pub use show::ShowParams;
 
+mod convert;
 mod show;
 
 #[derive(Debug)]

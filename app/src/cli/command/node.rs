@@ -20,7 +20,7 @@ pub enum Node {
     /// Show node resources (allocatable by default or capacity).
     #[command(visible_aliases = ["resource", "res"])]
     Resources {
-        /// Show node capacity
+        /// Show node capacity instead of allocatable resources.
         #[arg(short, long)]
         capacity: bool,
     },

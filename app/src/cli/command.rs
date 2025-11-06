@@ -24,6 +24,8 @@ pub use delete::Delete;
 pub use get::Get;
 pub use node::Node;
 pub use secret::Secret;
+pub use troubleshoot::Debug;
+pub use troubleshoot::TroubleshootingDebugging;
 
 mod api_resource;
 mod auth;
@@ -34,6 +36,7 @@ mod delete;
 mod get;
 mod node;
 mod secret;
+mod troubleshoot;
 
 #[derive(Clone, Debug, Subcommand)]
 pub enum Command {
@@ -50,6 +53,9 @@ pub enum Command {
 
     #[command(flatten)]
     ClusterManagement(ClusterManagement),
+
+    #[command(flatten)]
+    TroubleshootingDebugging(TroubleshootingDebugging),
 
     /// Print the supported API resources on the server.
     ApiResources(ApiResources),
@@ -91,6 +97,7 @@ impl Command {
             Self::Intermediate(intermediate) => intermediate.exec(context).await,
             Self::Deploy(deploy) => deploy.exec(context).await,
             Self::ClusterManagement(cluster_management) => cluster_management.exec(context).await,
+            Self::TroubleshootingDebugging(tsd) => tsd.exec(context).await,
             Self::ApiResources(api_resources) => api_resources.exec(context).await,
             Self::Auth(auth) => auth.exec(context).await,
             Self::ApiVersions => self.api_versions(context).await,

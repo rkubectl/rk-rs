@@ -13,11 +13,13 @@ pub use command::Command;
 pub use command::Config;
 pub use command::Create;
 pub use command::CreateResource;
+pub use command::Debug;
 pub use command::Delete;
 pub use command::Dump;
 pub use command::Get;
 pub use command::Node;
 pub use command::Secret;
+pub use command::TroubleshootingDebugging;
 
 use context::Context;
 

@@ -1,23 +1,23 @@
 use super::*;
 
 impl Show for authenticationv1::SelfSubjectReview {
-    fn header(&self, _output: &OutputFormat) -> Vec<String> {
+    fn header(&self, _output: OutputFormat) -> Vec<String> {
         ["ATTRIBUTE", "VALUE"]
             .iter()
             .map(ToString::to_string)
             .collect()
     }
 
-    fn data(&self, _params: &ShowParams, _output: &OutputFormat) -> Vec<String> {
+    fn data(&self, _params: ShowParams, _output: OutputFormat) -> Vec<String> {
         unreachable!()
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         json::to_string_pretty(&data).unwrap_or_default()
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         yaml::to_string(&data).unwrap_or_default()
     }
@@ -26,7 +26,7 @@ impl Show for authenticationv1::SelfSubjectReview {
         unreachable!()
     }
 
-    fn normal(&self, _params: &ShowParams, output: &OutputFormat) -> Table {
+    fn normal(&self, _params: ShowParams, output: OutputFormat) -> Table {
         let iter = [
             Some(self.header(output)),
             username(self),

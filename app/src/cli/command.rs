@@ -127,7 +127,7 @@ impl Command {
         let show_params = default();
         context
             .ui()
-            .print(features.output(false, &show_params, output));
+            .print(features.output(false, show_params, output));
         Ok(())
     }
 

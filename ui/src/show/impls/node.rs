@@ -1,7 +1,7 @@
 use super::*;
 
 impl Show for corev1::Node {
-    fn header(&self, output: &OutputFormat) -> Vec<String> {
+    fn header(&self, output: OutputFormat) -> Vec<String> {
         let header = match output {
             OutputFormat::Normal => ["NAMESPACE", "NAME"].as_slice(),
             OutputFormat::Wide => ["NAMESPACE", "NAME", "AGE"].as_slice(),
@@ -10,7 +10,7 @@ impl Show for corev1::Node {
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
+    fn data(&self, params: ShowParams, output: OutputFormat) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
         let name = name(self, params);
         let age = self.creation_timestamp().map(age).unwrap_or_default();
@@ -21,12 +21,12 @@ impl Show for corev1::Node {
         }
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         yaml::to_string(&data).unwrap_or_default()
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         json::to_string_pretty(&data).unwrap_or_default()
     }
@@ -37,19 +37,19 @@ impl Show for corev1::Node {
 }
 
 impl Show for corev1::NodeSystemInfo {
-    fn header(&self, _output: &OutputFormat) -> Vec<String> {
+    fn header(&self, _output: OutputFormat) -> Vec<String> {
         todo!()
     }
 
-    fn data(&self, _params: &ShowParams, _output: &OutputFormat) -> Vec<String> {
+    fn data(&self, _params: ShowParams, _output: OutputFormat) -> Vec<String> {
         todo!()
     }
 
-    fn json(&self, _params: &ShowParams) -> String {
+    fn json(&self, _params: ShowParams) -> String {
         json::to_string(self).unwrap_or_default()
     }
 
-    fn yaml(&self, _params: &ShowParams) -> String {
+    fn yaml(&self, _params: ShowParams) -> String {
         yaml::to_string(self).unwrap_or_default()
     }
 
@@ -57,7 +57,7 @@ impl Show for corev1::NodeSystemInfo {
         todo!()
     }
 
-    fn normal(&self, _params: &ShowParams, _output: &OutputFormat) -> tabled::Table {
+    fn normal(&self, _params: ShowParams, _output: OutputFormat) -> tabled::Table {
         convert::serialize_to_title_case_table(self).unwrap_or_default()
     }
 }

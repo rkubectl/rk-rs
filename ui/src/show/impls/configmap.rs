@@ -1,7 +1,7 @@
 use super::*;
 
 impl Show for corev1::ConfigMap {
-    fn header(&self, output: &OutputFormat) -> Vec<String> {
+    fn header(&self, output: OutputFormat) -> Vec<String> {
         let header = match output {
             OutputFormat::Normal => ["NAMESPACE", "NAME", "DATA", "AGE"].as_slice(),
             OutputFormat::Wide => ["NAMESPACE", "NAME", "DATA", "AGE"].as_slice(),
@@ -10,7 +10,7 @@ impl Show for corev1::ConfigMap {
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
+    fn data(&self, params: ShowParams, output: OutputFormat) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
         let name = name(self, params);
         let data = self
@@ -32,12 +32,12 @@ impl Show for corev1::ConfigMap {
         }
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         yaml::to_string(&data).unwrap_or_default()
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         json::to_string_pretty(&data).unwrap_or_default()
     }

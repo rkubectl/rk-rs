@@ -90,27 +90,27 @@ fn resource_names<'a>(
 }
 
 impl Show for Resources {
-    fn header(&self, _output: &OutputFormat) -> Vec<String> {
+    fn header(&self, _output: OutputFormat) -> Vec<String> {
         self.resources.clone()
     }
 
-    fn data(&self, _params: &ShowParams, _output: &OutputFormat) -> Vec<String> {
+    fn data(&self, _params: ShowParams, _output: OutputFormat) -> Vec<String> {
         self.values.clone()
     }
 
-    fn normal(&self, _params: &ShowParams, _output: &OutputFormat) -> tabled::Table {
+    fn normal(&self, _params: ShowParams, _output: OutputFormat) -> tabled::Table {
         todo!("Not supported on Resources for normal")
     }
 
-    fn wide(&self, _params: &ShowParams, _output: &OutputFormat) -> tabled::Table {
+    fn wide(&self, _params: ShowParams, _output: OutputFormat) -> tabled::Table {
         todo!("Not supported on Resources for wide")
     }
 
-    fn yaml(&self, _params: &ShowParams) -> String {
+    fn yaml(&self, _params: ShowParams) -> String {
         todo!("Not supported on Resources for yaml")
     }
 
-    fn json(&self, _params: &ShowParams) -> String {
+    fn json(&self, _params: ShowParams) -> String {
         todo!("Not supported on Resources for json")
     }
 

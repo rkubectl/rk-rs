@@ -43,7 +43,7 @@ impl ConfigMap {
             // context.ui().show(items[0].clone(), &params);
             println!("{}", items[0].1);
         } else {
-            context.ui().show(items, &params);
+            context.ui().show(items, params);
             // decode_string_items(items);
         }
 

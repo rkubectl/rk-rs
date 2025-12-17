@@ -17,7 +17,7 @@ impl WhoAmI {
             .inspect_err(|err| kubeapi.inspect_err(err))?;
         let show_params = default();
         let output = context.output_deprecated();
-        println!("{}", ssr.output(false, &show_params, output));
+        println!("{}", ssr.output(false, show_params, output));
         Ok(())
     }
 }

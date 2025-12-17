@@ -1,7 +1,7 @@
 use super::*;
 
 impl Show for corev1::ComponentStatus {
-    fn header(&self, output: &OutputFormat) -> Vec<String> {
+    fn header(&self, output: OutputFormat) -> Vec<String> {
         let header = match output {
             OutputFormat::Normal | OutputFormat::Wide => {
                 ["NAME", "STATUS", "MESSAGE", "ERROR"].as_slice()
@@ -11,7 +11,7 @@ impl Show for corev1::ComponentStatus {
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
+    fn data(&self, params: ShowParams, output: OutputFormat) -> Vec<String> {
         let name = name(self, params);
 
         let (status, message, error) = if let Some(healthy) = self.healthy() {
@@ -36,12 +36,12 @@ impl Show for corev1::ComponentStatus {
         }
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         yaml::to_string(&data).unwrap_or_default()
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         json::to_string_pretty(&data).unwrap_or_default()
     }

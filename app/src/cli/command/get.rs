@@ -45,7 +45,7 @@ impl Get {
             for resource in resources {
                 let data = resource.get(kubeapi).await?;
                 let output = context.output_deprecated();
-                println!("{}", data.output(namespace, &params, output));
+                println!("{}", data.output(namespace, params, output));
             }
         }
         Ok(())

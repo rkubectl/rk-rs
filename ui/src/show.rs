@@ -17,18 +17,18 @@ mod params;
 type TableSettings = Settings<Settings<Settings, Style<(), (), (), (), (), On, 0, 0>>, Padding>;
 
 pub trait Show {
-    fn header(&self, output: &OutputFormat) -> Vec<String>;
-    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String>;
-    fn json(&self, params: &ShowParams) -> String;
-    fn yaml(&self, params: &ShowParams) -> String;
+    fn header(&self, output: OutputFormat) -> Vec<String>;
+    fn data(&self, params: ShowParams, output: OutputFormat) -> Vec<String>;
+    fn json(&self, params: ShowParams) -> String;
+    fn yaml(&self, params: ShowParams) -> String;
     fn name(&self) -> String;
 
-    fn normal(&self, params: &ShowParams, output: &OutputFormat) -> Table {
+    fn normal(&self, params: ShowParams, output: OutputFormat) -> Table {
         tabled::builder::Builder::from_iter([self.header(output), self.data(params, output)])
             .build()
     }
 
-    fn wide(&self, params: &ShowParams, output: &OutputFormat) -> Table {
+    fn wide(&self, params: ShowParams, output: OutputFormat) -> Table {
         tabled::builder::Builder::from_iter([self.header(output), self.data(params, output)])
             .build()
     }
@@ -69,7 +69,7 @@ pub trait Show {
         todo!("This method is not supported yet")
     }
 
-    fn output(&self, namespace: bool, params: &ShowParams, output: &OutputFormat) -> String {
+    fn output(&self, namespace: bool, params: ShowParams, output: OutputFormat) -> String {
         match output {
             OutputFormat::Normal => {
                 let mut table = self.normal(params, output);
@@ -114,15 +114,15 @@ impl<T> Show for Vec<T>
 where
     T: Show,
 {
-    fn header(&self, output: &OutputFormat) -> Vec<String> {
+    fn header(&self, output: OutputFormat) -> Vec<String> {
         todo!("Not supported on Vec<T> for {output:?}")
     }
 
-    fn data(&self, _params: &ShowParams, output: &OutputFormat) -> Vec<String> {
+    fn data(&self, _params: ShowParams, output: OutputFormat) -> Vec<String> {
         todo!("Not supported on Vec<T> for {output:?}")
     }
 
-    fn normal(&self, params: &ShowParams, output: &OutputFormat) -> tabled::Table {
+    fn normal(&self, params: ShowParams, output: OutputFormat) -> tabled::Table {
         let header = self.first().map(|t| t.header(output));
         let data = self.iter().map(|t| t.data(params, output));
         let builder = header
@@ -132,7 +132,7 @@ where
         builder.build()
     }
 
-    fn wide(&self, params: &ShowParams, output: &OutputFormat) -> Table {
+    fn wide(&self, params: ShowParams, output: OutputFormat) -> Table {
         let header = self.first().map(|t| t.header(output));
         let data = self.iter().map(|t| t.data(params, output));
         let builder = header
@@ -142,14 +142,14 @@ where
         builder.build()
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         self.iter()
             .map(|item| item.yaml(params))
             .collect::<Vec<_>>()
             .join("")
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         self.iter()
             .map(|item| item.json(params))
             .collect::<Vec<_>>()
@@ -161,7 +161,7 @@ where
     }
 }
 
-fn name<K>(object: &K, params: &ShowParams) -> String
+fn name<K>(object: &K, params: ShowParams) -> String
 where
     K: kube::Resource,
     K::DynamicType: Default,

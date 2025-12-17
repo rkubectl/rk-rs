@@ -76,7 +76,7 @@ impl ClusterInfo {
 
         iter::once(ClusterService::control_plane(&kubeapi))
             .chain(services)
-            .for_each(|svc| context.ui().show(svc, &default()));
+            .for_each(|svc| context.ui().show(svc, default()));
 
         Ok(())
     }
@@ -144,7 +144,7 @@ impl ClusterService {
 }
 
 impl Show for ClusterService {
-    fn output(&self, _namespace: bool, params: &ShowParams, output: &OutputFormat) -> String {
+    fn output(&self, _namespace: bool, params: ShowParams, output: OutputFormat) -> String {
         match output {
             OutputFormat::Normal => format!("{} is running on {}", self.name, self.url),
             OutputFormat::Json => self.json(params),
@@ -163,28 +163,28 @@ impl Show for ClusterService {
         }
     }
 
-    fn header(&self, output: &OutputFormat) -> Vec<String> {
+    fn header(&self, output: OutputFormat) -> Vec<String> {
         self.svc
             .as_ref()
             .map(|svc| svc.header(output))
             .unwrap_or_default()
     }
 
-    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
+    fn data(&self, params: ShowParams, output: OutputFormat) -> Vec<String> {
         self.svc
             .as_ref()
             .map(|svc| svc.data(params, output))
             .unwrap_or_default()
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         self.svc
             .as_ref()
             .map(|svc| svc.json(params))
             .unwrap_or_default()
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         self.svc
             .as_ref()
             .map(|svc| svc.yaml(params))

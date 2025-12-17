@@ -19,7 +19,7 @@ impl Context {
         &self.ui
     }
 
-    pub fn output_deprecated(&self) -> &OutputFormat {
+    pub fn output_deprecated(&self) -> OutputFormat {
         self.ui.output_deprecated()
     }
 }

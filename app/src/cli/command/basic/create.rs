@@ -121,7 +121,7 @@ impl Create {
         let namespace = kubeapi.show_namespace();
         let params = self.params();
         let output = context.output_deprecated();
-        println!("{}", created.output(namespace, &params, output));
+        println!("{}", created.output(namespace, params, output));
         Ok(())
     }
 

@@ -1,7 +1,7 @@
 use super::*;
 
 impl Show for corev1::Pod {
-    fn header(&self, output: &OutputFormat) -> Vec<String> {
+    fn header(&self, output: OutputFormat) -> Vec<String> {
         let header = match output {
             OutputFormat::Normal => {
                 ["NAMESPACE", "NAME", "READY", "STATUS", "RESTARTS", "AGE"].as_slice()
@@ -14,7 +14,7 @@ impl Show for corev1::Pod {
         header.iter().map(ToString::to_string).collect()
     }
 
-    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
+    fn data(&self, params: ShowParams, output: OutputFormat) -> Vec<String> {
         let namespace = self.namespace().unwrap_or_default();
         let name = name(self, params);
         let total = self.total_containers();
@@ -30,12 +30,12 @@ impl Show for corev1::Pod {
         }
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         yaml::to_string(&data).unwrap_or_default()
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         let data = self.maybe_strip_managed_fields(params);
         json::to_string_pretty(&data).unwrap_or_default()
     }

@@ -15,9 +15,7 @@ impl WhoAmI {
             .await
             .inspect(|k| kubeapi.inspect(k))
             .inspect_err(|err| kubeapi.inspect_err(err))?;
-        let show_params = default();
-        let output = context.output_deprecated();
-        println!("{}", ssr.output(false, show_params, output));
+        context.show(ssr);
         Ok(())
     }
 }

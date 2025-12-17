@@ -39,8 +39,8 @@ impl Node {
         for node in self.nodes(context).await? {
             let name = node.name_any();
             if let Some(info) = node_info(node) {
-                context.ui().print(format!("\n{name}"));
-                context.ui().show(info, default());
+                context.print_deprecated(format!("\n{name}"));
+                context.show(info);
             }
         }
 
@@ -65,7 +65,7 @@ impl Node {
     async fn resources(&self, context: &Context, capacity: bool) -> RkResult<()> {
         let nodes = self.nodes(context).await?;
         let resources = Resources::from_nodes(nodes, capacity);
-        context.ui().show(resources, default());
+        context.show(resources);
 
         Ok(())
     }

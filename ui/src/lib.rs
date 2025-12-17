@@ -29,6 +29,7 @@ mod show;
 pub struct Ui {
     namespace: bool,
     output: OutputFormat,
+    params: ShowParams,
 }
 
 impl Ui {
@@ -36,14 +37,19 @@ impl Ui {
         Self {
             namespace: true,
             output,
+            params: ShowParams::default(),
         }
     }
 
-    pub fn show<T>(&self, item: T, params: ShowParams)
+    pub fn with_params(self, params: ShowParams) -> Self {
+        Self { params, ..self }
+    }
+
+    pub fn show<T>(&self, item: T)
     where
         T: Show,
     {
-        self.print(item.output(self.namespace, params, self.output));
+        self.print(item.output(self.namespace, self.params, self.output));
     }
 
     pub fn print(&self, text: impl fmt::Display) {

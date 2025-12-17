@@ -29,10 +29,7 @@ impl CanI {
             .map_err(|_err| kube::Error::LinesCodecMaxLineLengthExceeded)?
             .ask(kubeapi, &self.verb)
             .await?;
-
-        let show_params = default();
-        let output = context.output_deprecated();
-        println!("{}", ssar.output(false, show_params, output));
+        context.show(ssar);
         Ok(())
     }
 }

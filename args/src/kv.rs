@@ -40,7 +40,7 @@ impl KeyValue<String> {
     }
 
     pub fn label_selector(&self) -> metav1::LabelSelector {
-        metav1::LabelSelector::new().match_labels([(&self.key, &self.value)])
+        metav1::LabelSelector::match_labels([(&self.key, &self.value)])
     }
 
     fn from_text(text: impl AsRef<str>) -> Result<Self, String> {

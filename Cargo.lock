@@ -1332,6 +1332,7 @@ name = "rkubectl-ext"
 version = "0.0.0-alpha.3"
 dependencies = [
  "base64",
+ "k8s-openapi",
  "k8s-openapi-ext",
  "kube",
 ]

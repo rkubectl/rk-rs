@@ -12,7 +12,6 @@ use super::*;
 
 pub use api_resource::ApiResource;
 pub use api_resource::ApiResources;
-pub use auth::Auth;
 pub use basic::Basic;
 pub use basic::Create;
 pub use basic::CreateResource;
@@ -24,11 +23,11 @@ pub use delete::Delete;
 pub use get::Get;
 pub use node::Node;
 pub use secret::Secret;
+pub use troubleshoot::Auth;
 pub use troubleshoot::Debug;
 pub use troubleshoot::TroubleshootingDebugging;
 
 mod api_resource;
-mod auth;
 mod basic;
 mod cluster;
 mod config;
@@ -59,10 +58,6 @@ pub enum Command {
 
     /// Print the supported API resources on the server.
     ApiResources(ApiResources),
-
-    /// Inspect authorization.
-    #[command(subcommand)]
-    Auth(Auth),
 
     /// Print the supported API versions on the server, in the form of "group/version".
     ApiVersions,
@@ -99,7 +94,6 @@ impl Command {
             Self::ClusterManagement(cluster_management) => cluster_management.exec(context).await,
             Self::TroubleshootingDebugging(tsd) => tsd.exec(context).await,
             Self::ApiResources(api_resources) => api_resources.exec(context).await,
-            Self::Auth(auth) => auth.exec(context).await,
             Self::ApiVersions => self.api_versions(context).await,
             Self::Config(config) => config.exec(context),
             Self::Features => self.features(context).await,

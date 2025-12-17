@@ -1,7 +1,9 @@
 use super::*;
 
+pub use auth::Auth;
 pub use debug::Debug;
 
+mod auth;
 mod debug;
 
 /// Troubleshooting and Debugging Commands
@@ -21,8 +23,11 @@ pub enum TroubleshootingDebugging {
     Proxy,
     /// Copy files and directories to and from containers
     Cp,
+
     /// Inspect authorization
-    Auth,
+    #[command(subcommand)]
+    Auth(Auth),
+
     /// Create debugging sessions for troubleshooting workloads and nodes
     Debug,
     /// List events
@@ -31,7 +36,6 @@ pub enum TroubleshootingDebugging {
 
 impl TroubleshootingDebugging {
     pub async fn exec(self, context: &Context) -> RkResult<()> {
-        context.ui().not_implemented(&self);
         match self {
             Self::Describe => Err(RkError::todo()),
             Self::Logs => Err(RkError::todo()),
@@ -40,7 +44,7 @@ impl TroubleshootingDebugging {
             Self::PortForward => Err(RkError::todo()),
             Self::Proxy => Err(RkError::todo()),
             Self::Cp => Err(RkError::todo()),
-            Self::Auth => Err(RkError::todo()),
+            Self::Auth(auth) => auth.exec(context).await,
             Self::Debug => Err(RkError::todo()),
             Self::Events => Err(RkError::todo()),
         }

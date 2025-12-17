@@ -112,46 +112,40 @@ impl Command {
     }
 
     async fn api_versions(&self, context: &Context) -> RkResult<()> {
-        let ui = context.ui();
         context
             .kubeapi()
             .api_versions()
             .await?
-            .for_each(|version| ui.print(version.group_version));
+            .for_each(|version| context.print_deprecated(version.group_version));
         Ok(())
     }
 
     async fn features(&self, context: &Context) -> RkResult<()> {
-        let output = context.output_deprecated();
         let features = context.kubeapi().features().await?;
-        let show_params = default();
-        context
-            .ui()
-            .print(features.output(false, show_params, output));
+        context.show(features);
         Ok(())
     }
 
     async fn info(&self, context: &Context) -> RkResult<()> {
         let info = context.kubeapi().info().await?;
-        let ui = context.ui();
 
-        ui.print(format!("build date:     {}", info.build_date));
-        ui.print(format!("compiler:       {}", info.compiler));
-        ui.print(format!("compiler:       {}", info.compiler));
-        ui.print(format!("git_commit:     {}", info.git_commit));
-        ui.print(format!("git_tree_state: {}", info.git_tree_state));
-        ui.print(format!("git_version:    {}", info.git_version));
-        ui.print(format!("go_version:     {}", info.go_version));
-        ui.print(format!("major:          {}", info.major));
-        ui.print(format!("minor:          {}", info.minor));
-        ui.print(format!("platform:       {}", info.platform));
+        context.print_deprecated(format!("build date:     {}", info.build_date));
+        context.print_deprecated(format!("compiler:       {}", info.compiler));
+        context.print_deprecated(format!("compiler:       {}", info.compiler));
+        context.print_deprecated(format!("git_commit:     {}", info.git_commit));
+        context.print_deprecated(format!("git_tree_state: {}", info.git_tree_state));
+        context.print_deprecated(format!("git_version:    {}", info.git_version));
+        context.print_deprecated(format!("go_version:     {}", info.go_version));
+        context.print_deprecated(format!("major:          {}", info.major));
+        context.print_deprecated(format!("minor:          {}", info.minor));
+        context.print_deprecated(format!("platform:       {}", info.platform));
 
         Ok(())
     }
 
     async fn version(&self, context: &Context) -> RkResult<()> {
         let text = context.kubeapi().version().await?;
-        context.ui().print(text);
+        context.print_deprecated(text);
         Ok(())
     }
 }
@@ -196,7 +190,7 @@ pub enum Deploy {
 
 impl Deploy {
     async fn exec(self, context: &Context) -> RkResult<()> {
-        context.ui().not_implemented(&self);
+        context.not_implemented(&self);
         match self {
             Self::Rollout => Err(RkError::todo()),
             Self::Scale => Err(RkError::todo()),

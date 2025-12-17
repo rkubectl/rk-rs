@@ -76,7 +76,7 @@ impl ClusterInfo {
 
         iter::once(ClusterService::control_plane(&kubeapi))
             .chain(services)
-            .for_each(|svc| context.ui().show(svc, default()));
+            .for_each(|svc| context.show(svc));
 
         Ok(())
     }
@@ -90,7 +90,7 @@ pub enum Dump {
 
 impl Dump {
     async fn exec(&self, context: &Context) -> RkResult<()> {
-        context.ui().not_implemented(self);
+        context.not_implemented(self);
         Ok(())
     }
 }

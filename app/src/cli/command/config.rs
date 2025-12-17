@@ -48,11 +48,10 @@ pub enum Config {
 impl Config {
     pub fn exec(self, context: &Context) -> RkResult<()> {
         let kubeapi = context.kubeapi();
-        let ui = context.ui();
         match self {
             Self::CurrentContext => {
                 if let Some(ctx) = kubeapi.current_context() {
-                    ui.print(ctx);
+                    context.print_deprecated(ctx);
                 }
             }
             Self::DeleteCluster => Err(RkError::todo())?,
@@ -62,19 +61,19 @@ impl Config {
                 kubeapi
                     .get_clusters()
                     .iter()
-                    .for_each(|cluster| ui.print(&cluster.name));
+                    .for_each(|cluster| context.print_deprecated(&cluster.name));
             }
             Self::GetContexts => {
                 kubeapi
                     .get_contexts()
                     .iter()
-                    .for_each(|ctx| ui.print(&ctx.name));
+                    .for_each(|ctx| context.print_deprecated(&ctx.name));
             }
             Self::GetUsers => {
                 kubeapi
                     .get_users()
                     .iter()
-                    .for_each(|auth| ui.print(&auth.name));
+                    .for_each(|auth| context.print_deprecated(&auth.name));
             }
             Self::RenameContext => Err(RkError::todo())?,
             Self::Set => Err(RkError::todo())?,
@@ -85,7 +84,7 @@ impl Config {
             Self::UseContext => Err(RkError::todo())?,
             Self::View => {
                 if let Ok(text) = kubeapi.view() {
-                    ui.print(text);
+                    context.print_deprecated(text);
                 }
             }
         }

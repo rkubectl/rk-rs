@@ -23,7 +23,6 @@ impl ConfigMap {
         configmap: &str,
         data: Option<&[String]>,
     ) -> RkResult<()> {
-        let params = default();
         let configmap = context.kubeapi().configmaps()?.get(configmap).await?;
         let items = configmap
             .binary_data
@@ -43,7 +42,7 @@ impl ConfigMap {
             // context.ui().show(items[0].clone(), &params);
             println!("{}", items[0].1);
         } else {
-            context.ui().show(items, params);
+            context.show(items);
             // decode_string_items(items);
         }
 

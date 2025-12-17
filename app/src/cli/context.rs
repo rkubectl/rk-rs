@@ -15,7 +15,22 @@ impl Context {
         &self.kubeapi
     }
 
-    pub fn ui(&self) -> &Ui {
+    pub fn show<T>(&self, item: T)
+    where
+        T: Show,
+    {
+        self.ui.show(item);
+    }
+
+    pub fn print_deprecated(&self, text: impl fmt::Display) {
+        self.ui.print(text);
+    }
+
+    pub fn not_implemented(&self, item: impl fmt::Debug) {
+        self.ui.not_implemented(item);
+    }
+
+    fn _ui(&self) -> &Ui {
         &self.ui
     }
 

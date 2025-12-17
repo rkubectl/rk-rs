@@ -32,7 +32,7 @@ impl CanI {
 
         let show_params = default();
         let output = context.output_deprecated();
-        println!("{}", ssar.output(false, &show_params, output));
+        println!("{}", ssar.output(false, show_params, output));
         Ok(())
     }
 }

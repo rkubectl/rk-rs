@@ -1,19 +1,19 @@
 use super::*;
 
 impl Show for rkubectl_features::Feature {
-    fn header(&self, _output: &OutputFormat) -> Vec<String> {
+    fn header(&self, _output: OutputFormat) -> Vec<String> {
         Self::headers().into_iter().map(Into::into).collect()
     }
 
-    fn data(&self, _params: &ShowParams, _output: &OutputFormat) -> Vec<String> {
+    fn data(&self, _params: ShowParams, _output: OutputFormat) -> Vec<String> {
         self.fields().into_iter().map(Into::into).collect()
     }
 
-    fn json(&self, _params: &ShowParams) -> String {
+    fn json(&self, _params: ShowParams) -> String {
         json::to_string_pretty(self).unwrap_or_default()
     }
 
-    fn yaml(&self, _params: &ShowParams) -> String {
+    fn yaml(&self, _params: ShowParams) -> String {
         yaml::to_string(self).unwrap_or_default()
     }
 

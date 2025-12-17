@@ -4,23 +4,23 @@ impl<K> Show for kube::core::ObjectList<K>
 where
     K: Clone + Show + kube::ResourceExt + serde::Serialize,
 {
-    fn header(&self, output: &OutputFormat) -> Vec<String> {
+    fn header(&self, output: OutputFormat) -> Vec<String> {
         self.items.header(output)
     }
 
-    fn data(&self, params: &ShowParams, output: &OutputFormat) -> Vec<String> {
+    fn data(&self, params: ShowParams, output: OutputFormat) -> Vec<String> {
         self.items.data(params, output)
     }
 
-    fn normal(&self, params: &ShowParams, output: &OutputFormat) -> Table {
+    fn normal(&self, params: ShowParams, output: OutputFormat) -> Table {
         self.items.normal(params, output)
     }
 
-    fn wide(&self, params: &ShowParams, output: &OutputFormat) -> Table {
+    fn wide(&self, params: ShowParams, output: OutputFormat) -> Table {
         self.items.wide(params, output)
     }
 
-    fn yaml(&self, params: &ShowParams) -> String {
+    fn yaml(&self, params: ShowParams) -> String {
         if params.show_managed_fields {
             yaml::to_string(self).unwrap_or_default()
         } else {
@@ -32,7 +32,7 @@ where
         }
     }
 
-    fn json(&self, params: &ShowParams) -> String {
+    fn json(&self, params: ShowParams) -> String {
         if params.show_managed_fields {
             json::to_string_pretty(self).unwrap_or_default()
         } else {

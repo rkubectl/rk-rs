@@ -1284,7 +1284,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "kube",
  "miette",
@@ -1295,7 +1295,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl-app"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "clap",
  "flate2",
@@ -1320,7 +1320,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl-args"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "clap",
  "k8s-openapi",
@@ -1329,7 +1329,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl-ext"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "base64",
  "k8s-openapi-ext",
@@ -1338,7 +1338,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl-features"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "prometheus-parse",
  "serde",
@@ -1347,7 +1347,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl-kubeapi"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "clap",
  "etcetera",
@@ -1368,7 +1368,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl-resource"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "k8s-openapi",
  "k8s-openapi-ext",
@@ -1382,7 +1382,7 @@ dependencies = [
 
 [[package]]
 name = "rkubectl-ui"
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 dependencies = [
  "clap",
  "heck",

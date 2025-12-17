@@ -13,7 +13,7 @@ resolver = "3"
 
 
 [workspace.package]
-version = "0.0.0-alpha.2"
+version = "0.0.0-alpha.3"
 edition = "2024"
 rust-version = "1.89"
 license = "Apache-2.0"
@@ -50,13 +50,13 @@ tokio = { version = "1.47", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-rkubectl-app = { version = "0.0.0-alpha.2", path = "./app" }
-rkubectl-args = { version = "0.0.0-alpha.2", path = "./args" }
-rkubectl-ext = { version = "0.0.0-alpha.2", path = "./ext" }
-rkubectl-features = { version = "0.0.0-alpha.2", path = "./features" }
-rkubectl-kubeapi = { version = "0.0.0-alpha.2", path = "./kubeapi" }
-rkubectl-resource = { version = "0.0.0-alpha.2", path = "./resource" }
-rkubectl-ui = { version = "0.0.0-alpha.2", path = "./ui" }
+rkubectl-app = { version = "0.0.0-alpha.3", path = "./app" }
+rkubectl-args = { version = "0.0.0-alpha.3", path = "./args" }
+rkubectl-ext = { version = "0.0.0-alpha.3", path = "./ext" }
+rkubectl-features = { version = "0.0.0-alpha.3", path = "./features" }
+rkubectl-kubeapi = { version = "0.0.0-alpha.3", path = "./kubeapi" }
+rkubectl-resource = { version = "0.0.0-alpha.3", path = "./resource" }
+rkubectl-ui = { version = "0.0.0-alpha.3", path = "./ui" }
 
 
 [workspace.lints.rust]

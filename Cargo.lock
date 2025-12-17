@@ -1323,6 +1323,7 @@ name = "rkubectl-args"
 version = "0.0.0-alpha.2"
 dependencies = [
  "clap",
+ "k8s-openapi",
  "k8s-openapi-ext",
 ]
 

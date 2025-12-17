@@ -89,7 +89,7 @@ impl CreateClusterRole {
             .as_ref()?
             .iter()
             .map(|kv| kv.as_pair());
-        let label_selector = metav1::LabelSelector::new().match_labels(labels);
+        let label_selector = metav1::LabelSelector::match_labels(labels);
         let cluster_role_selectors = Some(vec![label_selector]);
 
         Some(rbacv1::AggregationRule {

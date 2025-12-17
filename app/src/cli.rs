@@ -11,6 +11,7 @@ pub use command::ClusterInfo;
 pub use command::ClusterManagement;
 pub use command::Command;
 pub use command::Config;
+pub use command::ConfigMap;
 pub use command::Create;
 pub use command::CreateResource;
 pub use command::Debug;

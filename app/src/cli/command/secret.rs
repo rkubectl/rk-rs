@@ -23,7 +23,6 @@ impl Secret {
     }
 
     async fn show(&self, context: &Context, secret: &str, data: Option<&[String]>) -> RkResult<()> {
-        let _output = context.output_deprecated();
         let secret = context.kubeapi().secrets()?.get(secret).await?;
         let r#type = secret.type_.as_deref().unwrap_or("Opaque");
         let items = secret

@@ -14,6 +14,28 @@ mod pod;
 mod service;
 mod subjectreview;
 
+impl Show for (String, String) {
+    fn header(&self, _output: &OutputFormat) -> Vec<String> {
+        vec!["Key".to_string(), "Value".to_string()]
+    }
+
+    fn data(&self, _params: &ShowParams, _output: &OutputFormat) -> Vec<String> {
+        vec![self.0.clone(), self.1.clone()]
+    }
+
+    fn json(&self, _params: &ShowParams) -> String {
+        todo!()
+    }
+
+    fn yaml(&self, _params: &ShowParams) -> String {
+        todo!()
+    }
+
+    fn name(&self) -> String {
+        self.0.clone()
+    }
+}
+
 trait StripManagedFields<'a>: Clone + 'a {
     fn maybe_strip_managed_fields(&'a self, params: &ShowParams) -> Cow<'a, Self>;
 }

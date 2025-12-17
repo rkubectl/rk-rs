@@ -19,6 +19,7 @@ pub use cluster::ClusterInfo;
 pub use cluster::ClusterManagement;
 pub use cluster::Dump;
 pub use config::Config;
+pub use configmap::ConfigMap;
 pub use delete::Delete;
 pub use get::Get;
 pub use node::Node;
@@ -31,6 +32,7 @@ mod api_resource;
 mod basic;
 mod cluster;
 mod config;
+mod configmap;
 mod delete;
 mod get;
 mod node;
@@ -80,6 +82,10 @@ pub enum Command {
     #[command(subcommand, visible_aliases = ["se", "sec", "secrets"])]
     Secret(Secret),
 
+    /// Print ConfigMap related info
+    #[command(subcommand, visible_aliases = ["cm", "configmaps"])]
+    ConfigMap(ConfigMap),
+
     /// Print client and server version
     Version,
 }
@@ -100,6 +106,7 @@ impl Command {
             Self::Info => self.info(context).await,
             Self::Node(node) => node.exec(context).await,
             Self::Secret(secret) => secret.exec(context).await,
+            Self::ConfigMap(configmap) => configmap.exec(context).await,
             Self::Version => self.version(context).await,
         }
     }
@@ -117,7 +124,7 @@ impl Command {
     async fn features(&self, context: &Context) -> RkResult<()> {
         let output = context.output_deprecated();
         let features = context.kubeapi().features().await?;
-        let show_params: ShowParams = default();
+        let show_params = default();
         context
             .ui()
             .print(features.output(false, &show_params, output));

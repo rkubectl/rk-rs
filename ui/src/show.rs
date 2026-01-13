@@ -181,54 +181,156 @@ fn age(time: metav1::Time) -> String {
     human_time(delta)
 }
 
-/// Mimics k8s humantime printer
+/// Mimics k8s humantime printer. See
+/// https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/util/duration/duration.go
 fn human_time(delta: jiff::Span) -> String {
-    let options = jiff::SpanRound::new()
-        .largest(jiff::Unit::Day)
-        .smallest(jiff::Unit::Second)
-        .days_are_24_hours();
-    let Ok(delta) = delta.round(options) else {
-        return "<invalid>".to_string();
+    // Get total seconds directly from the original span
+    let options = jiff::SpanTotal::from(jiff::Unit::Second).days_are_24_hours();
+    let seconds = match delta.total(options) {
+        Ok(seconds) => seconds as i64,
+        Err(_) => return "<invalid>".to_string(),
     };
 
-    let days = delta.get_days();
-    let hours = delta.get_hours();
-    let minutes = delta.get_minutes();
-    let seconds = delta.get_seconds();
+    // Precalculate all time units
+    let minutes = seconds / 60;
+    let hours = seconds / 3600;
+    let days = hours / 24;
     let years = days / 365;
 
-    if years > 7 {
-        format!("{years}y")
-    } else if years > 1 {
+    // Allow deviation no more than 2 seconds(excluded) to tolerate machine time
+    // inconsistence, it can be considered as almost now.
+    if seconds < -1 {
+        "<invalid>".to_string()
+    } else if seconds < 0 {
+        "0s".to_string()
+    } else if seconds < 60 * 2 {
+        format!("{seconds}s")
+    } else if minutes < 10 {
+        let seconds = seconds % 60;
+        if seconds == 0 {
+            format!("{minutes}m")
+        } else {
+            format!("{minutes}m{seconds}s")
+        }
+    } else if minutes < 60 * 3 {
+        format!("{minutes}m")
+    } else if hours < 8 {
+        let minutes = minutes % 60;
+        if minutes == 0 {
+            format!("{hours}h")
+        } else {
+            format!("{hours}h{minutes}m")
+        }
+    } else if hours < 48 {
+        format!("{hours}h")
+    } else if hours < 24 * 8 {
+        let hours = hours % 24;
+        if hours == 0 {
+            format!("{days}d")
+        } else {
+            format!("{days}d{hours}h")
+        }
+    } else if hours < 24 * 365 * 2 {
+        format!("{days}d")
+    } else if hours < 24 * 365 * 8 {
         let days = days % 365;
         if days == 0 {
             format!("{years}y")
         } else {
             format!("{years}y{days}d")
         }
-    } else if days > 7 {
-        format!("{days}d")
-    } else if days > 1 {
-        if hours == 0 {
-            format!("{days}d")
-        } else {
-            format!("{days}d{hours}h")
-        }
-    } else if hours > 7 {
-        format!("{hours}h")
-    } else if hours > 0 {
-        if minutes == 0 {
-            format!("{hours}h")
-        } else {
-            format!("{hours}h{minutes}m")
-        }
-    } else if minutes > 1 {
-        if seconds == 0 {
-            format!("{minutes}m")
-        } else {
-            format!("{minutes}m{seconds}s")
-        }
     } else {
-        format!("{seconds}s")
+        format!("{years}y")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use jiff::ToSpan;
+
+    trait SpanExt {
+        fn less_milli(self) -> jiff::Span;
+    }
+
+    impl SpanExt for jiff::Span {
+        fn less_milli(self) -> jiff::Span {
+            let options = jiff::SpanArithmetic::from(1.millisecond()).days_are_24_hours();
+            self.checked_sub(options).unwrap()
+        }
+    }
+
+    #[test]
+    fn human_time_basic() {
+        assert_eq!(human_time(1.seconds()), "1s");
+        assert_eq!(human_time(70.seconds()), "70s");
+        assert_eq!(human_time(190.seconds()), "3m10s");
+        assert_eq!(human_time(70.minutes()), "70m");
+        assert_eq!(human_time(47.hours()), "47h");
+        assert_eq!(human_time(49.hours()), "2d1h");
+        assert_eq!(human_time((8 * 24 + 2).hours()), "8d");
+        assert_eq!(human_time((367 * 24).hours()), "367d");
+        assert_eq!(human_time((365 * 2 * 24 + 25).hours()), "2y1d");
+        assert_eq!(human_time((365 * 8 * 24 + 2).hours()), "8y");
+    }
+
+    #[test]
+    fn human_time_boundary() -> Result<(), jiff::Error> {
+        // Negative times
+        assert_eq!(human_time(-2.seconds()), "<invalid>");
+        assert_eq!(human_time(-1.seconds()), "0s");
+        assert_eq!(human_time(0.seconds()), "0s");
+        assert_eq!(human_time(1.seconds().less_milli()), "0s");
+
+        // Seconds boundary (< 2 minutes)
+        assert_eq!(human_time(2.minutes().less_milli()), "119s");
+        assert_eq!(human_time(2.minutes()), "2m");
+        assert_eq!(human_time(2.minutes().seconds(1)), "2m1s");
+
+        // Minutes boundary (< 10 minutes)
+        assert_eq!(human_time(10.minutes().less_milli()), "9m59s");
+        assert_eq!(human_time(10.minutes()), "10m");
+        assert_eq!(human_time(10.minutes().seconds(1)), "10m");
+
+        // Minutes boundary (< 3 hours)
+        assert_eq!(human_time(3.hours().less_milli()), "179m");
+        assert_eq!(human_time(3.hours()), "3h");
+        assert_eq!(human_time(3.hours().minutes(1)), "3h1m");
+
+        // Hours boundary (< 8 hours)
+        assert_eq!(human_time(8.hours().less_milli()), "7h59m");
+        assert_eq!(human_time(8.hours()), "8h");
+        assert_eq!(human_time(8.hours().minutes(59)), "8h");
+
+        // Hours boundary (< 48 hours)
+        assert_eq!(human_time(2.days().less_milli()), "47h");
+        assert_eq!(human_time(2.days()), "2d");
+        assert_eq!(human_time(2.days().hours(1)), "2d1h");
+
+        // Days boundary (< 8 days)
+        assert_eq!(human_time(8.days().less_milli()), "7d23h");
+        assert_eq!(human_time(8.days()), "8d");
+        assert_eq!(human_time(8.days().hours(23)), "8d");
+
+        // Years boundary (< 2 years)
+        assert_eq!(human_time((2 * 365).days().less_milli()), "729d");
+        assert_eq!(human_time((2 * 365).days()), "2y");
+        assert_eq!(human_time((2 * 365).days().hours(23)), "2y");
+        assert_eq!(human_time((2 * 365).days().hours(23).minutes(59)), "2y");
+        assert_eq!(human_time((2 * 365 + 1).days().less_milli()), "2y");
+        assert_eq!(human_time((2 * 365 + 1).days()), "2y1d");
+
+        // Years boundary (< 8 years)
+        assert_eq!(human_time((3 * 365).days()), "3y");
+        assert_eq!(human_time((4 * 365).days()), "4y");
+        assert_eq!(human_time((5 * 365).days()), "5y");
+        assert_eq!(human_time((6 * 365).days()), "6y");
+        assert_eq!(human_time((7 * 365).days()), "7y");
+        assert_eq!(human_time((8 * 365).days().less_milli()), "7y364d");
+        assert_eq!(human_time((8 * 365).days()), "8y");
+        assert_eq!(human_time((8 * 365 + 364).days()), "8y");
+        assert_eq!(human_time((9 * 365).days()), "9y");
+
+        Ok(())
     }
 }

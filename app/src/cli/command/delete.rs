@@ -215,12 +215,7 @@ impl Delete {
     }
 
     fn ignore_not_found(&self, err: kube::Error) -> kube::Result<()> {
-        if self.ignore_not_found
-            && matches!(
-                err,
-                kube::Error::Api(kube::error::ErrorResponse { code: 404, .. })
-            )
-        {
+        if self.ignore_not_found && matches!(err, kube::Error::Api(ref err) if err.is_not_found()) {
             Ok(())
         } else {
             Err(err)

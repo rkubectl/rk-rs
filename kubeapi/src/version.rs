@@ -1,8 +1,5 @@
 use super::*;
 
-k8s_openapi::k8s_if_1_30! {
-    const K8S_VERSION: &str = "1.30";
-}
 k8s_openapi::k8s_if_1_31! {
     const K8S_VERSION: &str = "1.31";
 }
@@ -15,8 +12,11 @@ k8s_openapi::k8s_if_1_33! {
 k8s_openapi::k8s_if_1_34! {
     const K8S_VERSION: &str = "1.34";
 }
-// k8s_openapi::k8s_if_1_35! {
-//     const K8S_VERSION: &str = "1.35";
+k8s_openapi::k8s_if_1_35! {
+    const K8S_VERSION: &str = "1.35";
+}
+// k8s_openapi::k8s_if_1_36! {
+//     const K8S_VERSION: &str = "1.36";
 // }
 
 impl Kubeapi {
